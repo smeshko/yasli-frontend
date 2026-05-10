@@ -1,0 +1,19 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+export function getStaticPaths() {
+  return [{ params: { id: "1" } }];
+}
+
+const { id } = Astro.params;
+---
+
+<BaseLayout title={`Институция ${id} | Ясли Варна`}>
+  <section class="section-stack">
+    <p class="eyebrow">Институция</p>
+    <h1>Профил на институция</h1>
+    <p>
+      Покритието по адреси за институция {id} ще бъде добавено в следваща стъпка.
+    </p>
+  </section>
+</BaseLayout>

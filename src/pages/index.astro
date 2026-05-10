@@ -1,0 +1,18 @@
+---
+import { StatusBadge } from "@/components/StatusBadge";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Ясли Варна">
+  <section class="section-stack">
+    <StatusBadge client:load label="Начало" />
+    <p class="eyebrow">Варна</p>
+    <h1>Ясли и детски градини</h1>
+    <p>
+      Начален екран за бъдещо търсене по адрес и преглед на институции.
+    </p>
+    <div class="actions">
+      <a class="button" href="/institutions">Институции</a>
+    </div>
+  </section>
+</BaseLayout>
