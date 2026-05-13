@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildMatchRequestPath } from "./client";
+import { buildMatchRequestPath, normalizeMatchResponse, type MatchInstitution } from "./client";
 
 describe("buildMatchRequestPath", () => {
   it("builds an unfiltered match path from address id", () => {
@@ -11,5 +11,42 @@ describe("buildMatchRequestPath", () => {
     expect(buildMatchRequestPath(123, "kindergarten")).toBe(
       "/api/match?address_id=123&kind=kindergarten",
     );
+  });
+
+  it("leaves known-district match arrays unchanged", () => {
+    const row: MatchInstitution = {
+      id: 1,
+      external_id: "1",
+      name: "ДГ Тест",
+      kind: "kindergarten",
+      source_url: "https://example.test/source",
+      match_type: "street",
+    };
+
+    expect(normalizeMatchResponse([row])).toEqual({
+      institutions: [row],
+      districtUnknown: false,
+    });
+  });
+
+  it("unwraps district-unknown match envelopes", () => {
+    const row: MatchInstitution = {
+      id: 1,
+      external_id: "1",
+      name: "ДГ Тест",
+      kind: "kindergarten",
+      source_url: "https://example.test/source",
+      match_type: "street",
+    };
+
+    expect(
+      normalizeMatchResponse({
+        match_type: "district_unknown",
+        results: [row],
+      }),
+    ).toEqual({
+      institutions: [row],
+      districtUnknown: true,
+    });
   });
 });

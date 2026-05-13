@@ -129,6 +129,22 @@ export interface components {
             /** Addresses */
             addresses: components["schemas"]["InstitutionAddress"][];
         };
+        /**
+         * DistrictUnknownResponse
+         * @description Envelope returned when the queried address has no district stamp
+         *     and nurseries/preschools were among the kinds the request could have
+         *     returned. ``results`` carries kindergarten matches only.
+         */
+        DistrictUnknownResponse: {
+            /**
+             * Match Type
+             * @default district_unknown
+             * @constant
+             */
+            match_type: "district_unknown";
+            /** Results */
+            results: components["schemas"]["MatchInstitution"][];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -189,7 +205,13 @@ export interface components {
              */
             last_seen_at: string;
         };
-        /** MatchInstitution */
+        /**
+         * MatchInstitution
+         * @description One institution covering the queried address.
+         *
+         *     ``match_type`` is ``"street"`` for kindergartens (junction match) and
+         *     ``"district"`` for nurseries and preschools (district routing).
+         */
         MatchInstitution: {
             /** Id */
             id: number;
@@ -204,6 +226,11 @@ export interface components {
             kind: "nursery" | "kindergarten" | "preschool";
             /** Source Url */
             source_url: string;
+            /**
+             * Match Type
+             * @enum {string}
+             */
+            match_type: "street" | "district";
         };
         /** StreetOut */
         StreetOut: {
@@ -351,13 +378,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Successful Response */
+            /** @description Bare array of institution rows when the queried address has a known district. Envelope `{match_type: 'district_unknown', results: [...]}` when the district is unknown and nursery/preschool matches were possible. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchInstitution"][];
+                    "application/json": components["schemas"]["MatchInstitution"][] | components["schemas"]["DistrictUnknownResponse"];
                 };
             };
             /** @description Validation Error */

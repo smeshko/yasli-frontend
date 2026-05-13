@@ -34,6 +34,7 @@ describe("SearchResults", () => {
           name: "ДГ Тест",
           kind: "kindergarten",
           source_url: "https://example.test/source",
+          match_type: "street",
         },
       ]),
     };
@@ -57,6 +58,7 @@ describe("SearchResults", () => {
     const matchState: MatchState = {
       status: "success",
       selectedAddress: null,
+      districtUnknown: true,
       grouped: groupMatchResults([
         {
           id: 3,
@@ -64,6 +66,7 @@ describe("SearchResults", () => {
           name: "ДГ Частичен резултат",
           kind: "kindergarten",
           source_url: "https://example.test/source",
+          match_type: "street",
         },
       ]),
     };
@@ -79,6 +82,7 @@ describe("SearchResults", () => {
     );
 
     expect(html).toContain("Покритието за ясли е непълно");
+    expect(html).toContain("Районът за този адрес още не е зареден");
     expect(html).toContain("ДГ Частичен резултат");
   });
 

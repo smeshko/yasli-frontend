@@ -1,11 +1,18 @@
 import { apiBaseUrl } from "@/lib/api/config";
-import type { components } from "@/lib/api/types";
+import type { components, operations } from "@/lib/api/types";
 import type { ReceptionKind } from "@/lib/domain/kinds";
 
 export type Street = components["schemas"]["StreetOut"];
 export type Address = components["schemas"]["AddressOut"];
 export type MatchInstitution = components["schemas"]["MatchInstitution"];
+export type MatchResponse =
+  operations["match_api_match_get"]["responses"][200]["content"]["application/json"];
 export type InstitutionListItem = components["schemas"]["InstitutionListItem"];
+
+export interface MatchData {
+  institutions: MatchInstitution[];
+  districtUnknown: boolean;
+}
 
 export type ApiErrorCode =
   | "network_error"
@@ -51,8 +58,31 @@ export function listInstitutions(): Promise<ApiResult<InstitutionListItem[]>> {
   return requestJson<InstitutionListItem[]>("/api/institutions");
 }
 
-export function matchAddress(addressId: number): Promise<ApiResult<MatchInstitution[]>> {
-  return requestJson<MatchInstitution[]>(buildMatchRequestPath(addressId));
+export async function matchAddress(addressId: number): Promise<ApiResult<MatchData>> {
+  const result = await requestJson<MatchResponse>(buildMatchRequestPath(addressId));
+
+  if (!result.ok) {
+    return result;
+  }
+
+  return {
+    ok: true,
+    data: normalizeMatchResponse(result.data),
+  };
+}
+
+export function normalizeMatchResponse(response: MatchResponse): MatchData {
+  if (Array.isArray(response)) {
+    return {
+      institutions: response,
+      districtUnknown: false,
+    };
+  }
+
+  return {
+    institutions: response.results,
+    districtUnknown: true,
+  };
 }
 
 async function requestJson<T>(path: string): Promise<ApiResult<T>> {

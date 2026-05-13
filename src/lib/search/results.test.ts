@@ -18,6 +18,7 @@ describe("groupMatchResults", () => {
         name: "ПГ Б",
         kind: "preschool",
         source_url: "https://example.test/3",
+        match_type: "district",
       },
       {
         id: 2,
@@ -25,6 +26,7 @@ describe("groupMatchResults", () => {
         name: "ДГ Я",
         kind: "kindergarten",
         source_url: "https://example.test/2",
+        match_type: "street",
       },
       {
         id: 1,
@@ -32,6 +34,7 @@ describe("groupMatchResults", () => {
         name: "ДГ А",
         kind: "kindergarten",
         source_url: "https://example.test/1",
+        match_type: "street",
       },
     ];
 

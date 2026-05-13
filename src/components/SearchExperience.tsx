@@ -23,6 +23,7 @@ export interface MatchState {
   status: MatchStatus;
   grouped: GroupedResults | null;
   selectedAddress: ExactAddressSuggestion | null;
+  districtUnknown?: boolean;
   message?: string;
 }
 
@@ -95,13 +96,25 @@ export function SearchExperience() {
       selectedAddress: suggestion,
     });
 
-    const result = await matchAddress(suggestion.addressId);
+    let result;
+    try {
+      result = await matchAddress(suggestion.addressId);
+    } catch {
+      setMatchState({
+        status: "error",
+        grouped: null,
+        selectedAddress: suggestion,
+        message: "Не успяхме да заредим резултатите. Опитайте отново.",
+      });
+      return;
+    }
 
     if (result.ok) {
       setMatchState({
         status: "success",
-        grouped: groupMatchResults(result.data),
+        grouped: groupMatchResults(result.data.institutions),
         selectedAddress: suggestion,
+        districtUnknown: result.data.districtUnknown,
       });
       return;
     }
@@ -306,6 +319,13 @@ export function SearchResults({
           {staleResults ? (
             <div className="stale-banner">
               Данните са по-стари от 14 дни. Проверете и официалния източник преди кандидатстване.
+            </div>
+          ) : null}
+
+          {matchState.districtUnknown ? (
+            <div className="results-status">
+              Районът за този адрес още не е зареден. Показваме само детските градини по адрес; яслите и
+              подготвителните групи изискват потвърден район.
             </div>
           ) : null}
 
