@@ -1,0 +1,83 @@
+import { describe, expect, it } from "vitest";
+
+import type { InstitutionListItem, MatchInstitution } from "@/lib/api/client";
+
+import {
+  groupMatchResults,
+  newestFreshnessDate,
+  shouldShowStaleBanner,
+  visibleResultKinds,
+} from "./results";
+
+describe("groupMatchResults", () => {
+  it("groups results by canonical reception order and sorts names", () => {
+    const institutions: MatchInstitution[] = [
+      {
+        id: 3,
+        external_id: "3",
+        name: "ПГ Б",
+        kind: "preschool",
+        source_url: "https://example.test/3",
+      },
+      {
+        id: 2,
+        external_id: "2",
+        name: "ДГ Я",
+        kind: "kindergarten",
+        source_url: "https://example.test/2",
+      },
+      {
+        id: 1,
+        external_id: "1",
+        name: "ДГ А",
+        kind: "kindergarten",
+        source_url: "https://example.test/1",
+      },
+    ];
+
+    const grouped = groupMatchResults(institutions);
+
+    expect(Object.keys(grouped)).toEqual(["nursery", "kindergarten", "preschool"]);
+    expect(grouped.kindergarten.map((institution) => institution.name)).toEqual(["ДГ А", "ДГ Я"]);
+  });
+});
+
+describe("visibleResultKinds", () => {
+  it("returns all kinds for the all filter", () => {
+    expect(visibleResultKinds("all")).toEqual(["nursery", "kindergarten", "preschool"]);
+  });
+
+  it("returns one kind for a specific filter", () => {
+    expect(visibleResultKinds("kindergarten")).toEqual(["kindergarten"]);
+  });
+});
+
+describe("freshness helpers", () => {
+  it("selects the newest valid freshness date", () => {
+    const institutions = [
+      {
+        id: 1,
+        external_id: "1",
+        name: "ДГ 1",
+        kind: "kindergarten",
+        source_url: "https://example.test/1",
+        last_seen_at: "2026-05-01T00:00:00Z",
+      },
+      {
+        id: 2,
+        external_id: "2",
+        name: "ДГ 2",
+        kind: "kindergarten",
+        source_url: "https://example.test/2",
+        last_seen_at: "2026-05-05T00:00:00Z",
+      },
+    ] satisfies InstitutionListItem[];
+
+    expect(newestFreshnessDate(institutions)?.toISOString()).toBe("2026-05-05T00:00:00.000Z");
+  });
+
+  it("uses the fourteen-day stale threshold", () => {
+    expect(shouldShowStaleBanner(new Date("2026-04-25T00:00:00Z"), new Date("2026-05-11T00:00:00Z"))).toBe(true);
+    expect(shouldShowStaleBanner(new Date("2026-04-27T00:00:00Z"), new Date("2026-05-11T00:00:00Z"))).toBe(false);
+  });
+});
