@@ -9,7 +9,7 @@ describe("SearchExperience", () => {
   it("renders the final initial search surface", () => {
     const html = renderToStaticMarkup(<SearchExperience />);
 
-    expect(html).toContain("Адресът избира резултата");
+    expect(html).toContain("Коя е моята градина?");
     expect(html).toContain("бул. Генерал Колев 85");
   });
 });

@@ -20,7 +20,12 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     width: min(100% - 32px, 760px);
     align-content: center;
     justify-self: center;
-    padding: 108px 0 72px;
+    padding: 0;
+  }
+
+  .search-experience[data-has-results="true"] .search-hero {
+    align-content: start;
+    padding: 48px 0 30px;
   }
 
   .search-copy {
@@ -325,6 +330,45 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     white-space: nowrap;
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .search-hero {
+      transition: padding 220ms ease, align-content 220ms ease;
+    }
+
+    .filters button {
+      transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        color 160ms ease;
+    }
+
+    @keyframes resultCardIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .result-card {
+      animation: resultCardIn 220ms ease both;
+      animation-delay: var(--result-delay, 0ms);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .search-hero,
+    .filters button,
+    .result-card {
+      animation: none;
+      transition: none;
+    }
+  }
+
   @media (max-width: 720px) {
     .search-experience {
       min-height: calc(100vh - 82px);
@@ -332,7 +376,11 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
     .search-hero {
       align-content: start;
-      padding-top: 64px;
+      padding: 64px 0 72px;
+    }
+
+    .search-experience[data-has-results="true"] .search-hero {
+      padding: 64px 0 72px;
     }
 
     .search-copy {

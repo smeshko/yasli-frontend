@@ -180,13 +180,14 @@ export function SearchExperience() {
   }
 
   const inputDescriptionId = validationMessage ? "search-validation" : undefined;
+  const hasResults = matchState.status !== "idle";
 
   return (
-    <div className="search-experience">
+    <div className="search-experience" data-has-results={hasResults ? "true" : undefined}>
       <section className="search-hero" aria-labelledby="search-title">
         <div className="search-copy">
-          <h1 id="search-title">Адресът избира резултата</h1>
-          <p>Въведете улица и номер във Варна. Докосването върху точен адрес от списъка стартира търсенето директно.</p>
+          <h1 id="search-title">Коя е моята градина?</h1>
+          <p>Въведете адреса си в полето и ще видите списък на всички детски градини и ясли, за които можете да кандидатствате</p>
         </div>
 
         <div className="search-panel">
@@ -382,8 +383,12 @@ function ResultGroup({
       <h2 id={`result-group-${kind}`}>{labelForReceptionKind(kind)}</h2>
       {institutions.length > 0 ? (
         <div className="cards">
-          {institutions.map((institution) => (
-            <article className="result-card" key={`${institution.kind}-${institution.id}`}>
+          {institutions.map((institution, index) => (
+            <article
+              className="result-card"
+              key={`${institution.kind}-${institution.id}`}
+              style={{ "--result-delay": `${index * 40}ms` } as React.CSSProperties}
+            >
               <div>
                 <p className="kind-label">{labelForReceptionKind(institution.kind)}</p>
                 <h3>{institution.name}</h3>
