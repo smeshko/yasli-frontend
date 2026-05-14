@@ -95,7 +95,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     top: calc(100% + 10px);
     left: 0;
     width: 100%;
-    max-height: min(376px, 52vh);
+    max-height: min(376px, 52dvh);
     overflow-y: auto;
     border: 1px solid #c9d8ef;
     border-radius: 10px;
@@ -118,10 +118,16 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     padding: 9px 12px;
   }
 
-  .suggestion-panel li.active,
-  .suggestion-panel li:hover {
+  .suggestion-panel li.active {
     background: #e7f0ff;
     color: #2563eb;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .suggestion-panel li:hover {
+      background: #e7f0ff;
+      color: #2563eb;
+    }
   }
 
   .suggestion-text {
@@ -222,7 +228,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   .filters button {
-    min-height: 38px;
+    min-height: 44px;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     background: #fff;
@@ -285,6 +291,8 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     margin: 3px 0 0;
     color: #0f172a;
     font-size: 1rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .kind-label {
@@ -301,6 +309,8 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   .card-actions a {
+    display: inline-block;
+    padding: 8px 0;
     color: #1d4ed8;
     font-size: 0.92rem;
     font-weight: 700;

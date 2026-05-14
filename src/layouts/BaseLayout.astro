@@ -106,10 +106,16 @@ const navItems = [
     text-decoration: none;
   }
 
-  nav a:hover,
   nav a[aria-current="page"] {
     color: #2563eb;
     font-weight: 800;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    nav a:hover {
+      color: #2563eb;
+      font-weight: 800;
+    }
   }
 
   main {
@@ -190,7 +196,7 @@ const navItems = [
       justify-content: center;
       gap: 8px;
       min-height: 82px;
-      padding: 12px 24px;
+      padding: 12px 16px;
     }
 
     nav {
