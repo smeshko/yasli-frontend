@@ -43,7 +43,7 @@ export function SearchExperience() {
   });
 
   const visibleSuggestions = useMemo(
-    () => searchExactAddressSuggestions(suggestions, query, 5),
+    () => searchExactAddressSuggestions(suggestions, query),
     [query, suggestions],
   );
   const hasQuery = query.trim().length > 0;

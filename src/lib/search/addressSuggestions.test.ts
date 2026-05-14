@@ -22,6 +22,13 @@ const streets: Street[] = [
     street_part: "ГЕНЕРАЛ КОЛЕВ",
     type_marker: "УЛ.",
   },
+  {
+    id: 12,
+    city: "ГР.ВАРНА",
+    raw_name: "ГР.ВАРНА УЛ.НИКОЛА ВАПЦАРОВ",
+    street_part: "НИКОЛА ВАПЦАРОВ",
+    type_marker: "УЛ.",
+  },
 ];
 
 describe("buildExactAddressSuggestions", () => {
@@ -89,7 +96,7 @@ describe("searchExactAddressSuggestions", () => {
     expect(searchExactAddressSuggestions(suggestions, "генерал 85")[0]?.addressId).toBe(301);
   });
 
-  it("does not transliterate Latin input", () => {
+  it("transliterates Latin input to Cyrillic before matching", () => {
     const suggestions = buildExactAddressSuggestions(streets, [
       {
         id: 401,
@@ -100,6 +107,22 @@ describe("searchExactAddressSuggestions", () => {
       },
     ]);
 
-    expect(searchExactAddressSuggestions(suggestions, "General Kolev 85")).toEqual([]);
+    expect(searchExactAddressSuggestions(suggestions, "General Kolev 85")[0]?.addressId).toBe(401);
+  });
+
+  it("matches a street whose street_part contains the typed prefix", () => {
+    const suggestions = buildExactAddressSuggestions(streets, [
+      {
+        id: 501,
+        street_id: 12,
+        number_int: 12,
+        number_suffix: null,
+        entrance: null,
+      },
+    ]);
+
+    const results = searchExactAddressSuggestions(suggestions, "никола вапца");
+
+    expect(results[0]?.addressId).toBe(501);
   });
 });

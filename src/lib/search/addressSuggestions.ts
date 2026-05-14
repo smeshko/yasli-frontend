@@ -2,7 +2,46 @@ import type { Address, Street } from "@/lib/api/client";
 import { formatAddressNumber } from "@/lib/domain/address";
 
 const CYRILLIC_OR_DIGIT_QUERY = /[\p{Script=Cyrillic}\d]/u;
-const LATIN_LETTER = /[A-Za-z]/;
+
+const LATIN_DIGRAPHS: ReadonlyArray<readonly [RegExp, string]> = [
+  [/sht/gi, "щ"],
+  [/sh/gi, "ш"],
+  [/ch/gi, "ч"],
+  [/ts/gi, "ц"],
+  [/zh/gi, "ж"],
+  [/yu/gi, "ю"],
+  [/ya/gi, "я"],
+  [/yo/gi, "йо"],
+];
+
+const LATIN_SINGLES: Record<string, string> = {
+  a: "а",
+  b: "б",
+  c: "к",
+  d: "д",
+  e: "е",
+  f: "ф",
+  g: "г",
+  h: "х",
+  i: "и",
+  j: "й",
+  k: "к",
+  l: "л",
+  m: "м",
+  n: "н",
+  o: "о",
+  p: "п",
+  q: "к",
+  r: "р",
+  s: "с",
+  t: "т",
+  u: "у",
+  v: "в",
+  w: "в",
+  x: "х",
+  y: "й",
+  z: "з",
+};
 
 export interface ExactAddressSuggestion {
   id: string;
@@ -62,11 +101,7 @@ export function searchExactAddressSuggestions(
   query: string,
   limit = 8,
 ): ExactAddressSuggestion[] {
-  if (LATIN_LETTER.test(query)) {
-    return [];
-  }
-
-  const normalizedQuery = normalizeSearchText(query);
+  const normalizedQuery = normalizeSearchText(transliterateLatin(query));
 
   if (!CYRILLIC_OR_DIGIT_QUERY.test(normalizedQuery) || normalizedQuery.length < 2) {
     return [];
@@ -89,6 +124,19 @@ export function searchExactAddressSuggestions(
     })
     .slice(0, limit)
     .map((item) => item.suggestion);
+}
+
+export function transliterateLatin(value: string): string {
+  let result = value;
+
+  for (const [pattern, replacement] of LATIN_DIGRAPHS) {
+    result = result.replace(pattern, replacement);
+  }
+
+  return result.replace(/[a-z]/gi, (letter) => {
+    const replacement = LATIN_SINGLES[letter.toLowerCase()];
+    return replacement ?? letter;
+  });
 }
 
 export function normalizeSearchText(value: string): string {
@@ -126,6 +174,12 @@ function scoreSuggestion(
 ): number {
   if (suggestion.searchText.startsWith(normalizedQuery)) {
     return 100 + normalizedQuery.length;
+  }
+
+  const words = suggestion.searchText.split(" ");
+
+  if (terms.every((term) => words.some((word) => word.startsWith(term)))) {
+    return 75 + terms.join("").length;
   }
 
   if (terms.every((term) => suggestion.searchText.includes(term))) {
