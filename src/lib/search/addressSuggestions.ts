@@ -14,6 +14,16 @@ const LATIN_DIGRAPHS: ReadonlyArray<readonly [RegExp, string]> = [
   [/yo/gi, "йо"],
 ];
 
+const ABBREVIATION_EXPANSIONS: ReadonlyArray<readonly [string, string]> = [
+  ["Н.Й.ВАПЦАРОВ", "НИКОЛА ЙОНКОВ ВАПЦАРОВ"],
+  ["Г.М.ДИМИТРОВ", "ГЕОРГИ МИХОВ ДИМИТРОВ"],
+  ["Н.ОБРЕШКОВ", "НИКОЛА ОБРЕШКОВ"],
+  ["В.КОЛАРОВ", "ВАСИЛ КОЛАРОВ"],
+  ["Н.НИКОЛАЕВИЧ", "НИКОЛАЙ НИКОЛАЕВИЧ"],
+  ["Н.КОНСТАНТИНОВ", "НИКОЛА КОНСТАНТИНОВ"],
+  ["Г.ПЕЦОВ", "ГЕОРГИ ГЕОРГИЕВ ПЕЦОВ"],
+];
+
 const LATIN_SINGLES: Record<string, string> = {
   a: "а",
   b: "б",
@@ -81,6 +91,7 @@ export function buildExactAddressSuggestions(
         street.city,
         numberLabel,
         unpaddedNumber,
+        ...expandAbbreviations(street.raw_name),
       ];
 
       return {
@@ -124,6 +135,12 @@ export function searchExactAddressSuggestions(
     })
     .slice(0, limit)
     .map((item) => item.suggestion);
+}
+
+function expandAbbreviations(rawName: string): string[] {
+  return ABBREVIATION_EXPANSIONS.filter(([abbr]) => rawName.includes(abbr)).map(
+    ([, expansion]) => expansion,
+  );
 }
 
 export function transliterateLatin(value: string): string {

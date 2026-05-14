@@ -29,6 +29,20 @@ const streets: Street[] = [
     street_part: "НИКОЛА ВАПЦАРОВ",
     type_marker: "УЛ.",
   },
+  {
+    id: 13,
+    city: "ГР.ВАРНА",
+    raw_name: "ГР.ВАРНА УЛ.Н.Й.ВАПЦАРОВ",
+    street_part: "Н.Й.ВАПЦАРОВ",
+    type_marker: "УЛ.",
+  },
+  {
+    id: 14,
+    city: "С. ТОПОЛИ",
+    raw_name: "С. ТОПОЛИ БАРАКИ КДД В.КОЛАРОВ",
+    street_part: "",
+    type_marker: null,
+  },
 ];
 
 describe("buildExactAddressSuggestions", () => {
@@ -124,5 +138,27 @@ describe("searchExactAddressSuggestions", () => {
     const results = searchExactAddressSuggestions(suggestions, "никола вапца");
 
     expect(results[0]?.addressId).toBe(501);
+  });
+
+  it("expands stored initials so the full first name matches", () => {
+    const suggestions = buildExactAddressSuggestions(streets, [
+      {
+        id: 601,
+        street_id: 13,
+        number_int: 10,
+        number_suffix: null,
+        entrance: null,
+      },
+      {
+        id: 602,
+        street_id: 14,
+        number_int: 3,
+        number_suffix: null,
+        entrance: null,
+      },
+    ]);
+
+    expect(searchExactAddressSuggestions(suggestions, "никола вапцаров")[0]?.addressId).toBe(601);
+    expect(searchExactAddressSuggestions(suggestions, "васил коларов")[0]?.addressId).toBe(602);
   });
 });
