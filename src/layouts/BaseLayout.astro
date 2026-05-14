@@ -12,7 +12,6 @@ const {
 const pathname = Astro.url.pathname;
 
 const navItems = [
-  { href: "/", label: "Начало", active: pathname === "/" },
   { href: "/about", label: "За мен / Кой съм аз", active: pathname === "/about" },
 ];
 ---
@@ -28,7 +27,9 @@ const navItems = [
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="/">Ясли</a>
+      <a class="brand" href="/" aria-label="Начало">
+        <img alt="" height="32" src="/favicon.svg" width="32" />
+      </a>
       <nav aria-label="Основна навигация">
         {
           navItems.map((item) => (
@@ -83,10 +84,14 @@ const navItems = [
   }
 
   .brand {
+    display: inline-flex;
+    align-items: center;
     color: #0f172a;
-    font-size: 1.35rem;
-    font-weight: 800;
     text-decoration: none;
+  }
+
+  .brand img {
+    display: block;
   }
 
   nav {
