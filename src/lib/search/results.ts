@@ -5,13 +5,21 @@ import { isSnapshotStale } from "@/lib/domain/freshness";
 
 export type ResultFilter = "all" | ReceptionKind;
 
-export type GroupedResults = Record<ReceptionKind, MatchInstitution[]>;
+export interface GroupedInstitution extends MatchInstitution {
+  infantGroupOrigin?: boolean;
+}
+
+export type GroupedResults = Record<ReceptionKind, GroupedInstitution[]>;
 
 export function groupMatchResults(institutions: MatchInstitution[]): GroupedResults {
   const grouped = emptyGroupedResults();
 
   for (const institution of institutions) {
     grouped[institution.kind].push(institution);
+
+    if (institution.kind === "kindergarten" && institution.has_infant_group) {
+      grouped.nursery.push({ ...institution, infantGroupOrigin: true });
+    }
   }
 
   for (const kind of receptionKindOrder) {

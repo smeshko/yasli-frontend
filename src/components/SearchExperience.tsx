@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { listInstitutions, matchAddress, type MatchInstitution } from "@/lib/api/client";
+import { listInstitutions, matchAddress } from "@/lib/api/client";
 import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
 import {
   searchExactAddressSuggestions,
@@ -12,6 +12,7 @@ import {
   newestFreshnessDate,
   shouldShowStaleBanner,
   visibleResultKinds,
+  type GroupedInstitution,
   type GroupedResults,
   type ResultFilter,
 } from "@/lib/search/results";
@@ -376,30 +377,41 @@ function ResultGroup({
   institutions,
 }: {
   kind: ReceptionKind;
-  institutions: MatchInstitution[];
+  institutions: GroupedInstitution[];
 }) {
   return (
     <section className="result-group" aria-labelledby={`result-group-${kind}`}>
       <h2 id={`result-group-${kind}`}>{labelForReceptionKind(kind)}</h2>
+      {kind === "nursery" ? (
+        <p className="group-note">
+          Яслите не са по адрес, имате право да кандидатствате във всяка, но получавате
+          предимство в тези, които са във вашия район.
+        </p>
+      ) : null}
       {institutions.length > 0 ? (
         <div className="cards">
-          {institutions.map((institution, index) => (
-            <article
-              className="result-card"
-              key={`${institution.kind}-${institution.id}`}
-              style={{ "--result-delay": `${index * 40}ms` } as React.CSSProperties}
-            >
-              <div>
-                <p className="kind-label">{labelForReceptionKind(institution.kind)}</p>
-                <h3>{institution.name}</h3>
-              </div>
-              <div className="card-actions">
-                <a href={institution.source_url} target="_blank" rel="noreferrer">
-                  Източник <span aria-hidden="true">↗</span>
-                </a>
-              </div>
-            </article>
-          ))}
+          {institutions.map((institution, index) => {
+            const displayName = institution.infantGroupOrigin
+              ? `${institution.name} (яслена група)`
+              : institution.name;
+            return (
+              <article
+                className="result-card"
+                key={`${kind}-${institution.kind}-${institution.id}`}
+                style={{ "--result-delay": `${index * 40}ms` } as React.CSSProperties}
+              >
+                <div>
+                  <p className="kind-label">{labelForReceptionKind(institution.kind)}</p>
+                  <h3>{displayName}</h3>
+                </div>
+                <div className="card-actions">
+                  <a href={institution.source_url} target="_blank" rel="noreferrer">
+                    Източник <span aria-hidden="true">↗</span>
+                  </a>
+                </div>
+              </article>
+            );
+          })}
         </div>
       ) : (
         <p className="empty-group">{emptyGroupText(kind)}</p>

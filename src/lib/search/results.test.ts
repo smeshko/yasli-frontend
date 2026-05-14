@@ -19,6 +19,7 @@ describe("groupMatchResults", () => {
         kind: "preschool",
         source_url: "https://example.test/3",
         match_type: "district",
+        has_infant_group: false,
       },
       {
         id: 2,
@@ -27,6 +28,7 @@ describe("groupMatchResults", () => {
         kind: "kindergarten",
         source_url: "https://example.test/2",
         match_type: "street",
+        has_infant_group: false,
       },
       {
         id: 1,
@@ -35,6 +37,7 @@ describe("groupMatchResults", () => {
         kind: "kindergarten",
         source_url: "https://example.test/1",
         match_type: "street",
+        has_infant_group: false,
       },
     ];
 
@@ -42,6 +45,50 @@ describe("groupMatchResults", () => {
 
     expect(Object.keys(grouped)).toEqual(["nursery", "kindergarten", "preschool"]);
     expect(grouped.kindergarten.map((institution) => institution.name)).toEqual(["ДГ А", "ДГ Я"]);
+  });
+
+  it("surfaces an infant-group kindergarten in both the nursery and kindergarten buckets", () => {
+    const institutions: MatchInstitution[] = [
+      {
+        id: 10,
+        external_id: "10",
+        name: "ДГ №17 Петър Берон",
+        kind: "kindergarten",
+        source_url: "https://example.test/10",
+        match_type: "street",
+        has_infant_group: true,
+      },
+    ];
+
+    const grouped = groupMatchResults(institutions);
+
+    expect(grouped.kindergarten).toHaveLength(1);
+    expect(grouped.kindergarten[0].infantGroupOrigin).toBeUndefined();
+
+    expect(grouped.nursery).toHaveLength(1);
+    expect(grouped.nursery[0].name).toBe("ДГ №17 Петър Берон");
+    expect(grouped.nursery[0].source_url).toBe("https://example.test/10");
+    expect(grouped.nursery[0].kind).toBe("kindergarten");
+    expect(grouped.nursery[0].infantGroupOrigin).toBe(true);
+  });
+
+  it("does not duplicate kindergartens that do not run an infant group", () => {
+    const institutions: MatchInstitution[] = [
+      {
+        id: 11,
+        external_id: "11",
+        name: "ДГ №2",
+        kind: "kindergarten",
+        source_url: "https://example.test/11",
+        match_type: "street",
+        has_infant_group: false,
+      },
+    ];
+
+    const grouped = groupMatchResults(institutions);
+
+    expect(grouped.nursery).toEqual([]);
+    expect(grouped.kindergarten).toHaveLength(1);
   });
 });
 

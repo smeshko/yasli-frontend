@@ -21,6 +21,7 @@ describe("buildMatchRequestPath", () => {
       kind: "kindergarten",
       source_url: "https://example.test/source",
       match_type: "street",
+      has_infant_group: false,
     };
 
     expect(normalizeMatchResponse([row])).toEqual({
@@ -37,6 +38,7 @@ describe("buildMatchRequestPath", () => {
       kind: "kindergarten",
       source_url: "https://example.test/source",
       match_type: "street",
+      has_infant_group: false,
     };
 
     expect(

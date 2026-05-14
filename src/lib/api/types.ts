@@ -231,6 +231,8 @@ export interface components {
              * @enum {string}
              */
             match_type: "street" | "district";
+            /** Has Infant Group */
+            has_infant_group: boolean;
         };
         /** StreetOut */
         StreetOut: {

@@ -35,6 +35,7 @@ describe("SearchResults", () => {
           kind: "kindergarten",
           source_url: "https://example.test/source",
           match_type: "street",
+          has_infant_group: false,
         },
       ]),
     };
@@ -67,6 +68,7 @@ describe("SearchResults", () => {
           kind: "kindergarten",
           source_url: "https://example.test/source",
           match_type: "street",
+          has_infant_group: false,
         },
       ]),
     };
