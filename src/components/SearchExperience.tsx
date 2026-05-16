@@ -332,22 +332,25 @@ export function SearchExperience() {
 }
 
 function FreshnessPortal({ freshnessDate }: { freshnessDate: Date | null }) {
-  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  const [slots, setSlots] = useState<HTMLElement[]>([]);
 
   useEffect(() => {
-    setSlot(document.getElementById("site-footer-freshness"));
+    setSlots(Array.from(document.querySelectorAll<HTMLElement>("[data-site-footer-freshness]")));
   }, []);
 
-  if (!slot || !freshnessDate) {
+  if (slots.length === 0 || !freshnessDate) {
     return null;
   }
 
-  return createPortal(
-    <>
-      <span>Last updated: {formatDate(freshnessDate)}</span>
-      <span aria-hidden="true" className="site-footer__separator">|</span>
-    </>,
-    slot,
+  return slots.map((slot) =>
+    createPortal(
+      <>
+        <span>Last updated: {formatDate(freshnessDate)}</span>
+        <span aria-hidden="true" className="site-footer__separator">|</span>
+      </>,
+      slot,
+      slot.id,
+    ),
   );
 }
 

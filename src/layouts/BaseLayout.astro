@@ -11,13 +11,20 @@ const {
   description = "Ясли и детски градини във Варна.",
 } = Astro.props;
 
-const pathname = Astro.url.pathname;
+const normalizePath = (path: string) => {
+  const normalizedPath = path.replace(/\/+$/, "");
+  return normalizedPath === "" ? "/" : normalizedPath;
+};
+
+const pathname = normalizePath(Astro.url.pathname);
 
 const navItems = [
-  { href: "/", label: "Търсене", active: pathname === "/" },
-  { href: "/pravila", label: "Правила за прием", active: pathname === "/pravila" },
-  { href: "/about", label: "За мен / Кой съм аз", active: pathname === "/about" },
-];
+  { href: "/", label: "Търсене" },
+  { href: "/pravila", label: "Правила за прием" },
+].map((item) => ({
+  ...item,
+  active: pathname === normalizePath(item.href),
+}));
 ---
 
 <!doctype html>
@@ -34,7 +41,19 @@ const navItems = [
       <a class="brand" href="/" aria-label="Начало">
         <img alt="" height="32" src="/favicon.svg" width="32" />
       </a>
-      <nav aria-label="Основна навигация">
+      <button
+        aria-controls="site-nav"
+        aria-expanded="false"
+        aria-label="Отвори меню"
+        class="nav-toggle"
+        data-nav-toggle
+        type="button"
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+      <nav aria-label="Основна навигация" data-site-nav id="site-nav">
         {
           navItems.map((item) => (
             <a aria-current={item.active ? "page" : undefined} href={item.href}>
@@ -42,12 +61,40 @@ const navItems = [
             </a>
           ))
         }
+        <SiteFooter class="site-footer--mobile" freshnessId="site-footer-freshness-mobile" />
       </nav>
     </header>
     <main>
       <slot />
     </main>
-    <SiteFooter />
+    <SiteFooter class="site-footer--desktop" />
+    <script>
+      const header = document.querySelector(".site-header");
+      const nav = document.querySelector("[data-site-nav]");
+      const toggle = document.querySelector("[data-nav-toggle]");
+
+      const setNavOpen = (isOpen: boolean) => {
+        header?.toggleAttribute("data-nav-open", isOpen);
+        toggle?.setAttribute("aria-expanded", String(isOpen));
+        toggle?.setAttribute("aria-label", isOpen ? "Затвори меню" : "Отвори меню");
+      };
+
+      toggle?.addEventListener("click", () => {
+        setNavOpen(toggle.getAttribute("aria-expanded") !== "true");
+      });
+
+      nav?.addEventListener("click", (event) => {
+        if (event.target instanceof Element && event.target.closest("a")) {
+          setNavOpen(false);
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          setNavOpen(false);
+        }
+      });
+    </script>
   </body>
 </html>
 
@@ -178,6 +225,32 @@ const navItems = [
     display: block;
   }
 
+  .nav-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    border: 1px solid var(--color-border-default);
+    border-radius: 8px;
+    background: var(--color-bg-surface);
+    color: var(--color-text-strong);
+    cursor: pointer;
+  }
+
+  .nav-toggle span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    border-radius: 1px;
+    background: currentColor;
+    transition:
+      transform 160ms ease,
+      opacity 160ms ease;
+  }
+
   nav {
     display: flex;
     align-items: center;
@@ -216,7 +289,16 @@ const navItems = [
     opacity: 1;
   }
 
+  .site-footer.site-footer--mobile {
+    display: none;
+  }
+
   @media (hover: hover) and (pointer: fine) {
+    .nav-toggle:hover {
+      border-color: var(--color-border-accent);
+      color: var(--color-accent);
+    }
+
     nav a:hover {
       color: var(--color-accent);
     }
@@ -302,17 +384,72 @@ const navItems = [
 
   @media (max-width: 640px) {
     .site-header {
-      align-items: flex-start;
-      flex-direction: column;
-      justify-content: center;
-      gap: 8px;
-      min-height: 82px;
+      display: grid;
+      grid-template-columns: auto auto;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 16px;
+      min-height: 66px;
       padding: 12px 16px;
     }
 
+    .nav-toggle {
+      display: inline-flex;
+    }
+
+    .site-header[data-nav-open] .nav-toggle span:first-child {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .site-header[data-nav-open] .nav-toggle span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .site-header[data-nav-open] .nav-toggle span:last-child {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
     nav {
-      flex-wrap: wrap;
-      gap: 14px;
+      grid-column: 1 / -1;
+      display: grid;
+      width: 100%;
+      max-height: 0;
+      gap: 4px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        max-height 180ms ease,
+        opacity 160ms ease;
+    }
+
+    .site-header[data-nav-open] nav {
+      max-height: 260px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    nav a {
+      min-height: 42px;
+      padding: 10px 0;
+    }
+
+    nav a::after {
+      bottom: 4px;
+    }
+
+    .site-footer.site-footer--desktop {
+      display: none;
+    }
+
+    .site-footer.site-footer--mobile {
+      display: flex;
+      justify-content: flex-start;
+      margin-top: 8px;
+      padding: 12px 0 0;
+      border-top: 1px solid var(--color-border-subtle);
+      background: transparent;
+      font-weight: 400;
     }
 
     .section-stack {

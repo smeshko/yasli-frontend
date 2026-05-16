@@ -1,8 +1,14 @@
 ---
+interface Props {
+  class?: string;
+  freshnessId?: string;
+}
+
+const { class: className, freshnessId = "site-footer-freshness" } = Astro.props;
 ---
 
-<footer class="site-footer">
-  <span class="site-footer__slot" id="site-footer-freshness"></span>
+<footer class:list={["site-footer", className]}>
+  <span class="site-footer__slot" data-site-footer-freshness id={freshnessId}></span>
   <a href="https://ivotsonev.com" rel="noreferrer" target="_blank">
     Built by ivotsonev.com
   </a>
