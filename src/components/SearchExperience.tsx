@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { listInstitutions, matchAddress } from "@/lib/api/client";
 import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
@@ -28,6 +29,39 @@ export interface MatchState {
   message?: string;
 }
 
+const STORAGE_KEY = "yasli:search-state:v1";
+
+interface StoredSearchState {
+  query: string;
+  filter: ResultFilter;
+  matchState: MatchState | null;
+}
+
+function loadStoredState(): StoredSearchState | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as StoredSearchState) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredState(state: StoredSearchState): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    /* sessionStorage unavailable or quota exceeded — drop silently */
+  }
+}
+
 export function SearchExperience() {
   const [referenceStatus, setReferenceStatus] = useState<ReferenceStatus>("idle");
   const [suggestions, setSuggestions] = useState<ExactAddressSuggestion[]>([]);
@@ -42,6 +76,7 @@ export function SearchExperience() {
     grouped: null,
     selectedAddress: null,
   });
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   const visibleSuggestions = useMemo(
     () => searchExactAddressSuggestions(suggestions, query),
@@ -53,9 +88,30 @@ export function SearchExperience() {
   const staleResults = shouldShowStaleBanner(freshnessDate);
 
   useEffect(() => {
+    const stored = loadStoredState();
+
+    if (stored) {
+      setQuery(stored.query);
+      setFilter(stored.filter);
+
+      if (stored.matchState && stored.matchState.status !== "loading") {
+        setMatchState(stored.matchState);
+      }
+    }
+
+    setHasHydrated(true);
     void loadReferences();
     void loadFreshness();
   }, []);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
+    const persistableMatch = matchState.status === "loading" ? null : matchState;
+    saveStoredState({ query, filter, matchState: persistableMatch });
+  }, [hasHydrated, query, filter, matchState]);
 
   useEffect(() => {
     setActiveIndex(0);
@@ -202,7 +258,7 @@ export function SearchExperience() {
               type="search"
               autoComplete="off"
               value={query}
-              placeholder="бул. Генерал Колев 85"
+              placeholder="ул. Преслав 12"
               aria-autocomplete="list"
               aria-controls="address-suggestions"
               aria-expanded={isAutocompleteOpen}
@@ -270,9 +326,28 @@ export function SearchExperience() {
         onFilterChange={setFilter}
         onRetryStale={() => void retryReferences()}
       />
-
-      <FooterFreshness freshnessDate={freshnessDate} />
+      <FreshnessPortal freshnessDate={freshnessDate} />
     </div>
+  );
+}
+
+function FreshnessPortal({ freshnessDate }: { freshnessDate: Date | null }) {
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setSlot(document.getElementById("site-footer-freshness"));
+  }, []);
+
+  if (!slot || !freshnessDate) {
+    return null;
+  }
+
+  return createPortal(
+    <>
+      <span>Last updated: {formatDate(freshnessDate)}</span>
+      <span aria-hidden="true" className="site-footer__separator">|</span>
+    </>,
+    slot,
   );
 }
 
@@ -417,18 +492,6 @@ function ResultGroup({
         <p className="empty-group">{emptyGroupText(kind)}</p>
       )}
     </section>
-  );
-}
-
-function FooterFreshness({ freshnessDate }: { freshnessDate: Date | null }) {
-  return (
-    <footer className="home-footer">
-      {freshnessDate ? <span>Last updated: {formatDate(freshnessDate)}</span> : <span>Last updated: --</span>}
-      <span aria-hidden="true">|</span>
-      <a href="https://ivotsonev.com" target="_blank" rel="noreferrer">
-        Built by ivotsonev.com
-      </a>
-    </footer>
   );
 }
 

@@ -10,7 +10,7 @@ describe("SearchExperience", () => {
     const html = renderToStaticMarkup(<SearchExperience />);
 
     expect(html).toContain("Коя е моята градина?");
-    expect(html).toContain("бул. Генерал Колев 85");
+    expect(html).toContain("ул. Преслав 12");
   });
 });
 

@@ -10,13 +10,13 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 <style is:global>
   .search-experience {
     display: grid;
-    min-height: calc(100vh - 66px);
-    grid-template-rows: 1fr auto auto;
-    background: #f4f7fb;
+    min-height: 100%;
+    grid-template-rows: 1fr auto;
+    background: var(--color-bg-page);
   }
 
   .search-experience[data-has-results="true"] {
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr;
   }
 
   .search-hero {
@@ -41,7 +41,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .search-copy h1 {
     max-width: 720px;
-    color: #081225;
+    color: var(--color-text-display);
     font-size: clamp(2.5rem, 5vw, 3.25rem);
     font-weight: 800;
     line-height: 1.12;
@@ -49,7 +49,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .search-copy p {
     max-width: 760px;
-    color: #52627a;
+    color: var(--color-text-subtle);
     font-size: 1.08rem;
     line-height: 1.55;
   }
@@ -65,11 +65,11 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: 14px;
-    border: 2px solid #6fa3ff;
+    border: 2px solid var(--color-border-accent);
     border-radius: 9px;
-    background: #fff;
-    box-shadow: 0 0 0 1px rgba(52, 108, 255, 0.04);
-    color: #2563eb;
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-field);
+    color: var(--color-accent);
     padding: 0 18px;
   }
 
@@ -78,14 +78,14 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     border: 0;
     outline: 0;
     background: transparent;
-    color: #0f172a;
+    color: var(--color-text-strong);
     font: inherit;
     font-size: 1rem;
     font-weight: 700;
   }
 
   .search-field input::placeholder {
-    color: #7d8ba4;
+    color: var(--color-text-faint);
     font-weight: 500;
   }
 
@@ -97,12 +97,12 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     width: 100%;
     max-height: min(376px, 52dvh);
     overflow-y: auto;
-    border: 1px solid #c9d8ef;
+    border: 1px solid var(--color-border-soft);
     border-radius: 10px;
     margin: 0;
     padding: 8px;
-    background: #fff;
-    box-shadow: 0 22px 44px rgba(31, 55, 88, 0.12);
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-panel);
     list-style: none;
   }
 
@@ -113,20 +113,20 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     align-items: center;
     gap: 14px;
     border-radius: 8px;
-    color: #607089;
+    color: var(--color-text-subtle);
     cursor: pointer;
     padding: 9px 12px;
   }
 
   .suggestion-panel li.active {
-    background: #e7f0ff;
-    color: #2563eb;
+    background: var(--color-bg-accent-soft);
+    color: var(--color-accent);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .suggestion-panel li:hover {
-      background: #e7f0ff;
-      color: #2563eb;
+      background: var(--color-bg-accent-soft);
+      color: var(--color-accent);
     }
   }
 
@@ -138,7 +138,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   .suggestion-text strong {
-    color: #0f172a;
+    color: var(--color-text-strong);
     font-size: 0.94rem;
     white-space: nowrap;
   }
@@ -146,7 +146,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .suggestion-text span {
     min-width: 0;
     overflow: hidden;
-    color: #59677d;
+    color: var(--color-text-subtle);
     font-size: 0.9rem;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -162,7 +162,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    color: #475569;
+    color: var(--color-text-muted);
     font-size: 0.94rem;
   }
 
@@ -170,8 +170,8 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .results-status button {
     border: 0;
     border-radius: 7px;
-    background: #2563eb;
-    color: #fff;
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
@@ -180,7 +180,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .validation-message {
     margin-top: 12px;
-    color: #b42318;
+    color: var(--color-text-error-strong);
     font-size: 0.94rem;
   }
 
@@ -192,25 +192,25 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .selected-address {
     max-width: none;
-    color: #0f172a;
+    color: var(--color-text-strong);
     font-weight: 700;
   }
 
   .results-status,
   .stale-banner {
-    border: 1px solid #c9d8ef;
+    border: 1px solid var(--color-border-soft);
     border-radius: 8px;
     margin-top: 18px;
-    background: #fff;
-    color: #475569;
+    background: var(--color-bg-surface);
+    color: var(--color-text-muted);
     padding: 16px;
   }
 
   .results-status.error,
   .stale-banner {
-    border-color: #f3b4a6;
-    background: #fff7ed;
-    color: #9a3412;
+    border-color: var(--color-border-error);
+    background: var(--color-bg-error-soft);
+    color: var(--color-text-error);
   }
 
   .results-status.error {
@@ -229,10 +229,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .filters button {
     min-height: 44px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-border-default);
     border-radius: 8px;
-    background: #fff;
-    color: #475569;
+    background: var(--color-bg-surface);
+    color: var(--color-text-muted);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
@@ -240,9 +240,9 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   .filters button.active {
-    border-color: #2563eb;
-    background: #e7f0ff;
-    color: #1d4ed8;
+    border-color: var(--color-accent);
+    background: var(--color-bg-accent-soft);
+    color: var(--color-accent-strong);
   }
 
   .result-groups {
@@ -257,15 +257,15 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .result-group h2 {
     margin: 0;
-    color: #0f172a;
+    color: var(--color-text-strong);
     font-size: 1.2rem;
   }
 
   .group-note {
     max-width: none;
-    border-left: 3px solid #2563eb;
-    background: #eef4ff;
-    color: #1e3a8a;
+    border-left: 3px solid var(--color-accent);
+    background: var(--color-bg-accent-softer);
+    color: var(--color-text-group-note);
     font-size: 0.95rem;
     line-height: 1.5;
     padding: 10px 14px;
@@ -281,22 +281,22 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    border: 1px solid #d6e0ee;
+    border: 1px solid var(--color-border-card);
     border-radius: 8px;
-    background: #fff;
+    background: var(--color-bg-surface);
     padding: 16px;
   }
 
   .result-card h3 {
     margin: 3px 0 0;
-    color: #0f172a;
+    color: var(--color-text-strong);
     font-size: 1rem;
     overflow-wrap: anywhere;
     word-break: break-word;
   }
 
   .kind-label {
-    color: #2563eb;
+    color: var(--color-accent);
     font-size: 0.84rem;
     font-weight: 800;
     line-height: 1.3;
@@ -311,7 +311,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .card-actions a {
     display: inline-block;
     padding: 8px 0;
-    color: #1d4ed8;
+    color: var(--color-accent-strong);
     font-size: 0.92rem;
     font-weight: 700;
     text-decoration: none;
@@ -319,29 +319,11 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .empty-group {
     max-width: none;
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed var(--color-border-default);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.72);
-    color: #59677d;
+    background: var(--color-bg-surface-muted);
+    color: var(--color-text-subtle);
     padding: 14px;
-  }
-
-  .home-footer {
-    display: flex;
-    min-height: 46px;
-    align-items: center;
-    justify-content: center;
-    gap: 22px;
-    border-top: 1px solid #d4deea;
-    color: #687892;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    font-size: 0.78rem;
-  }
-
-  .home-footer a {
-    color: #2563eb;
-    font-weight: 800;
-    text-decoration: none;
   }
 
   .sr-only {
@@ -393,10 +375,6 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   @media (max-width: 720px) {
-    .search-experience {
-      min-height: calc(100vh - 82px);
-    }
-
     .search-hero {
       align-content: start;
       padding: 64px 0 72px;
@@ -425,13 +403,6 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     .results-status.error {
       align-items: flex-start;
       flex-direction: column;
-    }
-
-    .home-footer {
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 12px;
-      text-align: center;
     }
   }
 </style>
