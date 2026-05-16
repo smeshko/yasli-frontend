@@ -1,98 +1,48 @@
-# yasli frontend
+# yasli-frontend
 
-Astro, React, and TypeScript frontend for the Bulgarian-only `yasli` user
-interface.
+Bulgarian-language Astro + React UI for finding nurseries, kindergartens, and preschools by address in Varna. Static site that talks to [`yasli-backend`](https://github.com/smeshko/yasli-backend) over JSON.
 
-## Status
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the pieces fit together.
 
-The app is feature-frozen at the s11 search experience. User-facing routes are
-limited to `/` (the address-driven search) and `/about`. The institution
-profile and listing routes were intentionally removed in s12; result cards
-link out to the official `dg.uslugi.io` source instead.
+## Quickstart
 
-## Requirements
-
-- Node.js 22 for local development and Cloudflare Pages builds.
-- npm, using the committed `package-lock.json`.
-- A reachable backend only when regenerating OpenAPI types.
-
-## Local setup
+Requires Node 22.
 
 ```bash
 npm ci
-npm run dev
+npm run dev   # http://localhost:4321
 ```
 
-The local development server defaults API configuration to
-`http://localhost:8000` when `PUBLIC_YASLI_API_BASE_URL` is not set.
+Defaults `PUBLIC_YASLI_API_BASE_URL` to `http://localhost:8000` in dev.
 
 ## Commands
 
 ```bash
-npm run dev       # local Astro server
-npm run build     # production build
-npm run preview   # preview the built output
-npm run check     # Astro type check
-npm run lint      # ESLint
-npm run test      # Vitest unit tests
-npm run api:types # regenerate backend OpenAPI TypeScript types
+npm run dev        # Astro dev server
+npm run build      # static build → dist/
+npm run preview    # serve the built output
+npm run check      # Astro type check
+npm run lint       # ESLint
+npm run test       # Vitest
+npm run api:types  # regenerate src/lib/api/types.ts from backend OpenAPI
 ```
 
-`npm run build` consumes the committed `src/lib/api/types.ts` file. It does not
-regenerate OpenAPI types and does not require the backend service to be running.
+`npm run build` consumes the committed `src/lib/api/types.ts`; it does **not** regenerate types and does **not** require the backend.
 
-## API configuration
+## Environment variables
 
-Set `PUBLIC_YASLI_API_BASE_URL` to the browser-visible backend origin in every
-deployed environment, for example:
+| Variable | When | Purpose |
+| --- | --- | --- |
+| `PUBLIC_YASLI_API_BASE_URL` | build-time | Absolute URL of the backend (e.g. `https://yasli-backend-production.up.railway.app`). Required in every non-dev environment. |
+| `YASLI_OPENAPI_URL` | `api:types` only | OpenAPI source URL (defaults to `http://localhost:8000/openapi.json`). |
 
-```bash
-PUBLIC_YASLI_API_BASE_URL=https://api.example.test npm run build
-```
+## Deployment
 
-The value must be an absolute `http` or `https` URL. A trailing slash is removed
-by the shared API configuration module.
+Deployed on Cloudflare Pages (Git-connected, auto-deploys on push to `main`).
 
-## Search development
-
-The home search flow loads these backend endpoints in the browser:
-
-- `GET /api/streets`
-- `GET /api/addresses`
-- `GET /api/match?address_id=<id>`
-- `GET /api/institutions` for freshness metadata
-
-Run the frontend against a backend that has the s07, s08, and s09 endpoints
-available. The search input builds exact-address suggestions from the streets
-and addresses payloads, so selecting a suggestion starts the match request
-directly. Free-text submission without selecting a suggestion is intentionally
-not supported in v1.
-
-## OpenAPI type generation
-
-The generator reads `YASLI_OPENAPI_URL` and defaults to
-`http://localhost:8000/openapi.json` when it is absent:
-
-```bash
-npm run api:types
-YASLI_OPENAPI_URL=https://api.example.test/openapi.json npm run api:types
-```
-
-Run this command after backend OpenAPI changes, then commit the updated
-`src/lib/api/types.ts`.
-
-For the search UI, refresh generated types after the backend OpenAPI includes
-the s09 institution endpoints:
-
-```bash
-YASLI_OPENAPI_URL=http://localhost:8000/openapi.json npm run api:types
-```
-
-## Cloudflare Pages
-
+- Framework preset: **Astro**
 - Build command: `npm run build`
-- Output directory: `dist`
-- Node version: 22
-- Required environment variable: `PUBLIC_YASLI_API_BASE_URL`
+- Build output directory: `dist`
+- Environment variables: `PUBLIC_YASLI_API_BASE_URL`, `NODE_VERSION=22`
 
-Cloudflare Pages should run `npm ci` before the build command.
+`PUBLIC_YASLI_API_BASE_URL` is baked in at build time — changing it requires a redeploy.
