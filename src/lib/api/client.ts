@@ -6,13 +6,10 @@ export type Address = components["schemas"]["AddressOut"];
 export type MatchAddressContext = components["schemas"]["MatchAddressContext"];
 export type MatchResult = components["schemas"]["MatchResult"];
 export type StructuredMatchResponse =
-  operations["structured_match_api_match_v2_get"]["responses"][200]["content"]["application/json"];
+  operations["match_api_match_get"]["responses"][200]["content"]["application/json"];
 export type InstitutionListItem = components["schemas"]["InstitutionListItem"];
 
-export interface MatchData {
-  address: MatchAddressContext;
-  results: MatchResult[];
-}
+export type MatchData = StructuredMatchResponse;
 
 export type ApiErrorCode =
   | "network_error"
@@ -39,7 +36,7 @@ export type ApiResult<T> =
 export function buildMatchRequestPath(addressId: number): string {
   const params = new URLSearchParams({ address_id: String(addressId) });
 
-  return `/api/match/v2?${params.toString()}`;
+  return `/api/match?${params.toString()}`;
 }
 
 export function listStreets(): Promise<ApiResult<Street[]>> {
@@ -55,23 +52,7 @@ export function listInstitutions(): Promise<ApiResult<InstitutionListItem[]>> {
 }
 
 export async function matchAddress(addressId: number): Promise<ApiResult<MatchData>> {
-  const result = await requestJson<StructuredMatchResponse>(buildMatchRequestPath(addressId));
-
-  if (!result.ok) {
-    return result;
-  }
-
-  return {
-    ok: true,
-    data: adaptStructuredMatchResponse(result.data),
-  };
-}
-
-export function adaptStructuredMatchResponse(response: StructuredMatchResponse): MatchData {
-  return {
-    address: response.address,
-    results: response.results,
-  };
+  return requestJson<MatchData>(buildMatchRequestPath(addressId));
 }
 
 async function requestJson<T>(path: string): Promise<ApiResult<T>> {

@@ -146,20 +146,6 @@ export interface components {
             /** Addresses */
             addresses: components["schemas"]["InstitutionAddress"][];
         };
-        /**
-         * DistrictUnknownResponse
-         * @description Legacy envelope for addresses with neither rayon nor settlement stamp.
-         */
-        DistrictUnknownResponse: {
-            /**
-             * Match Type
-             * @default district_unknown
-             * @constant
-             */
-            match_type: "district_unknown";
-            /** Results */
-            results: components["schemas"]["MatchInstitution"][];
-        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -228,37 +214,6 @@ export interface components {
             district_code: ("01" | "02" | "03" | "04" | "05") | null;
             settlement: components["schemas"]["MatchSettlementContext"] | null;
         };
-        /**
-         * MatchInstitution
-         * @description One legacy institution row covering the queried address.
-         *
-         *     ``match_type`` is ``"street"`` for junction-based matches
-         *     (kindergartens always; preschools when the source publishes a catchment
-         *     that includes the address) and ``"district"`` for district-routed matches
-         *     (nurseries always; preschools when no junction row was found).
-         */
-        MatchInstitution: {
-            /** Id */
-            id: number;
-            /** External Id */
-            external_id: string;
-            /** Name */
-            name: string;
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "nursery" | "kindergarten" | "preschool";
-            /** Source Url */
-            source_url: string;
-            /**
-             * Match Type
-             * @enum {string}
-             */
-            match_type: "street" | "district";
-            /** Has Infant Group */
-            has_infant_group: boolean;
-        };
         /** MatchResult */
         MatchResult: {
             /** Id */
@@ -303,20 +258,6 @@ export interface components {
              * @enum {string}
              */
             locality_type: "city" | "village";
-        };
-        /**
-         * SettlementOnlyResponse
-         * @description Legacy envelope for addresses with settlement stamp but no rayon.
-         */
-        SettlementOnlyResponse: {
-            /**
-             * Match Type
-             * @default settlement_only
-             * @constant
-             */
-            match_type: "settlement_only";
-            /** Results */
-            results: components["schemas"]["MatchInstitution"][];
         };
         /** StreetOut */
         StreetOut: {
@@ -470,13 +411,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Bare array of institution rows when the queried address has a known rayon. Envelope `{match_type: 'settlement_only', results: [...]}` for settlement-stamped rows with no rayon. Envelope `{match_type: 'district_unknown', results: [...]}` when neither rayon nor settlement is stamped. */
+            /** @description Successful Response */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchInstitution"][] | components["schemas"]["DistrictUnknownResponse"] | components["schemas"]["SettlementOnlyResponse"];
+                    "application/json": components["schemas"]["StructuredMatchResponse"];
                 };
             };
             /** @description Validation Error */

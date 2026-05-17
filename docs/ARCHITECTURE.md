@@ -47,7 +47,7 @@ src/
 | `listStreets()` | `GET /api/streets` |
 | `listAddresses()` | `GET /api/addresses` |
 | `listInstitutions()` | `GET /api/institutions` |
-| `matchAddress(addressId)` | `GET /api/match/v2?address_id={id}` |
+| `matchAddress(addressId)` | `GET /api/match?address_id={id}` |
 
 Error codes: `network_error`, `http_error`, `invalid_json`, `address_not_found`. Messages are Bulgarian — they're rendered directly in the UI.
 
@@ -58,8 +58,8 @@ Error codes: `network_error`, `http_error`, `invalid_json`, `address_not_found`.
 1. **On mount** — `referenceData.ts` fetches `/api/streets` and `/api/addresses` once, caches the Promise.
 2. **Build suggestions** — `addressSuggestions.buildExactAddressSuggestions()` transliterates Latin → Cyrillic, expands abbreviated person-name streets, and indexes every `(street, number)` row.
 3. **As the user types** — `searchExactAddressSuggestions()` filters by substring + word-prefix scoring.
-4. **On suggestion select** — call `matchAddress(addressId)`, which requests the structured `{ address, results }` response from `/api/match/v2` without a `kind` filter.
-5. **Group results** — `results.groupMatchResults()` buckets structured rows by `institution_kind` (`nursery`, `kindergarten`, `preschool`) and synthesises nursery entries from kindergartens that have `has_infant_group` set.
+4. **On suggestion select** — call `matchAddress(addressId)`, which requests the structured `{ address, results }` response from `/api/match` without a `kind` filter.
+5. **Group results** — `results.groupMatchResults()` buckets structured rows by `reception_kind` (`nursery`, `kindergarten`, `preschool`). Infant-group rows come from the backend as explicit `offering = "infant_group"` rows.
 6. **Render** — grouped cards with filter tabs (`all` / per-kind). Missing-district and district-fallback notices are derived from `address.district_code` and `match_basis === "district"`, not legacy response envelopes. Freshness banner if `last_seen_at` is >14 days old (`freshness.shouldShowStaleBanner`).
 
 Free-text submission without selecting a suggestion is intentionally **not** supported — the search is exact-address only.

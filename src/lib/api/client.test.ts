@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
-  adaptStructuredMatchResponse,
   buildMatchRequestPath,
   matchAddress,
   type StructuredMatchResponse,
@@ -9,42 +8,11 @@ import {
 
 describe("buildMatchRequestPath", () => {
   it("builds an unfiltered match path from address id", () => {
-    expect(buildMatchRequestPath(123)).toBe("/api/match/v2?address_id=123");
+    expect(buildMatchRequestPath(123)).toBe("/api/match?address_id=123");
   });
 
   it("does not include a kind filter in search requests", () => {
     expect(buildMatchRequestPath(123)).not.toContain("kind=");
-  });
-});
-
-describe("adaptStructuredMatchResponse", () => {
-  it("adapts the structured address context and result rows", () => {
-    const response: StructuredMatchResponse = {
-      address: {
-        id: 123,
-        district_code: "01",
-        settlement: {
-          code: "10135",
-          name: "ГР.ВАРНА",
-          locality_type: "city",
-        },
-      },
-      results: [
-        {
-          id: 1,
-          external_id: "1",
-          name: "ДГ Тест",
-          institution_kind: "kindergarten",
-          reception_kind: "kindergarten",
-          offering: "standard",
-          source_url: "https://example.test/source",
-          match_basis: "address",
-          has_infant_group: false,
-        },
-      ],
-    };
-
-    expect(adaptStructuredMatchResponse(response)).toEqual(response);
   });
 });
 
@@ -53,7 +21,7 @@ describe("matchAddress", () => {
     vi.unstubAllGlobals();
   });
 
-  it("requests structured match data from /api/match/v2", async () => {
+  it("requests structured match data from /api/match", async () => {
     const response: StructuredMatchResponse = {
       address: {
         id: 123,
@@ -76,7 +44,7 @@ describe("matchAddress", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:8000/api/match/v2?address_id=123",
+      "http://localhost:8000/api/match?address_id=123",
       { headers: { Accept: "application/json" } },
     );
   });
