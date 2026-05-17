@@ -457,6 +457,11 @@ function ResultGroup({
   kind: ReceptionKind;
   institutions: GroupedInstitution[];
 }) {
+  const preschoolDistrictFallback =
+    kind === "preschool" &&
+    institutions.length > 0 &&
+    institutions.every((item) => item.match_type === "district");
+
   return (
     <section className="result-group" aria-labelledby={`result-group-${kind}`}>
       <h2 id={`result-group-${kind}`}>{labelForReceptionKind(kind)}</h2>
@@ -464,6 +469,12 @@ function ResultGroup({
         <p className="group-note">
           Яслите не са по адрес, имате право да кандидатствате във всяка, но получавате
           предимство в тези, които са във вашия район.
+        </p>
+      ) : null}
+      {preschoolDistrictFallback ? (
+        <p className="group-note">
+          За този адрес няма резултати, показваме всички училища с подготвителни групи в
+          съответния район.
         </p>
       ) : null}
       {institutions.length > 0 ? (
