@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/match/v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Structured Match */
+        get: operations["structured_match_api_match_v2_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/institutions": {
         parameters: {
             query?: never;
@@ -131,9 +148,7 @@ export interface components {
         };
         /**
          * DistrictUnknownResponse
-         * @description Envelope returned when the queried address has no district stamp
-         *     and nurseries/preschools were among the kinds the request could have
-         *     returned. ``results`` carries kindergarten matches only.
+         * @description Legacy envelope for addresses with neither rayon nor settlement stamp.
          */
         DistrictUnknownResponse: {
             /**
@@ -205,12 +220,22 @@ export interface components {
              */
             last_seen_at: string;
         };
+        /** MatchAddressContext */
+        MatchAddressContext: {
+            /** Id */
+            id: number;
+            /** District Code */
+            district_code: ("01" | "02" | "03" | "04" | "05") | null;
+            settlement: components["schemas"]["MatchSettlementContext"] | null;
+        };
         /**
          * MatchInstitution
-         * @description One institution covering the queried address.
+         * @description One legacy institution row covering the queried address.
          *
-         *     ``match_type`` is ``"street"`` for kindergartens (junction match) and
-         *     ``"district"`` for nurseries and preschools (district routing).
+         *     ``match_type`` is ``"street"`` for junction-based matches
+         *     (kindergartens always; preschools when the source publishes a catchment
+         *     that includes the address) and ``"district"`` for district-routed matches
+         *     (nurseries always; preschools when no junction row was found).
          */
         MatchInstitution: {
             /** Id */
@@ -233,6 +258,55 @@ export interface components {
             match_type: "street" | "district";
             /** Has Infant Group */
             has_infant_group: boolean;
+        };
+        /** MatchResult */
+        MatchResult: {
+            /** Id */
+            id: number;
+            /** External Id */
+            external_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Institution Kind
+             * @enum {string}
+             */
+            institution_kind: "nursery" | "kindergarten" | "preschool";
+            /** Source Url */
+            source_url: string;
+            /**
+             * Match Basis
+             * @enum {string}
+             */
+            match_basis: "address" | "district";
+            /** Has Infant Group */
+            has_infant_group: boolean;
+        };
+        /** MatchSettlementContext */
+        MatchSettlementContext: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /**
+             * Locality Type
+             * @enum {string}
+             */
+            locality_type: "city" | "village";
+        };
+        /**
+         * SettlementOnlyResponse
+         * @description Legacy envelope for addresses with settlement stamp but no rayon.
+         */
+        SettlementOnlyResponse: {
+            /**
+             * Match Type
+             * @default settlement_only
+             * @constant
+             */
+            match_type: "settlement_only";
+            /** Results */
+            results: components["schemas"]["MatchInstitution"][];
         };
         /** StreetOut */
         StreetOut: {
@@ -259,6 +333,12 @@ export interface components {
             street_part: string;
             /** Type Marker */
             type_marker: string | null;
+        };
+        /** StructuredMatchResponse */
+        StructuredMatchResponse: {
+            address: components["schemas"]["MatchAddressContext"];
+            /** Results */
+            results: components["schemas"]["MatchResult"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -380,13 +460,47 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Bare array of institution rows when the queried address has a known district. Envelope `{match_type: 'district_unknown', results: [...]}` when the district is unknown and nursery/preschool matches were possible. */
+            /** @description Bare array of institution rows when the queried address has a known rayon. Envelope `{match_type: 'settlement_only', results: [...]}` for settlement-stamped rows with no rayon. Envelope `{match_type: 'district_unknown', results: [...]}` when neither rayon nor settlement is stamped. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchInstitution"][] | components["schemas"]["DistrictUnknownResponse"];
+                    "application/json": components["schemas"]["MatchInstitution"][] | components["schemas"]["DistrictUnknownResponse"] | components["schemas"]["SettlementOnlyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    structured_match_api_match_v2_get: {
+        parameters: {
+            query: {
+                /** @description addresses.id */
+                address_id: number;
+                /** @description Filter by institution kind */
+                kind?: ("nursery" | "kindergarten" | "preschool") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StructuredMatchResponse"];
                 };
             };
             /** @description Validation Error */
