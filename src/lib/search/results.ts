@@ -1,23 +1,32 @@
-import type { InstitutionListItem, MatchInstitution } from "@/lib/api/client";
+import type { InstitutionListItem, MatchAddressContext, MatchResult } from "@/lib/api/client";
 import type { ReceptionKind } from "@/lib/domain/kinds";
 import { receptionKindOrder } from "@/lib/domain/kinds";
 import { isSnapshotStale } from "@/lib/domain/freshness";
 
 export type ResultFilter = "all" | ReceptionKind;
 
-export interface GroupedInstitution extends MatchInstitution {
+export type MatchLocalityType = NonNullable<MatchAddressContext["settlement"]>["locality_type"];
+
+export interface GroupedInstitution extends MatchResult {
   infantGroupOrigin?: boolean;
 }
 
 export type GroupedResults = Record<ReceptionKind, GroupedInstitution[]>;
 
-export function groupMatchResults(institutions: MatchInstitution[]): GroupedResults {
+export interface ResultGroupState {
+  isEmpty: boolean;
+  hasMissingDistrictContext: boolean;
+  hasDistrictFallback: boolean;
+  localityType: MatchLocalityType | null;
+}
+
+export function groupMatchResults(results: MatchResult[]): GroupedResults {
   const grouped = emptyGroupedResults();
 
-  for (const institution of institutions) {
-    grouped[institution.kind].push(institution);
+  for (const institution of results) {
+    grouped[institution.institution_kind].push(institution);
 
-    if (institution.kind === "kindergarten" && institution.has_infant_group) {
+    if (institution.institution_kind === "kindergarten" && institution.has_infant_group) {
       grouped.nursery.push({ ...institution, infantGroupOrigin: true });
     }
   }
@@ -27,6 +36,22 @@ export function groupMatchResults(institutions: MatchInstitution[]): GroupedResu
   }
 
   return grouped;
+}
+
+export function deriveResultGroupState(
+  address: MatchAddressContext,
+  institutions: GroupedInstitution[],
+): ResultGroupState {
+  return {
+    isEmpty: institutions.length === 0,
+    hasMissingDistrictContext: address.district_code === null,
+    hasDistrictFallback: hasDistrictFallback(institutions),
+    localityType: address.settlement?.locality_type ?? null,
+  };
+}
+
+export function hasDistrictFallback(institutions: GroupedInstitution[]): boolean {
+  return institutions.length > 0 && institutions.every((item) => item.match_basis === "district");
 }
 
 export function visibleResultKinds(filter: ResultFilter): ReceptionKind[] {

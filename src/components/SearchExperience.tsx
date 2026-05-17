@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { listInstitutions, matchAddress } from "@/lib/api/client";
+import {
+  listInstitutions,
+  matchAddress,
+  type MatchAddressContext,
+} from "@/lib/api/client";
 import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
 import {
   searchExactAddressSuggestions,
@@ -9,6 +13,7 @@ import {
 } from "@/lib/search/addressSuggestions";
 import { clearReferenceDataCache, loadReferenceData } from "@/lib/search/referenceData";
 import {
+  deriveResultGroupState,
   groupMatchResults,
   newestFreshnessDate,
   shouldShowStaleBanner,
@@ -23,13 +28,13 @@ type MatchStatus = "idle" | "loading" | "success" | "error" | "stale";
 
 export interface MatchState {
   status: MatchStatus;
+  address: MatchAddressContext | null;
   grouped: GroupedResults | null;
   selectedAddress: ExactAddressSuggestion | null;
-  districtUnknown?: boolean;
   message?: string;
 }
 
-const STORAGE_KEY = "yasli:search-state:v1";
+const STORAGE_KEY = "yasli:search-state:v2";
 
 interface StoredSearchState {
   query: string;
@@ -73,6 +78,7 @@ export function SearchExperience() {
   const [freshnessDate, setFreshnessDate] = useState<Date | null>(null);
   const [matchState, setMatchState] = useState<MatchState>({
     status: "idle",
+    address: null,
     grouped: null,
     selectedAddress: null,
   });
@@ -149,6 +155,7 @@ export function SearchExperience() {
     setFilter("all");
     setMatchState({
       status: "loading",
+      address: null,
       grouped: null,
       selectedAddress: suggestion,
     });
@@ -159,6 +166,7 @@ export function SearchExperience() {
     } catch {
       setMatchState({
         status: "error",
+        address: null,
         grouped: null,
         selectedAddress: suggestion,
         message: "Не успяхме да заредим резултатите. Опитайте отново.",
@@ -169,9 +177,9 @@ export function SearchExperience() {
     if (result.ok) {
       setMatchState({
         status: "success",
-        grouped: groupMatchResults(result.data.institutions),
+        address: result.data.address,
+        grouped: groupMatchResults(result.data.results),
         selectedAddress: suggestion,
-        districtUnknown: result.data.districtUnknown,
       });
       return;
     }
@@ -180,6 +188,7 @@ export function SearchExperience() {
       clearReferenceDataCache();
       setMatchState({
         status: "stale",
+        address: null,
         grouped: null,
         selectedAddress: suggestion,
         message: "Данните за избрания адрес са обновени. Презаредете списъка и опитайте отново.",
@@ -189,6 +198,7 @@ export function SearchExperience() {
 
     setMatchState({
       status: "error",
+      address: null,
       grouped: null,
       selectedAddress: suggestion,
       message: "Не успяхме да заредим резултатите. Опитайте отново.",
@@ -402,18 +412,16 @@ export function SearchResults({
             </div>
           ) : null}
 
-          {matchState.districtUnknown ? (
-            <div className="results-status">
-              Районът за този адрес още не е зареден. Показваме само детските градини по адрес; яслите и
-              подготвителните групи изискват потвърден район.
-            </div>
-          ) : null}
-
           <FilterTabs currentFilter={filter} onFilterChange={onFilterChange} />
 
           <div className="result-groups">
             {visibleResultKinds(filter).map((kind) => (
-              <ResultGroup key={kind} kind={kind} institutions={matchState.grouped?.[kind] ?? []} />
+              <ResultGroup
+                key={kind}
+                kind={kind}
+                institutions={matchState.grouped?.[kind] ?? []}
+                address={matchState.address}
+              />
             ))}
           </div>
         </>
@@ -453,14 +461,17 @@ function FilterTabs({
 function ResultGroup({
   kind,
   institutions,
+  address,
 }: {
   kind: ReceptionKind;
   institutions: GroupedInstitution[];
+  address: MatchAddressContext | null;
 }) {
-  const preschoolDistrictFallback =
-    kind === "preschool" &&
-    institutions.length > 0 &&
-    institutions.every((item) => item.match_type === "district");
+  const groupState = address ? deriveResultGroupState(address, institutions) : null;
+  const showMissingDistrictNotice =
+    groupState?.hasMissingDistrictContext === true && isDistrictDependentGroup(kind);
+  const showDistrictFallbackNotice =
+    kind === "preschool" && groupState?.hasDistrictFallback === true;
 
   return (
     <section className="result-group" aria-labelledby={`result-group-${kind}`}>
@@ -471,10 +482,15 @@ function ResultGroup({
           предимство в тези, които са във вашия район.
         </p>
       ) : null}
-      {preschoolDistrictFallback ? (
-        <p className="group-note">
-          За този адрес няма резултати, показваме всички училища с подготвителни групи в
-          съответния район.
+      {showMissingDistrictNotice ? (
+        <p className="group-note group-note--warn">
+          За избрания адрес все още няма потвърден район. Районните резултати за тази група
+          не са налични.
+        </p>
+      ) : null}
+      {showDistrictFallbackNotice ? (
+        <p className="group-note group-note--warn">
+          Няма адресно съвпадение за тази група. Показваме резултати по район.
         </p>
       ) : null}
       {institutions.length > 0 ? (
@@ -486,11 +502,11 @@ function ResultGroup({
             return (
               <article
                 className="result-card"
-                key={`${kind}-${institution.kind}-${institution.id}`}
+                key={`${kind}-${institution.institution_kind}-${institution.id}`}
                 style={{ "--result-delay": `${index * 40}ms` } as React.CSSProperties}
               >
                 <div>
-                  <p className="kind-label">{labelForReceptionKind(institution.kind)}</p>
+                  <p className="kind-label">{labelForReceptionKind(institution.institution_kind)}</p>
                   <h3>{displayName}</h3>
                 </div>
                 <div className="card-actions">
@@ -507,6 +523,10 @@ function ResultGroup({
       )}
     </section>
   );
+}
+
+function isDistrictDependentGroup(kind: ReceptionKind): boolean {
+  return kind === "nursery" || kind === "preschool";
 }
 
 function emptyGroupText(kind: ReceptionKind): string {

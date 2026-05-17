@@ -1,17 +1,17 @@
 import { apiBaseUrl } from "@/lib/api/config";
 import type { components, operations } from "@/lib/api/types";
-import type { ReceptionKind } from "@/lib/domain/kinds";
 
 export type Street = components["schemas"]["StreetOut"];
 export type Address = components["schemas"]["AddressOut"];
-export type MatchInstitution = components["schemas"]["MatchInstitution"];
-export type MatchResponse =
-  operations["match_api_match_get"]["responses"][200]["content"]["application/json"];
+export type MatchAddressContext = components["schemas"]["MatchAddressContext"];
+export type MatchResult = components["schemas"]["MatchResult"];
+export type StructuredMatchResponse =
+  operations["structured_match_api_match_v2_get"]["responses"][200]["content"]["application/json"];
 export type InstitutionListItem = components["schemas"]["InstitutionListItem"];
 
 export interface MatchData {
-  institutions: MatchInstitution[];
-  districtUnknown: boolean;
+  address: MatchAddressContext;
+  results: MatchResult[];
 }
 
 export type ApiErrorCode =
@@ -36,14 +36,10 @@ export type ApiResult<T> =
       error: ApiRequestError;
     };
 
-export function buildMatchRequestPath(addressId: number, kind?: ReceptionKind): string {
+export function buildMatchRequestPath(addressId: number): string {
   const params = new URLSearchParams({ address_id: String(addressId) });
 
-  if (kind) {
-    params.set("kind", kind);
-  }
-
-  return `/api/match?${params.toString()}`;
+  return `/api/match/v2?${params.toString()}`;
 }
 
 export function listStreets(): Promise<ApiResult<Street[]>> {
@@ -59,7 +55,7 @@ export function listInstitutions(): Promise<ApiResult<InstitutionListItem[]>> {
 }
 
 export async function matchAddress(addressId: number): Promise<ApiResult<MatchData>> {
-  const result = await requestJson<MatchResponse>(buildMatchRequestPath(addressId));
+  const result = await requestJson<StructuredMatchResponse>(buildMatchRequestPath(addressId));
 
   if (!result.ok) {
     return result;
@@ -67,21 +63,14 @@ export async function matchAddress(addressId: number): Promise<ApiResult<MatchDa
 
   return {
     ok: true,
-    data: normalizeMatchResponse(result.data),
+    data: adaptStructuredMatchResponse(result.data),
   };
 }
 
-export function normalizeMatchResponse(response: MatchResponse): MatchData {
-  if (Array.isArray(response)) {
-    return {
-      institutions: response,
-      districtUnknown: false,
-    };
-  }
-
+export function adaptStructuredMatchResponse(response: StructuredMatchResponse): MatchData {
   return {
-    institutions: response.results,
-    districtUnknown: true,
+    address: response.address,
+    results: response.results,
   };
 }
 
