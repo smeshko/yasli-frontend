@@ -1,9 +1,27 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+import type { MatchResult } from "@/lib/api/client";
 import { groupMatchResults } from "@/lib/search/results";
 
 import { SearchExperience, SearchResults, type MatchState } from "./SearchExperience";
+
+function matchResult(overrides: Partial<MatchResult> = {}): MatchResult {
+  const id = overrides.id ?? 1;
+
+  return {
+    id,
+    external_id: String(id),
+    name: "ДГ Тест",
+    institution_kind: "kindergarten",
+    reception_kind: "kindergarten",
+    offering: "standard",
+    source_url: `https://example.test/${id}`,
+    match_basis: "address",
+    has_infant_group: false,
+    ...overrides,
+  };
+}
 
 describe("SearchExperience", () => {
   it("renders the final initial search surface", () => {
@@ -37,33 +55,26 @@ describe("SearchResults", () => {
         searchText: "БУЛ ГЕНЕРАЛ КОЛЕВ 085",
       },
       grouped: groupMatchResults([
-        {
+        matchResult({
           id: 42,
-          external_id: "42",
           name: "ДГ Тест",
-          institution_kind: "kindergarten",
           source_url: "https://example.test/source",
-          match_basis: "address",
-          has_infant_group: false,
-        },
-        {
+        }),
+        matchResult({
           id: 43,
-          external_id: "43",
           name: "Я Тест",
           institution_kind: "nursery",
+          reception_kind: "nursery",
           source_url: "https://example.test/nursery",
           match_basis: "district",
-          has_infant_group: false,
-        },
-        {
+        }),
+        matchResult({
           id: 44,
-          external_id: "44",
           name: "ПГ Тест",
           institution_kind: "preschool",
+          reception_kind: "preschool",
           source_url: "https://example.test/preschool",
-          match_basis: "address",
-          has_infant_group: false,
-        },
+        }),
       ]),
     };
 
@@ -101,15 +112,11 @@ describe("SearchResults", () => {
       },
       selectedAddress: null,
       grouped: groupMatchResults([
-        {
+        matchResult({
           id: 3,
-          external_id: "3",
           name: "ДГ Частичен резултат",
-          institution_kind: "kindergarten",
           source_url: "https://example.test/source",
-          match_basis: "address",
-          has_infant_group: false,
-        },
+        }),
       ]),
     };
 
@@ -160,6 +167,45 @@ describe("SearchResults", () => {
     expect(html).not.toContain("В това село няма ясла");
   });
 
+  it("renders infant-group offerings under nurseries with a concise suffix", () => {
+    const matchState: MatchState = {
+      status: "success",
+      address: {
+        id: 10,
+        district_code: "01",
+        settlement: null,
+      },
+      selectedAddress: null,
+      grouped: groupMatchResults([
+        matchResult({
+          id: 42,
+          name: "ДГ Тест",
+          has_infant_group: true,
+        }),
+        matchResult({
+          id: 42,
+          name: "ДГ Тест",
+          reception_kind: "nursery",
+          offering: "infant_group",
+          has_infant_group: true,
+        }),
+      ]),
+    };
+
+    const html = renderToStaticMarkup(
+      <SearchResults
+        filter="all"
+        matchState={matchState}
+        staleResults={false}
+        onFilterChange={vi.fn()}
+        onRetryStale={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain("ДГ Тест (яслена група)");
+    expect(html).toContain("<h3>ДГ Тест</h3>");
+  });
+
   it("renders preschool district fallback from match basis", () => {
     const matchState: MatchState = {
       status: "success",
@@ -170,15 +216,14 @@ describe("SearchResults", () => {
       },
       selectedAddress: null,
       grouped: groupMatchResults([
-        {
+        matchResult({
           id: 7,
-          external_id: "7",
           name: "ПГ Район",
           institution_kind: "preschool",
+          reception_kind: "preschool",
           source_url: "https://example.test/preschool",
           match_basis: "district",
-          has_infant_group: false,
-        },
+        }),
       ]),
     };
 

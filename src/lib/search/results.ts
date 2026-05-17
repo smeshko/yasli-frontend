@@ -7,9 +7,7 @@ export type ResultFilter = "all" | ReceptionKind;
 
 export type MatchLocalityType = NonNullable<MatchAddressContext["settlement"]>["locality_type"];
 
-export interface GroupedInstitution extends MatchResult {
-  infantGroupOrigin?: boolean;
-}
+export type GroupedInstitution = MatchResult;
 
 export type GroupedResults = Record<ReceptionKind, GroupedInstitution[]>;
 
@@ -24,11 +22,7 @@ export function groupMatchResults(results: MatchResult[]): GroupedResults {
   const grouped = emptyGroupedResults();
 
   for (const institution of results) {
-    grouped[institution.institution_kind].push(institution);
-
-    if (institution.institution_kind === "kindergarten" && institution.has_infant_group) {
-      grouped.nursery.push({ ...institution, infantGroupOrigin: true });
-    }
+    grouped[institution.reception_kind].push(institution);
   }
 
   for (const kind of receptionKindOrder) {

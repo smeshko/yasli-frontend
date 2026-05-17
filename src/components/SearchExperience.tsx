@@ -496,13 +496,13 @@ function ResultGroup({
       {institutions.length > 0 ? (
         <div className="cards">
           {institutions.map((institution, index) => {
-            const displayName = institution.infantGroupOrigin
+            const displayName = institution.offering === "infant_group"
               ? `${institution.name} (яслена група)`
               : institution.name;
             return (
               <article
                 className="result-card"
-                key={`${kind}-${institution.institution_kind}-${institution.id}`}
+                key={`${kind}-${institution.institution_kind}-${institution.offering}-${institution.id}`}
                 style={{ "--result-delay": `${index * 40}ms` } as React.CSSProperties}
               >
                 <div>

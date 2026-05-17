@@ -35,6 +35,8 @@ describe("adaptStructuredMatchResponse", () => {
           external_id: "1",
           name: "ДГ Тест",
           institution_kind: "kindergarten",
+          reception_kind: "kindergarten",
+          offering: "standard",
           source_url: "https://example.test/source",
           match_basis: "address",
           has_infant_group: false,

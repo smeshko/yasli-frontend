@@ -272,6 +272,16 @@ export interface components {
              * @enum {string}
              */
             institution_kind: "nursery" | "kindergarten" | "preschool";
+            /**
+             * Reception Kind
+             * @enum {string}
+             */
+            reception_kind: "nursery" | "kindergarten" | "preschool";
+            /**
+             * Offering
+             * @enum {string}
+             */
+            offering: "standard" | "infant_group";
             /** Source Url */
             source_url: string;
             /**
