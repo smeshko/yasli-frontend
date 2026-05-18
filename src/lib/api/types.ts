@@ -72,23 +72,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/match/v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Structured Match */
-        get: operations["structured_match_api_match_v2_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/institutions": {
         parameters: {
             query?: never;
@@ -398,40 +381,6 @@ export interface operations {
         };
     };
     match_api_match_get: {
-        parameters: {
-            query: {
-                /** @description addresses.id */
-                address_id: number;
-                /** @description Filter by institution kind */
-                kind?: ("nursery" | "kindergarten" | "preschool") | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StructuredMatchResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    structured_match_api_match_v2_get: {
         parameters: {
             query: {
                 /** @description addresses.id */
