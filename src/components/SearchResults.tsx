@@ -1,4 +1,5 @@
 import type { MatchAddressContext } from "@/lib/api/client";
+import { STALE_BANNER_THRESHOLD_DAYS } from "@/lib/domain/freshness";
 import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
 import {
   deriveResultGroupState,
@@ -8,6 +9,11 @@ import {
 } from "@/lib/search/results";
 
 import type { MatchState } from "./SearchExperience";
+
+const FILTER_TABS: ReadonlyArray<{ value: ResultFilter; label: string }> = [
+  { value: "all", label: "Всички" },
+  ...receptionKindOrder.map((kind) => ({ value: kind, label: labelForReceptionKind(kind) })),
+];
 
 interface SearchResultsProps {
   filter: ResultFilter;
@@ -53,7 +59,7 @@ export function SearchResults({
         <>
           {staleResults ? (
             <div className="stale-banner">
-              Данните са по-стари от 14 дни. Проверете и официалния източник преди кандидатстване.
+              Данните са по-стари от {STALE_BANNER_THRESHOLD_DAYS} дни. Проверете и официалния източник преди кандидатстване.
             </div>
           ) : null}
 
@@ -82,14 +88,9 @@ function FilterTabs({
   currentFilter: ResultFilter;
   onFilterChange: (filter: ResultFilter) => void;
 }) {
-  const filters: Array<{ value: ResultFilter; label: string }> = [
-    { value: "all", label: "Всички" },
-    ...receptionKindOrder.map((kind) => ({ value: kind, label: labelForReceptionKind(kind) })),
-  ];
-
   return (
     <div className="filters" aria-label="Филтър по тип">
-      {filters.map((item) => (
+      {FILTER_TABS.map((item) => (
         <button
           key={item.value}
           type="button"
