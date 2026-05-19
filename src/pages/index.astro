@@ -184,6 +184,15 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     font-size: 0.94rem;
   }
 
+  .freshness-line {
+    max-width: none;
+    margin-top: 14px;
+    color: var(--color-text-subtle);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
   .results-area {
     width: min(100% - 32px, 1040px);
     justify-self: center;
@@ -392,6 +401,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
     .search-copy {
       justify-items: start;
+      text-align: left;
+    }
+
+    .freshness-line {
       text-align: left;
     }
 

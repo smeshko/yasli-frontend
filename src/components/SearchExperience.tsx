@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 
 import {
   listInstitutions,
@@ -326,6 +325,10 @@ export function SearchExperience() {
               {validationMessage}
             </p>
           ) : null}
+
+          {freshnessDate ? (
+            <p className="freshness-line">Last updated: {formatDate(freshnessDate)}</p>
+          ) : null}
         </div>
       </section>
 
@@ -336,31 +339,7 @@ export function SearchExperience() {
         onFilterChange={setFilter}
         onRetryStale={() => void retryReferences()}
       />
-      <FreshnessPortal freshnessDate={freshnessDate} />
     </div>
-  );
-}
-
-function FreshnessPortal({ freshnessDate }: { freshnessDate: Date | null }) {
-  const [slots, setSlots] = useState<HTMLElement[]>([]);
-
-  useEffect(() => {
-    setSlots(Array.from(document.querySelectorAll<HTMLElement>("[data-site-footer-freshness]")));
-  }, []);
-
-  if (slots.length === 0 || !freshnessDate) {
-    return null;
-  }
-
-  return slots.map((slot) =>
-    createPortal(
-      <>
-        <span>Last updated: {formatDate(freshnessDate)}</span>
-        <span aria-hidden="true" className="site-footer__separator">|</span>
-      </>,
-      slot,
-      slot.id,
-    ),
   );
 }
 
