@@ -5,22 +5,21 @@ import {
   matchAddress,
   type MatchAddressContext,
 } from "@/lib/api/client";
-import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
 import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
 } from "@/lib/search/addressSuggestions";
 import { clearReferenceDataCache, loadReferenceData } from "@/lib/search/referenceData";
 import {
-  deriveResultGroupState,
   groupMatchResults,
   newestFreshnessDate,
   shouldShowStaleBanner,
-  visibleResultKinds,
-  type GroupedInstitution,
   type GroupedResults,
   type ResultFilter,
 } from "@/lib/search/results";
+
+import { ArrowRightIcon, MapPinIcon, SearchIcon } from "./icons";
+import { SearchResults } from "./SearchResults";
 
 type ReferenceStatus = "idle" | "loading" | "ready" | "error";
 type MatchStatus = "idle" | "loading" | "success" | "error" | "stale";
@@ -343,236 +342,10 @@ export function SearchExperience() {
   );
 }
 
-interface SearchResultsProps {
-  filter: ResultFilter;
-  matchState: MatchState;
-  staleResults: boolean;
-  onFilterChange: (filter: ResultFilter) => void;
-  onRetryStale: () => void;
-}
-
-export function SearchResults({
-  filter,
-  matchState,
-  staleResults,
-  onFilterChange,
-  onRetryStale,
-}: SearchResultsProps) {
-  if (matchState.status === "idle") {
-    return null;
-  }
-
-  return (
-    <section className="results-area" aria-live="polite">
-      {matchState.selectedAddress ? (
-        <p className="selected-address">Избран адрес: {matchState.selectedAddress.label}</p>
-      ) : null}
-
-      {matchState.status === "loading" ? <div className="results-status">Търсим институции...</div> : null}
-
-      {matchState.status === "error" ? (
-        <div className="results-status error">{matchState.message}</div>
-      ) : null}
-
-      {matchState.status === "stale" ? (
-        <div className="results-status error">
-          <span>{matchState.message}</span>
-          <button type="button" onClick={onRetryStale}>
-            Презареди адресите
-          </button>
-        </div>
-      ) : null}
-
-      {matchState.status === "success" && matchState.grouped ? (
-        <>
-          {staleResults ? (
-            <div className="stale-banner">
-              Данните са по-стари от 14 дни. Проверете и официалния източник преди кандидатстване.
-            </div>
-          ) : null}
-
-          <FilterTabs currentFilter={filter} onFilterChange={onFilterChange} />
-
-          <div className="result-groups">
-            {visibleResultKinds(filter).map((kind) => (
-              <ResultGroup
-                key={kind}
-                kind={kind}
-                institutions={matchState.grouped?.[kind] ?? []}
-                address={matchState.address}
-              />
-            ))}
-          </div>
-        </>
-      ) : null}
-    </section>
-  );
-}
-
-function FilterTabs({
-  currentFilter,
-  onFilterChange,
-}: {
-  currentFilter: ResultFilter;
-  onFilterChange: (filter: ResultFilter) => void;
-}) {
-  const filters: Array<{ value: ResultFilter; label: string }> = [
-    { value: "all", label: "Всички" },
-    ...receptionKindOrder.map((kind) => ({ value: kind, label: labelForReceptionKind(kind) })),
-  ];
-
-  return (
-    <div className="filters" aria-label="Филтър по тип">
-      {filters.map((item) => (
-        <button
-          key={item.value}
-          type="button"
-          className={item.value === currentFilter ? "active" : undefined}
-          onClick={() => onFilterChange(item.value)}
-        >
-          {item.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ResultGroup({
-  kind,
-  institutions,
-  address,
-}: {
-  kind: ReceptionKind;
-  institutions: GroupedInstitution[];
-  address: MatchAddressContext | null;
-}) {
-  const groupState = address ? deriveResultGroupState(address, institutions) : null;
-  const showMissingDistrictNotice =
-    groupState?.hasMissingDistrictContext === true && isDistrictDependentGroup(kind);
-  const showDistrictFallbackNotice =
-    kind === "preschool" && groupState?.hasDistrictFallback === true;
-
-  return (
-    <section className="result-group" aria-labelledby={`result-group-${kind}`}>
-      <h2 id={`result-group-${kind}`}>{labelForReceptionKind(kind)}</h2>
-      {kind === "nursery" ? (
-        <p className="group-note">
-          Яслите не са по адрес, имате право да кандидатствате във всяка, но получавате
-          предимство в тези, които са във вашия район.
-        </p>
-      ) : null}
-      {showMissingDistrictNotice ? (
-        <p className="group-note group-note--warn">
-          За избрания адрес все още няма потвърден район. Районните резултати за тази група
-          не са налични.
-        </p>
-      ) : null}
-      {showDistrictFallbackNotice ? (
-        <p className="group-note group-note--warn">
-          Няма адресно съвпадение за тази група. Показваме резултати по район.
-        </p>
-      ) : null}
-      {institutions.length > 0 ? (
-        <div className="cards">
-          {institutions.map((institution, index) => {
-            const displayName = institution.offering === "infant_group"
-              ? `${institution.name} (яслена група)`
-              : institution.name;
-            return (
-              <article
-                className="result-card"
-                key={`${kind}-${institution.institution_kind}-${institution.offering}-${institution.id}`}
-                style={{ "--result-delay": `${index * 40}ms` } as React.CSSProperties}
-              >
-                <div>
-                  <p className="kind-label">{labelForReceptionKind(institution.institution_kind)}</p>
-                  <h3>{displayName}</h3>
-                </div>
-                <div className="card-actions">
-                  <a href={institution.source_url} target="_blank" rel="noreferrer">
-                    Източник <span aria-hidden="true">↗</span>
-                  </a>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      ) : (
-        <p className="empty-group">{emptyGroupText(kind)}</p>
-      )}
-    </section>
-  );
-}
-
-function isDistrictDependentGroup(kind: ReceptionKind): boolean {
-  return kind === "nursery" || kind === "preschool";
-}
-
-function emptyGroupText(kind: ReceptionKind): string {
-  if (kind === "nursery") {
-    return "Няма ясла за този адрес в източника. Покритието за ясли е непълно и това може да е реална липса на данни.";
-  }
-
-  if (kind === "kindergarten") {
-    return "Няма детска градина за този адрес.";
-  }
-
-  return "Няма подготвителна група за този адрес.";
-}
-
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("bg-BG", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   }).format(date);
-}
-
-function SearchIcon() {
-  return (
-    <svg aria-hidden="true" className="field-icon" fill="none" height="22" viewBox="0 0 24 24" width="22">
-      <path
-        d="m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-function MapPinIcon() {
-  return (
-    <svg aria-hidden="true" className="row-icon" fill="none" height="18" viewBox="0 0 24 24" width="18">
-      <path
-        d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-      <path
-        d="M12 12.4a2.4 2.4 0 1 0 0-4.8 2.4 2.4 0 0 0 0 4.8Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-function ArrowRightIcon() {
-  return (
-    <svg aria-hidden="true" className="arrow-icon" fill="none" height="18" viewBox="0 0 24 24" width="18">
-      <path
-        d="M5 12h14m-6-6 6 6-6 6"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
 }
