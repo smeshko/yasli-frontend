@@ -19,9 +19,9 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   /* `data-restoring-results` is set on <html> by the pre-paint script in
      BaseLayout when sessionStorage holds a search to restore. It stands in for
-     `data-has-results` across the one frame between the server's markup and
+     `data-compact` across the one frame between the server's markup and
      React taking over, so the hero never starts tall and then collapses. */
-  .search-experience[data-has-results="true"],
+  .search-experience[data-compact="true"],
   :root[data-restoring-results] .search-experience {
     grid-template-rows: auto 1fr;
   }
@@ -34,7 +34,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     padding: max(48px, 32vh) 0 30px;
   }
 
-  .search-experience[data-has-results="true"] .search-hero,
+  .search-experience[data-compact="true"] .search-hero,
   :root[data-restoring-results] .search-hero {
     padding: 22px 0 24px;
   }
@@ -43,7 +43,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
      someone who has not searched yet, and leaving it up pushed the cards below
      the fold. Clipped rather than removed so the h1 that labels this section
      (and the page's only heading) stays in the accessibility tree. */
-  .search-experience[data-has-results="true"] .search-copy,
+  .search-experience[data-compact="true"] .search-copy,
   :root[data-restoring-results] .search-copy {
     position: absolute;
     width: 1px;
@@ -105,7 +105,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .search-field {
     display: grid;
     min-height: 62px;
-    grid-template-columns: auto 1fr;
+    /* Third column is the clear button; it collapses to nothing while the
+       field is empty, so the input keeps the full width until there is
+       something to clear. */
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 14px;
     border: 2px solid var(--color-ink);
@@ -143,6 +146,48 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .search-field input::placeholder {
     color: var(--color-text-faint);
     font-weight: 400;
+  }
+
+  /* WebKit draws its own clear affordance on type="search", but only on
+     desktop — two of them side by side on a Mac, none at all on a phone. */
+  .search-field input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* 44px of target hung on a 18px glyph, pulled into the field's own padding
+     so the cross still sits where the native one did. */
+  .clear-button {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 0;
+    border-radius: 999px;
+    margin-right: -12px;
+    background: transparent;
+    color: var(--color-text-faint);
+    cursor: pointer;
+    padding: 0;
+    transition: color 140ms ease, background-color 140ms ease;
+  }
+
+  .clear-button:focus-visible {
+    outline: 2px solid var(--color-section-nursery);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .clear-button:hover {
+      background: var(--color-bg-accent-softer);
+      color: var(--color-text-strong);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clear-button {
+      transition: none;
+    }
   }
 
   .suggestion-panel {
@@ -667,7 +712,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     /* Tighter than desktop's collapsed hero: on a phone the header, the field
        and the filters are already most of the viewport, so every pixel above
        the first card is one the parent has to scroll past. */
-    .search-experience[data-has-results="true"] .search-hero,
+    .search-experience[data-compact="true"] .search-hero,
     :root[data-restoring-results] .search-hero {
       padding: 16px 0 20px;
     }

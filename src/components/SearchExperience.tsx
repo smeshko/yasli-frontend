@@ -18,7 +18,7 @@ import {
   type ResultFilter,
 } from "@/lib/search/results";
 
-import { ArrowRightIcon, MapPinIcon, SearchIcon } from "./icons";
+import { ArrowRightIcon, ClearIcon, MapPinIcon, SearchIcon } from "./icons";
 import { SearchResults } from "./SearchResults";
 
 type ReferenceStatus = "idle" | "loading" | "ready" | "error";
@@ -81,7 +81,15 @@ export function SearchExperience() {
     selectedAddress: null,
   });
   const [hasHydrated, setHasHydrated] = useState(false);
+  /* Latched rather than derived from the results. Editing the address drops
+     the results on the keystroke (they belong to the address that was picked,
+     not to the text) — and if the compact hero were tied to those, deleting a
+     single character sprang the headline back and shoved the field halfway
+     down the page mid-edit. The latch only lifts when the field is emptied,
+     which is the one moment that is genuinely a fresh start. */
+  const [hasSearched, setHasSearched] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const visibleSuggestions = useMemo(
     () => searchExactAddressSuggestions(suggestions, query),
@@ -119,9 +127,9 @@ export function SearchExperience() {
   }, [hasHydrated, query, filter, matchState]);
 
   /* The pre-paint hint BaseLayout put on <html> has done its job by now: this
-     runs in the same commit that first renders data-has-results, so the hero
-     never loses its compact padding between the two. It has to come off —
-     left up, it would pin the hero compact after the results are cleared. */
+     runs in the same commit that first renders data-compact, so the hero never
+     loses its compact padding between the two. It has to come off — left up,
+     it would pin the hero compact after the field is cleared. */
   useEffect(() => {
     if (!hasHydrated) {
       return;
@@ -129,6 +137,12 @@ export function SearchExperience() {
 
     delete document.documentElement.dataset.restoringResults;
   }, [hasHydrated]);
+
+  useEffect(() => {
+    if (matchState.status !== "idle") {
+      setHasSearched(true);
+    }
+  }, [matchState.status]);
 
   useEffect(() => {
     setActiveIndex(0);
@@ -253,6 +267,14 @@ export function SearchExperience() {
     });
   }
 
+  /* Same path as typing the field empty, so the hero, the results and the
+     latch all reset together. Focus goes back to the input: the button is
+     about to unmount, and a phone keyboard staying up is the point. */
+  function clearQuery() {
+    handleQueryChange("");
+    inputRef.current?.focus();
+  }
+
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (!isAutocompleteOpen && event.key !== "Enter") {
       return;
@@ -293,6 +315,10 @@ export function SearchExperience() {
     setValidationMessage(null);
     setIsAutocompleteOpen(true);
 
+    if (value.trim() === "") {
+      setHasSearched(false);
+    }
+
     /* Results belong to the address that was picked from the list, not to
        whatever is in the field. Once the two stop agreeing — cleared, or
        edited towards a different address — the cards below are answering a
@@ -308,10 +334,9 @@ export function SearchExperience() {
   }
 
   const inputDescriptionId = validationMessage ? "search-validation" : undefined;
-  const hasResults = matchState.status !== "idle";
 
   return (
-    <div className="search-experience" data-has-results={hasResults ? "true" : undefined}>
+    <div className="search-experience" data-compact={hasSearched ? "true" : undefined}>
       <section className="search-hero" aria-labelledby="search-title">
         <div className="search-copy">
           {/* Split so `моята` can take the italic display face and `градина`
@@ -330,6 +355,7 @@ export function SearchExperience() {
             <div className="search-field">
               <SearchIcon />
               <input
+                ref={inputRef}
                 id="address-search"
                 type="search"
                 autoComplete="off"
@@ -343,6 +369,19 @@ export function SearchExperience() {
                 onFocus={() => setIsAutocompleteOpen(true)}
                 onKeyDown={handleKeyDown}
               />
+              {/* Ours, not WebKit's: the native type="search" clear button is
+                  desktop-only, so on a phone — where retyping a long address
+                  is worst — there was nothing to clear with. */}
+              {hasQuery ? (
+                <button
+                  aria-label="Изчисти адреса"
+                  className="clear-button"
+                  type="button"
+                  onClick={clearQuery}
+                >
+                  <ClearIcon />
+                </button>
+              ) : null}
             </div>
 
             {referenceStatus === "ready" && isAutocompleteOpen && visibleSuggestions.length > 0 ? (
