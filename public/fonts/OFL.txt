@@ -1,0 +1,38 @@
+Fonts in this directory
+=======================
+
+Both families are licensed under the SIL Open Font License, Version 1.1.
+Full licence text: https://openfontlicense.org/
+
+Sofia Sans
+  Designer:  Lettersoup (Botio Nikoltchev, Anna Giedrys) for the City of Sofia
+  Source:    https://fonts.google.com/specimen/Sofia+Sans
+  Licence:   SIL OFL 1.1
+  Why:       Bulgarian Cyrillic is its DEFAULT glyph set. No `locl` feature or
+             font-feature-settings hack is needed for <html lang="bg"> to render
+             correct Bulgarian letterforms (и→u, п→n, т→m, short г).
+  Files:     sofia-sans-latin-normal.woff2
+             sofia-sans-cyrillic-normal.woff2
+
+Cormorant Garamond
+  Designer:  Christian Thalmann (Catharsis Fonts)
+  Source:    https://fonts.google.com/specimen/Cormorant+Garamond
+  Licence:   SIL OFL 1.1
+  Why:       Display face for headings. Verified to ship Bulgarian Cyrillic
+             letterforms. The italic is a separate file because
+             `font-synthesis: none` forbids a synthesised oblique.
+  Files:     cormorant-garamond-latin-normal.woff2
+             cormorant-garamond-cyrillic-normal.woff2
+             cormorant-garamond-latin-italic.woff2
+             cormorant-garamond-cyrillic-italic.woff2
+
+All six files are the `latin` and `cyrillic` subsets as served by the Google
+Fonts CSS API, with `latin-ext`, `cyrillic-ext`, `greek` and `vietnamese`
+dropped. Each is a variable font: Sofia Sans covers weights 200-900 and
+Cormorant Garamond 400-700.
+
+To refresh, re-request the css2 API with a browser User-Agent and download the
+woff2 URLs from the `/* latin */` and `/* cyrillic */` blocks:
+
+  https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@200..900
+  https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700

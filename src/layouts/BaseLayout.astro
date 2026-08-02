@@ -1,5 +1,6 @@
 ---
 import SiteFooter from "@/components/SiteFooter.astro";
+import ThemeToggle from "@/components/ThemeToggle.astro";
 
 interface Props {
   title: string;
@@ -37,13 +38,99 @@ const navItems = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      as="font"
+      crossorigin
+      href="/fonts/sofia-sans-cyrillic-normal.woff2"
+      rel="preload"
+      type="font/woff2"
+    />
+    <link
+      as="font"
+      crossorigin
+      href="/fonts/cormorant-garamond-cyrillic-normal.woff2"
+      rel="preload"
+      type="font/woff2"
+    />
+    {/* The italic sets `моята` in the headline. Without a preload it was the
+        one display face discovered only once the CSS matched it, so the
+        headline swapped out of fallback Times a beat after the roman did —
+        and Times sets ~20% wider at 4.2rem, which moved the whole line. */}
+    <link
+      as="font"
+      crossorigin
+      href="/fonts/cormorant-garamond-cyrillic-italic.woff2"
+      rel="preload"
+      type="font/woff2"
+    />
     <title>{title}</title>
+    {/* Runs before first paint so a stored dark preference never flashes the
+        cream stock first. No stored value means "system", which the CSS
+        already handles via color-scheme: light dark. */}
+    <script is:inline>
+      (function () {
+        try {
+          const stored = localStorage.getItem("yasli:theme");
+          if (stored === "light" || stored === "dark") {
+            document.documentElement.dataset.theme = stored;
+          }
+        } catch {
+          /* storage blocked — fall through to the system preference */
+        }
+      })();
+    </script>
+    {/* Same before-first-paint trick, for the search hero. The server renders
+        the component's initial state — no results, so a tall 32vh hero — but
+        a returning visitor's results are restored from sessionStorage in an
+        effect, which lands after that frame is already on screen. Marking the
+        document here lets the CSS start the hero compact, so hydration has
+        nothing left to move. SearchExperience drops the attribute once it
+        owns the state; the condition below must stay in step with the status
+        check in its restore effect. */}
+    <script is:inline>
+      (function () {
+        try {
+          const raw = sessionStorage.getItem("yasli:search-state:v2");
+          if (!raw) return;
+          const status = (JSON.parse(raw).matchState || {}).status;
+          if (status && status !== "idle" && status !== "loading") {
+            document.documentElement.dataset.restoringResults = "true";
+          }
+        } catch {
+          /* storage blocked or the entry is malformed — the hero starts tall,
+             which is exactly the pre-existing behaviour */
+        }
+      })();
+    </script>
   </head>
   <body>
+    <div aria-hidden="true" class="page-tint page-tint--nursery"></div>
+    <div aria-hidden="true" class="page-tint page-tint--kindergarten"></div>
+    <div aria-hidden="true" class="page-tint page-tint--preschool"></div>
     <header class="site-header">
       <a class="brand" href="/" aria-label="Начало">
-        <img alt="" height="32" src="/favicon.svg" width="32" />
+        {/* Inline rather than <img src="/favicon.svg">: as a separate request
+            the mark was still in flight on the first frame, so the header
+            painted with a blank square next to the wordmark. Four shapes are
+            cheaper inlined than as a round trip. Kept byte-identical to
+            public/favicon.svg — edit both together. */}
+        <svg
+          aria-hidden="true"
+          class="brand-mark"
+          focusable="false"
+          height="30"
+          viewBox="0 0 64 64"
+          width="30"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect width="64" height="64" rx="14" fill="#f4ecdf"></rect>
+          <circle cx="35" cy="35" r="17" fill="#201c17"></circle>
+          <circle cx="31" cy="31" r="17" fill="#c7361f"></circle>
+          <circle cx="25" cy="25" r="4.5" fill="#f4ecdf"></circle>
+        </svg>
+        <span>Ясли Варна</span>
       </a>
+      <ThemeToggle />
       {
         showNav && (
           <Fragment>
@@ -106,90 +193,279 @@ const navItems = [
 </html>
 
 <style is:global>
+  /* Self-hosted, latin + cyrillic subsets only. See public/fonts/OFL.txt for
+     provenance and licence. Sofia Sans ships Bulgarian Cyrillic as its default
+     glyph set, which is why <html lang="bg"> finally has visible effect. */
+  @font-face {
+    font-family: "Sofia Sans";
+    font-style: normal;
+    font-weight: 200 900;
+    font-display: swap;
+    src: url("/fonts/sofia-sans-cyrillic-normal.woff2") format("woff2");
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+  }
+
+  @font-face {
+    font-family: "Sofia Sans";
+    font-style: normal;
+    font-weight: 200 900;
+    font-display: swap;
+    src: url("/fonts/sofia-sans-latin-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+      U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+      U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  /* Cormorant Garamond is the display face. The italic is a separate file on
+     purpose: font-synthesis is none below, so a roman-only subset would render
+     the italic word upright instead of faking an oblique. */
+  @font-face {
+    font-family: "Cormorant Garamond";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("/fonts/cormorant-garamond-cyrillic-normal.woff2") format("woff2");
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+  }
+
+  @font-face {
+    font-family: "Cormorant Garamond";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("/fonts/cormorant-garamond-latin-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+      U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+      U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: "Cormorant Garamond";
+    font-style: italic;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("/fonts/cormorant-garamond-cyrillic-italic.woff2") format("woff2");
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+  }
+
+  @font-face {
+    font-family: "Cormorant Garamond";
+    font-style: italic;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("/fonts/cormorant-garamond-latin-italic.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+      U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+      U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
   :root {
+    /* Дворът: a risograph neighbourhood guide printed on cream stock.
+       Dark is the same guide read in low light, NOT an inversion: the stock
+       goes warm charcoal, text settles to off-white rather than paper-white,
+       and lines/offsets step down instead of flipping to cream. Drawing the
+       riso outline in near-white on near-black is what turns this design into
+       a high-contrast accessibility theme, so the dark half of each pair is
+       deliberately quieter than its light twin. Every pair is
+       light-dark(light, dark); the toggle only narrows color-scheme, so there
+       is one token list, not two. */
     color-scheme: light dark;
 
-    --color-bg-page: #f4f7fb;
-    --color-bg-surface: #ffffff;
-    --color-bg-surface-muted: rgba(255, 255, 255, 0.72);
-    --color-bg-accent-soft: #e7f0ff;
-    --color-bg-accent-softer: #eef4ff;
-    --color-bg-error-soft: #fff7ed;
-    --color-bg-warn-soft: #fef9c3;
+    /* Sofia Sans carries the UI; Cormorant Garamond is display only. */
+    --font-ui:
+      "Sofia Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
 
-    --color-border-subtle: #d6dfeb;
-    --color-border-default: #cbd5e1;
-    --color-border-soft: #c9d8ef;
-    --color-border-card: #d6e0ee;
-    --color-border-status: #cbd7d0;
-    --color-border-accent: #6fa3ff;
-    --color-border-error: #f3b4a6;
-    --color-border-warn: #d8b84c;
+    /* --- ground and ink ------------------------------------------------ */
+    /* Cream stock, or dark warm stock. Everything else is measured against it. */
+    --color-bg-page: light-dark(#f4ecdf, #1a1713);
+    /* Card and panel surface — a half-step off the stock, so cards read as
+       paper laid on paper rather than as floating rectangles. */
+    --color-bg-surface: light-dark(#fbf6ee, #221e18);
+    --color-bg-surface-muted: light-dark(rgba(251, 246, 238, 0.72), rgba(34, 30, 24, 0.72));
+    /* Warm near-black on cream, 14.45:1; cream on dark stock, 14.9:1. */
+    --color-ink: light-dark(#201c17, #4a4238);
+    /* Secondary copy. 6.82:1 on the light card, 6.5:1 on the dark one. */
+    --color-ink-muted: light-dark(#5d554a, #9e9484);
 
-    --color-text-strong: #0f172a;
-    --color-text-display: #081225;
-    --color-text-muted: #475569;
-    --color-text-subtle: #59677d;
-    --color-text-faint: #7d8ba4;
-    --color-text-eyebrow: #5b6861;
-    --color-text-status: #30514a;
-    --color-text-error: #9a3412;
-    --color-text-error-strong: #b42318;
-    --color-text-group-note: #1e3a8a;
-    --color-text-warn: #713f12;
-    --color-text-on-accent: #ffffff;
+    /* --- section hues --------------------------------------------------- */
+    /* One value per section, used for BOTH graphics and text. Each passes
+       WCAG AA as small text on its own stock and on the card surface. The
+       background circles use these same three hues, so the decoration reads
+       as a key to the result grouping. The dark set is lightened rather than
+       re-hued — same three inks, more luminous on dark stock. */
+    --color-section-nursery: light-dark(#c7361f, #d9765c); /* ясли */
+    --color-section-kindergarten: light-dark(#2b52c9, #8098d8); /* детски градини */
+    --color-section-preschool: light-dark(#4a7550, #7fae89); /* подготвителни групи */
 
-    --color-accent: #2563eb;
-    --color-accent-strong: #1d4ed8;
+    /* --- semantic feedback, kept off the section axis -------------------- */
+    --color-bg-accent-soft: light-dark(#f6e2d8, #2e2620);
+    --color-bg-accent-softer: light-dark(#faeee7, #272019);
+    --color-bg-error-soft: light-dark(#f8e3dc, #2f221d);
+    --color-bg-warn-soft: light-dark(#f6ead0, #2f2a1c);
 
-    --shadow-field: 0 0 0 1px rgba(52, 108, 255, 0.04);
-    --shadow-panel: 0 22px 44px rgba(31, 55, 88, 0.12);
+    /* --- borders: ink at low alpha, never a separate grey ramp ---------- */
+    --color-border-subtle: light-dark(rgba(32, 28, 23, 0.14), rgba(242, 233, 220, 0.10));
+    --color-border-default: light-dark(rgba(32, 28, 23, 0.22), rgba(242, 233, 220, 0.16));
+    --color-border-soft: light-dark(rgba(32, 28, 23, 0.16), rgba(242, 233, 220, 0.12));
+    /* Cards and controls are drawn with a real 2px ink line — the riso look
+       comes from the outline, not from a shadow. */
+    --color-border-card: light-dark(#201c17, #4a4238);
+    --color-border-status: light-dark(rgba(32, 28, 23, 0.22), rgba(242, 233, 220, 0.16));
+    --color-border-accent: light-dark(#201c17, #4a4238);
+    --color-border-error: light-dark(#c7361f, #b8664f);
+    --color-border-warn: light-dark(#b07f22, #9c8140);
+
+    /* --- text ----------------------------------------------------------- */
+    --color-text-strong: light-dark(#201c17, #ded4c6);
+    --color-text-display: light-dark(#1a1712, #e6dccd);
+    --color-text-muted: light-dark(#5d554a, #9e9484);
+    --color-text-subtle: light-dark(#6b6255, #948a7b);
+    /* 4.6:1 on cream — the old #7d8ba4 was 3.44:1 and failed the floor. The
+       dark twin is held at 4.73:1 on the card surface for the same reason:
+       this is the input placeholder, so it is real text, not decoration. */
+    --color-text-faint: light-dark(#7a7061, #918878);
+    --color-text-eyebrow: light-dark(#5d554a, #9e9484);
+    --color-text-status: light-dark(#4a7550, #7fae89);
+    --color-text-error: light-dark(#9c2a17, #e0907a);
+    --color-text-error-strong: light-dark(#9c2a17, #e0907a);
+    --color-text-group-note: light-dark(#5d554a, #9e9484);
+    --color-text-warn: light-dark(#7a5514, #c4a45f);
+    /* Flips with the accent: white on the deep red, near-black on the coral. */
+    --color-text-on-accent: light-dark(#ffffff, #1a1712);
+
+    /* Primary action colour. The nursery hue doubles as the brand accent —
+       it is the first group a parent looks for. */
+    --color-accent: light-dark(#c7361f, #d9765c);
+    --color-accent-strong: light-dark(#a72c18, #e8907a);
+
+    /* Decoration that used to be hard-coded, so it can invert too. */
+    --color-headline-mark: light-dark(rgba(43, 82, 201, 0.35), rgba(128, 152, 216, 0.32));
+    --color-hairline-stroke: light-dark(rgba(32, 28, 23, 0.13), rgba(242, 233, 220, 0.09));
+    --color-border-dashed: light-dark(rgba(32, 28, 23, 0.32), rgba(242, 233, 220, 0.16));
+    --color-tint-nursery: light-dark(rgba(199, 54, 31, 0.22), rgba(217, 118, 92, 0.11));
+    --color-tint-kindergarten: light-dark(rgba(43, 82, 201, 0.21), rgba(128, 152, 216, 0.10));
+    --color-tint-preschool: light-dark(rgba(74, 117, 80, 0.24), rgba(127, 174, 137, 0.10));
+    /* The brand tile is cream in both themes (it is a printed sticker, not a
+       themed surface). Its misregistration offset therefore has to disappear
+       on dark stock — a cream offset behind a cream tile just fattens it. */
+    --color-brand-shadow: light-dark(rgba(32, 28, 23, 0.9), transparent);
+    /* The hard offset is ink misregistration on cream stock, but on dark stock
+       ink-coloured (cream) offsets read as a high-contrast outline theme. In
+       dark it becomes absence of light instead. */
+    --color-shadow-ink: light-dark(#201c17, rgba(0, 0, 0, 0.5));
+
+    /* --- elevation: print offset, not depth ----------------------------- */
+    /* A hard, un-blurred offset is a risograph misregistration device. It is
+       deliberately not the soft "floating card" shadow this design replaced. */
+    --shadow-hard: 5px 5px 0 var(--color-shadow-ink);
+    --shadow-hard-sm: 3px 3px 0 var(--color-shadow-ink);
+    --shadow-field: 5px 5px 0 var(--color-shadow-ink);
+    --shadow-panel: 6px 6px 0 light-dark(rgba(32, 28, 23, 0.22), rgba(0, 0, 0, 0.45));
+
+    /* --- radii: two values, assigned by role ---------------------------- */
+    --radius-control: 999px; /* the address field and filter pills */
+    --radius-surface: 16px; /* cards and panels */
+
+    /* Blend modes and opacities are not colours, so light-dark() cannot carry
+       them — these three are the only tokens that need a real theme branch.
+       Multiply darkens ink into cream stock; on dark stock the same overlay
+       has to lighten instead, or the tints turn into black holes. */
+    --tint-blend: multiply;
+    --grain-blend: multiply;
+    --grain-opacity: 0.5;
 
     color: var(--color-text-strong);
     background: var(--color-bg-page);
-    font-family:
-      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-      sans-serif;
+    font-family: var(--font-ui);
+    /* Never fake a weight or an oblique — every face we need is a real file. */
     font-synthesis: none;
     text-rendering: optimizeLegibility;
   }
 
+  /* `data-theme` is written by the inline <head> script before first paint.
+     Narrowing color-scheme is all light-dark() needs to switch every token;
+     these blocks only have to carry the three non-colour tokens above. */
+  :root[data-theme="light"] {
+    color-scheme: only light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: only dark;
+  }
+
   @media (prefers-color-scheme: dark) {
-    :root {
-      --color-bg-page: #0b1220;
-      --color-bg-surface: #131c2f;
-      --color-bg-surface-muted: rgba(19, 28, 47, 0.72);
-      --color-bg-accent-soft: rgba(96, 165, 250, 0.18);
-      --color-bg-accent-softer: rgba(96, 165, 250, 0.1);
-      --color-bg-error-soft: rgba(180, 83, 36, 0.2);
-      --color-bg-warn-soft: rgba(202, 138, 4, 0.18);
+    :root:not([data-theme="light"]) {
+      --tint-blend: screen;
+      --grain-blend: soft-light;
+      --grain-opacity: 0.28;
+    }
+  }
 
-      --color-border-subtle: #1f2a44;
-      --color-border-default: #2a3654;
-      --color-border-soft: #2a3654;
-      --color-border-card: #28324d;
-      --color-border-status: #2a3a36;
-      --color-border-accent: #60a5fa;
-      --color-border-error: rgba(244, 162, 97, 0.45);
-      --color-border-warn: rgba(250, 204, 21, 0.45);
+  :root[data-theme="dark"] {
+    --tint-blend: screen;
+    --grain-blend: soft-light;
+    --grain-opacity: 0.28;
+  }
 
-      --color-text-strong: #f1f5f9;
-      --color-text-display: #ffffff;
-      --color-text-muted: #cbd5e1;
-      --color-text-subtle: #94a3b8;
-      --color-text-faint: #64748b;
-      --color-text-eyebrow: #a3b3c5;
-      --color-text-status: #c1d6cf;
-      --color-text-error: #fdba74;
-      --color-text-error-strong: #fca5a5;
-      --color-text-group-note: #bfdbfe;
-      --color-text-warn: #fde68a;
+  /* Grain over the whole page. One inline SVG turbulence, fixed and
+     pointer-events-none, so it never repaints on scroll. */
+  body::before {
+    content: "";
+    position: fixed;
+    z-index: 3;
+    inset: 0;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+    mix-blend-mode: var(--grain-blend);
+    pointer-events: none;
+  }
 
-      --color-accent: #3b82f6;
-      --color-accent-strong: #60a5fa;
+  /* The three circles carry the three section hues.
+     Alpha is capped so that even muted body copy laid over a circle still
+     clears 4.5:1 — measured: nursery 4.51, kindergarten 4.52, preschool 4.54.
+     The reference mock used ~0.42, which put muted text at 3.27:1. */
+  /* No `filter: blur()` here. A blur promotes the circle to a composited
+     layer that the GPU can rasterise below devicePixelRatio, which on a HiDPI
+     screen shows up as a visibly low-resolution, stair-stepped edge. At 1px
+     over a 380px disc the softening was doing no design work anyway — the
+     border-radius edge antialiases at full device resolution on its own. */
+  .page-tint {
+    position: fixed;
+    z-index: 0;
+    border-radius: 50%;
+    mix-blend-mode: var(--tint-blend);
+    pointer-events: none;
+  }
 
-      --shadow-field: 0 0 0 1px rgba(96, 165, 250, 0.1);
-      --shadow-panel: 0 22px 44px rgba(0, 0, 0, 0.45);
+  .page-tint--nursery {
+    top: -120px;
+    right: -90px;
+    width: 380px;
+    height: 380px;
+    background: var(--color-tint-nursery);
+  }
+
+  .page-tint--kindergarten {
+    top: 180px;
+    left: -140px;
+    width: 300px;
+    height: 300px;
+    background: var(--color-tint-kindergarten);
+  }
+
+  .page-tint--preschool {
+    top: 420px;
+    right: 12%;
+    width: 190px;
+    height: 190px;
+    background: var(--color-tint-preschool);
+  }
+
+  @media (max-width: 720px) {
+    .page-tint--preschool {
+      display: none;
     }
   }
 
@@ -212,6 +488,14 @@ const navItems = [
     flex: 0 0 auto;
   }
 
+  /* Content sits above the tint circles (z 0) and below the grain (z 3). */
+  .site-header,
+  main,
+  .site-footer {
+    position: relative;
+    z-index: 1;
+  }
+
   a {
     color: inherit;
   }
@@ -222,20 +506,37 @@ const navItems = [
     justify-content: space-between;
     gap: 24px;
     min-height: 66px;
+    /* An ink hairline on the cream stock, not a white bar floating above it.
+       Opaque on purpose: a tint circle bleeding under the nav dropped muted
+       link text to 3.27:1. */
     border-bottom: 1px solid var(--color-border-subtle);
-    background: var(--color-bg-surface);
+    background: var(--color-bg-page);
     padding: 0 48px;
   }
 
   .brand {
     display: inline-flex;
     align-items: center;
+    gap: 10px;
     color: var(--color-text-strong);
+    font-weight: 800;
+    font-size: 0.98rem;
+    letter-spacing: -0.01em;
     text-decoration: none;
   }
 
-  .brand img {
+  .brand-mark {
     display: block;
+    flex: 0 0 auto;
+    /* The mark carries its own offset; this is the printed drop next to it. */
+    filter: drop-shadow(2px 2px 0 var(--color-brand-shadow));
+  }
+
+  .brand:focus-visible,
+  .site-footer a:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 
   .nav-toggle {
@@ -267,10 +568,12 @@ const navItems = [
   nav {
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 22px;
     color: var(--color-text-muted);
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   nav a {
@@ -281,25 +584,35 @@ const navItems = [
     transition: color 160ms ease;
   }
 
+  /* A printed highlight swipe rather than a hairline rule. */
   nav a::after {
     content: "";
     position: absolute;
     right: 0;
-    bottom: -2px;
+    bottom: 0;
     left: 0;
-    height: 2px;
-    border-radius: 1px;
-    background: var(--color-accent);
+    height: 6px;
+    background: var(--color-bg-accent-soft);
     opacity: 0;
     transition: opacity 160ms ease;
   }
 
   nav a[aria-current="page"] {
-    color: var(--color-accent);
+    color: var(--color-ink);
   }
 
   nav a[aria-current="page"]::after {
     opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    nav a,
+    nav a::after,
+    .nav-toggle span,
+    nav,
+    .button {
+      transition: none;
+    }
   }
 
   .site-footer.site-footer--mobile {
@@ -339,18 +652,21 @@ const navItems = [
 
   .eyebrow {
     margin: 0;
-    color: var(--color-text-eyebrow);
-    font-size: 0.9rem;
-    font-weight: 700;
+    color: var(--color-section-nursery);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
   }
 
   h1 {
     margin: 0;
     color: var(--color-text-display);
-    font-size: clamp(2rem, 6vw, 4.5rem);
-    line-height: 1;
-    letter-spacing: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 500;
+    line-height: 1.06;
+    letter-spacing: -0.01em;
   }
 
   p {
@@ -370,16 +686,30 @@ const navItems = [
 
   .button {
     display: inline-flex;
-    min-height: 44px;
+    min-height: 46px;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-accent);
-    border-radius: 8px;
-    padding: 0 16px;
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
+    padding: 0 22px;
     background: var(--color-accent);
+    box-shadow: var(--shadow-hard-sm);
     color: var(--color-text-on-accent);
     font-weight: 700;
     text-decoration: none;
+    transition:
+      transform 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  .button:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--color-shadow-ink);
+  }
+
+  .button:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
   }
 
   .status-badge {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   listInstitutions,
@@ -81,6 +81,7 @@ export function SearchExperience() {
     selectedAddress: null,
   });
   const [hasHydrated, setHasHydrated] = useState(false);
+  const anchorRef = useRef<HTMLDivElement>(null);
 
   const visibleSuggestions = useMemo(
     () => searchExactAddressSuggestions(suggestions, query),
@@ -117,9 +118,58 @@ export function SearchExperience() {
     saveStoredState({ query, filter, matchState: persistableMatch });
   }, [hasHydrated, query, filter, matchState]);
 
+  /* The pre-paint hint BaseLayout put on <html> has done its job by now: this
+     runs in the same commit that first renders data-has-results, so the hero
+     never loses its compact padding between the two. It has to come off —
+     left up, it would pin the hero compact after the results are cleared. */
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
+    delete document.documentElement.dataset.restoringResults;
+  }, [hasHydrated]);
+
   useEffect(() => {
     setActiveIndex(0);
   }, [query, visibleSuggestions.length]);
+
+  /* The date is fetched here because the stale banner is decided from it, but
+     it reads as a footnote about the dataset rather than as part of the search
+     — so it renders in the site footer, which Astro owns outside this island.
+     Handing it over through the footer's placeholder node keeps it to the one
+     /api/institutions call. */
+  useEffect(() => {
+    const slots = document.querySelectorAll<HTMLElement>("[data-footer-freshness]");
+
+    slots.forEach((slot) => {
+      slot.textContent = freshnessDate ? `Last updated: ${formatDate(freshnessDate)}` : "";
+      slot.hidden = freshnessDate === null;
+    });
+  }, [freshnessDate]);
+
+  /* Tapping anywhere off the field dismisses the list; focusing the input
+     brings it back (onFocus). pointerdown rather than click so the list goes
+     away on press, and capture so it still fires when a handler deeper in the
+     page stops propagation. */
+  useEffect(() => {
+    if (!isAutocompleteOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target;
+
+      if (target instanceof Node && anchorRef.current?.contains(target)) {
+        return;
+      }
+
+      setIsAutocompleteOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
+  }, [isAutocompleteOpen]);
 
   async function loadReferences() {
     setReferenceStatus("loading");
@@ -242,6 +292,19 @@ export function SearchExperience() {
     setQuery(value);
     setValidationMessage(null);
     setIsAutocompleteOpen(true);
+
+    /* Results belong to the address that was picked from the list, not to
+       whatever is in the field. Once the two stop agreeing — cleared, or
+       edited towards a different address — the cards below are answering a
+       question nobody is asking any more, so they go with the text rather
+       than sitting under it looking current. */
+    setMatchState((current) => {
+      if (current.status === "idle" || value.trim() === current.selectedAddress?.label) {
+        return current;
+      }
+
+      return { status: "idle", address: null, grouped: null, selectedAddress: null };
+    });
   }
 
   const inputDescriptionId = validationMessage ? "search-validation" : undefined;
@@ -251,7 +314,11 @@ export function SearchExperience() {
     <div className="search-experience" data-has-results={hasResults ? "true" : undefined}>
       <section className="search-hero" aria-labelledby="search-title">
         <div className="search-copy">
-          <h1 id="search-title">Коя е моята градина?</h1>
+          {/* Split so `моята` can take the italic display face and `градина`
+              the printed underline. The words and their order are unchanged. */}
+          <h1 id="search-title">
+            Коя е <em>моята</em> <span className="headline-mark">градина</span>?
+          </h1>
           <p>Въведете адреса си в полето и ще видите списък на всички детски градини и ясли, за които можете да кандидатствате</p>
         </div>
 
@@ -259,64 +326,72 @@ export function SearchExperience() {
           <label className="sr-only" htmlFor="address-search">
             Адрес във Варна
           </label>
-          <div className="search-field">
-            <SearchIcon />
-            <input
-              id="address-search"
-              type="search"
-              autoComplete="off"
-              value={query}
-              placeholder="ул. Преслав 12"
-              aria-autocomplete="list"
-              aria-controls="address-suggestions"
-              aria-expanded={isAutocompleteOpen}
-              aria-describedby={inputDescriptionId}
-              onChange={(event) => handleQueryChange(event.currentTarget.value)}
-              onFocus={() => setIsAutocompleteOpen(true)}
-              onKeyDown={handleKeyDown}
-            />
+          <div className="search-field-anchor" ref={anchorRef}>
+            <div className="search-field">
+              <SearchIcon />
+              <input
+                id="address-search"
+                type="search"
+                autoComplete="off"
+                value={query}
+                placeholder="ул. Преслав 12"
+                aria-autocomplete="list"
+                aria-controls="address-suggestions"
+                aria-expanded={isAutocompleteOpen}
+                aria-describedby={inputDescriptionId}
+                onChange={(event) => handleQueryChange(event.currentTarget.value)}
+                onFocus={() => setIsAutocompleteOpen(true)}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+
+            {referenceStatus === "ready" && isAutocompleteOpen && visibleSuggestions.length > 0 ? (
+              <ul className="suggestion-panel" id="address-suggestions" role="listbox">
+                {visibleSuggestions.map((suggestion, index) => (
+                  <li
+                    key={suggestion.id}
+                    aria-selected={index === activeIndex}
+                    className={index === activeIndex ? "active" : undefined}
+                    data-active={index === activeIndex ? "" : undefined}
+                    role="option"
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      void selectSuggestion(suggestion);
+                    }}
+                    onMouseEnter={() => setActiveIndex(index)}
+                  >
+                    <MapPinIcon />
+                    <span className="suggestion-text">
+                      <strong>{suggestion.label}</strong>
+                      <span>{suggestion.context}</span>
+                    </span>
+                    <ArrowRightIcon />
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            {showNoMatches ? (
+              <div className="suggestion-panel status-panel">Няма точен адрес за това търсене.</div>
+            ) : null}
           </div>
 
+          {/* Reference-load states stay in normal flow rather than in the
+              overlay: they are not suggestions, they outlive a blur, and the
+              error carries the only retry affordance. */}
           {referenceStatus === "loading" ? (
-            <div className="suggestion-panel status-panel">Зареждаме адресите...</div>
+            <div className="suggestion-panel status-panel status-panel--inline">
+              Зареждаме адресите...
+            </div>
           ) : null}
 
           {referenceStatus === "error" ? (
-            <div className="suggestion-panel status-panel">
+            <div className="suggestion-panel status-panel status-panel--inline">
               <span>Не успяхме да заредим адресите.</span>
               <button type="button" onClick={() => void retryReferences()}>
                 Опитайте пак
               </button>
             </div>
-          ) : null}
-
-          {referenceStatus === "ready" && isAutocompleteOpen && visibleSuggestions.length > 0 ? (
-            <ul className="suggestion-panel" id="address-suggestions" role="listbox">
-              {visibleSuggestions.map((suggestion, index) => (
-                <li
-                  key={suggestion.id}
-                  aria-selected={index === activeIndex}
-                  className={index === activeIndex ? "active" : undefined}
-                  role="option"
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    void selectSuggestion(suggestion);
-                  }}
-                  onMouseEnter={() => setActiveIndex(index)}
-                >
-                  <MapPinIcon />
-                  <span className="suggestion-text">
-                    <strong>{suggestion.label}</strong>
-                    <span>{suggestion.context}</span>
-                  </span>
-                  <ArrowRightIcon />
-                </li>
-              ))}
-            </ul>
-          ) : null}
-
-          {showNoMatches ? (
-            <div className="suggestion-panel status-panel">Няма точен адрес за това търсене.</div>
           ) : null}
 
           {validationMessage ? (
@@ -325,9 +400,6 @@ export function SearchExperience() {
             </p>
           ) : null}
 
-          {freshnessDate ? (
-            <p className="freshness-line">Last updated: {formatDate(freshnessDate)}</p>
-          ) : null}
         </div>
       </section>
 

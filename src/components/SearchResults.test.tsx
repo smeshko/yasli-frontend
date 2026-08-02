@@ -80,7 +80,11 @@ describe("SearchResults", () => {
       />,
     );
 
-    expect(html).toContain("Избран адрес: бул. Генерал Колев 085");
+    /* The search field above still shows the address, so the results do not
+       echo it — and a district match is the only basis worth printing. */
+    expect(html).not.toContain("Избран адрес");
+    expect(html).not.toContain("по вашия адрес");
+    expect(html).toContain("по вашия район");
     expect(html.indexOf("Ясла")).toBeLessThan(html.indexOf("Детска градина"));
     expect(html.indexOf("Детска градина")).toBeLessThan(html.indexOf("Подготвителна група"));
     expect(html).toContain("ДГ Тест");

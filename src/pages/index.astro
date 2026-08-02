@@ -12,10 +12,17 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     display: grid;
     min-height: 100%;
     grid-template-rows: 1fr auto;
-    background: var(--color-bg-page);
+    /* Transparent on purpose: an opaque fill here would paint over the three
+       section-hue tint circles that live behind the page. */
+    background: transparent;
   }
 
-  .search-experience[data-has-results="true"] {
+  /* `data-restoring-results` is set on <html> by the pre-paint script in
+     BaseLayout when sessionStorage holds a search to restore. It stands in for
+     `data-has-results` across the one frame between the server's markup and
+     React taking over, so the hero never starts tall and then collapses. */
+  .search-experience[data-has-results="true"],
+  :root[data-restoring-results] .search-experience {
     grid-template-rows: auto 1fr;
   }
 
@@ -27,8 +34,24 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     padding: max(48px, 32vh) 0 30px;
   }
 
-  .search-experience[data-has-results="true"] .search-hero {
-    padding: 48px 0 30px;
+  .search-experience[data-has-results="true"] .search-hero,
+  :root[data-restoring-results] .search-hero {
+    padding: 22px 0 24px;
+  }
+
+  /* Once there are results the headline has done its job — it is a pitch to
+     someone who has not searched yet, and leaving it up pushed the cards below
+     the fold. Clipped rather than removed so the h1 that labels this section
+     (and the page's only heading) stays in the accessibility tree. */
+  .search-experience[data-has-results="true"] .search-copy,
+  :root[data-restoring-results] .search-copy {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .search-copy {
@@ -40,37 +63,68 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   .search-copy h1 {
-    max-width: 720px;
+    max-width: 760px;
+    margin: 0;
     color: var(--color-text-display);
-    font-size: clamp(2.5rem, 5vw, 3.25rem);
-    font-weight: 800;
-    line-height: 1.12;
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 6vw, 4.2rem);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+  }
+
+  .search-copy h1 em {
+    font-style: italic;
+    color: var(--color-section-nursery);
+  }
+
+  /* A printed highlight under the noun, in the kindergarten hue. */
+  .search-copy h1 .headline-mark {
+    box-shadow: inset 0 -0.1em 0 var(--color-headline-mark);
   }
 
   .search-copy p {
-    max-width: 760px;
-    color: var(--color-text-subtle);
-    font-size: 1.08rem;
-    line-height: 1.55;
+    max-width: 54ch;
+    color: var(--color-text-muted);
+    font-size: 1.02rem;
+    line-height: 1.62;
   }
 
   .search-panel {
+    width: 100%;
+  }
+
+  /* The dropdown anchors to the field alone, not to the whole panel — the
+     panel also holds the freshness line, so anchoring there pushed the
+     suggestions below it and detached them from the bar. */
+  .search-field-anchor {
     position: relative;
     width: 100%;
   }
 
   .search-field {
     display: grid;
-    min-height: 60px;
+    min-height: 62px;
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: 14px;
-    border: 2px solid var(--color-border-accent);
-    border-radius: 9px;
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
     background: var(--color-bg-surface);
     box-shadow: var(--shadow-field);
-    color: var(--color-accent);
-    padding: 0 18px;
+    color: var(--color-section-nursery);
+    padding: 0 26px;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  /* Focus is drawn by the press itself: the field shifts 2px into its own
+     printed shadow, which drops from 5px to 3px. No ring — the misregistration
+     collapsing is the whole indicator, the way a physical key travels. */
+  .search-field:focus-within {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-hard-sm);
   }
 
   .search-field input {
@@ -80,25 +134,27 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     background: transparent;
     color: var(--color-text-strong);
     font: inherit;
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.02rem;
+    /* 700 was body weight on an input — the design puts weight on the card
+       names instead. */
+    font-weight: 500;
   }
 
   .search-field input::placeholder {
     color: var(--color-text-faint);
-    font-weight: 500;
+    font-weight: 400;
   }
 
   .suggestion-panel {
     position: absolute;
     z-index: 10;
-    top: calc(100% + 10px);
+    top: calc(100% + 12px);
     left: 0;
     width: 100%;
     max-height: min(376px, 52dvh);
     overflow-y: auto;
-    border: 1px solid var(--color-border-soft);
-    border-radius: 10px;
+    border: 2px solid var(--color-ink);
+    border-radius: 18px;
     margin: 0;
     padding: 8px;
     background: var(--color-bg-surface);
@@ -112,21 +168,22 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 14px;
-    border-radius: 8px;
-    color: var(--color-text-subtle);
+    border-radius: 12px;
+    color: var(--color-text-muted);
     cursor: pointer;
-    padding: 9px 12px;
+    padding: 11px 14px;
   }
 
-  .suggestion-panel li.active {
+  .suggestion-panel li[data-active] {
     background: var(--color-bg-accent-soft);
-    color: var(--color-accent);
+    box-shadow: inset 0 0 0 1.5px var(--color-section-nursery);
+    color: var(--color-text-strong);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .suggestion-panel li:hover {
-      background: var(--color-bg-accent-soft);
-      color: var(--color-accent);
+      background: var(--color-bg-accent-softer);
+      color: var(--color-text-strong);
     }
   }
 
@@ -157,6 +214,13 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     flex: 0 0 auto;
   }
 
+  /* Same printed panel, but in normal flow under the field instead of
+     overlaying it — see the note in SearchExperience. */
+  .status-panel--inline {
+    position: static;
+    margin-top: 12px;
+  }
+
   .status-panel {
     display: flex;
     align-items: center;
@@ -168,29 +232,31 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .status-panel button,
   .results-status button {
-    border: 0;
-    border-radius: 7px;
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
     background: var(--color-accent);
     color: var(--color-text-on-accent);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
-    padding: 8px 12px;
+    padding: 9px 16px;
+    box-shadow: var(--shadow-hard-sm);
+    transition:
+      transform 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  .status-panel button:hover,
+  .results-status button:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--color-shadow-ink);
   }
 
   .validation-message {
     margin-top: 12px;
     color: var(--color-text-error-strong);
     font-size: 0.94rem;
-  }
-
-  .freshness-line {
-    max-width: none;
-    margin-top: 14px;
-    color: var(--color-text-subtle);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    font-size: 0.78rem;
-    text-align: center;
+    font-weight: 600;
   }
 
   .results-area {
@@ -199,20 +265,14 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     padding: 0 0 56px;
   }
 
-  .selected-address {
-    max-width: none;
-    color: var(--color-text-strong);
-    font-weight: 700;
-  }
-
   .results-status,
   .stale-banner {
-    border: 1px solid var(--color-border-soft);
-    border-radius: 8px;
+    border: 2px solid var(--color-border-card);
+    border-radius: var(--radius-surface);
     margin-top: 18px;
     background: var(--color-bg-surface);
     color: var(--color-text-muted);
-    padding: 16px;
+    padding: 16px 18px;
   }
 
   .results-status.error,
@@ -220,6 +280,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     border-color: var(--color-border-error);
     background: var(--color-bg-error-soft);
     color: var(--color-text-error);
+    font-weight: 500;
   }
 
   .results-status.error {
@@ -238,20 +299,35 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .filters button {
     min-height: 44px;
-    border: 1px solid var(--color-border-default);
-    border-radius: 8px;
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
     background: var(--color-bg-surface);
-    color: var(--color-text-muted);
+    color: var(--color-text-strong);
     cursor: pointer;
     font: inherit;
+    font-size: 0.88rem;
     font-weight: 700;
-    padding: 0 12px;
+    padding: 0 18px;
+    box-shadow: var(--shadow-hard-sm);
+  }
+
+  .filters button:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--color-shadow-ink);
+  }
+
+  .filters button:focus-visible,
+  .card-actions a:focus-visible,
+  .status-panel button:focus-visible,
+  .results-status button:focus-visible {
+    outline: 2px solid var(--color-section-nursery);
+    outline-offset: 3px;
   }
 
   .filters button.active {
-    border-color: var(--color-accent);
-    background: var(--color-bg-accent-soft);
-    color: var(--color-accent-strong);
+    background: var(--color-ink);
+    color: var(--color-bg-page);
+    box-shadow: 3px 3px 0 var(--color-section-nursery);
   }
 
   .result-groups {
@@ -262,83 +338,273 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .result-group {
     display: grid;
     gap: 12px;
+    /* Each group resolves one hue, then everything inside reads from it. */
+    --tone: var(--color-section-nursery);
+  }
+
+  .result-group[data-kind="kindergarten"] {
+    --tone: var(--color-section-kindergarten);
+  }
+
+  .result-group[data-kind="preschool"] {
+    --tone: var(--color-section-preschool);
   }
 
   .result-group h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
     margin: 0;
     color: var(--color-text-strong);
-    font-size: 1.2rem;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .result-group h2 .group-count {
+    background: var(--tone);
+    border-radius: 999px;
+    /* Flips with the theme: the dark section hues are light enough that white
+       on them drops to ~2.4:1. */
+    color: var(--color-text-on-accent);
+    font-family: var(--font-ui);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    transform: translateY(-4px);
+  }
+
+  .group-rule {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--tone);
+    margin-bottom: 6px;
   }
 
   .group-note {
     max-width: none;
-    border-left: 3px solid var(--color-accent);
-    background: var(--color-bg-accent-softer);
-    color: var(--color-text-group-note);
-    font-size: 0.95rem;
-    line-height: 1.5;
-    padding: 10px 14px;
+    border-left: 4px solid var(--tone);
+    border-radius: 0 12px 12px 0;
+    background: var(--color-bg-surface-muted);
+    color: var(--color-text-muted);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    padding: 13px 16px;
   }
 
   .group-note--warn {
-    border-left-color: var(--color-border-warn);
+    border-left-color: var(--color-section-nursery);
     background: var(--color-bg-warn-soft);
     color: var(--color-text-warn);
   }
 
+  /* The page-level notice: about the address, so it reads once above the
+     filters rather than inside the groups it happens to affect. */
+  .results-notice {
+    margin-top: 18px;
+  }
+
+  /* Lift the whole group while its panel is open. The count badge of a later
+     group is transformed, and its rule is a plain block — both paint in
+     sibling order, so a z-index on the panel alone loses to them. */
+  .result-group:has(.group-info-button[aria-expanded="true"]) {
+    position: relative;
+    z-index: 30;
+  }
+
+  /* Pushed to the far end of the heading row so it stops competing with the
+     count pill. Its own underline used to land a couple of pixels above the
+     group rule and the two read as one broken line — so it is bounded instead:
+     a hollow pill answering the filled count pill at the other end. */
+  .group-info {
+    position: relative;
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .group-info-button {
+    display: inline-flex;
+    min-height: 26px;
+    align-items: center;
+    border: 1.5px solid var(--color-border-card);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text-subtle);
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 0 12px;
+    text-transform: uppercase;
+    transition:
+      color 140ms ease,
+      border-color 140ms ease,
+      background-color 140ms ease;
+  }
+
+  .group-info-button[aria-expanded="true"] {
+    border-color: var(--tone);
+    background: var(--color-bg-accent-soft);
+    color: var(--tone);
+  }
+
+  .group-info-button:focus-visible {
+    outline: 2px solid var(--tone);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .group-info-button:hover {
+      border-color: var(--tone);
+      color: var(--tone);
+    }
+  }
+
+  /* Hangs from the right edge inward, since the trigger now sits there. */
+  .group-info-panel {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 10px);
+    right: 0;
+    display: grid;
+    width: max-content;
+    max-width: min(340px, calc(100vw - 48px));
+    gap: 10px;
+    border: 2px solid var(--color-border-card);
+    border-left: 4px solid var(--tone);
+    border-radius: 0 14px 14px 0;
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-panel);
+    color: var(--color-text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.92rem;
+    font-weight: 400;
+    line-height: 1.55;
+    padding: 13px 16px;
+    text-align: left;
+  }
+
+  .group-info-panel[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .group-info-button {
+      transition: none;
+    }
+  }
+
   .cards {
     display: grid;
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+    gap: 16px;
   }
 
   .result-card {
+    position: relative;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    border: 1px solid var(--color-border-card);
-    border-radius: 8px;
+    /* Column, so a long institution name gets the full card width and the
+       source link sits beneath it rather than competing for the same row. */
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 12px;
+    overflow: hidden;
+    border: 2px solid var(--color-border-card);
+    border-radius: var(--radius-surface);
     background: var(--color-bg-surface);
-    padding: 16px;
+    box-shadow: var(--shadow-hard);
+    padding: 20px 18px 16px;
+    transition:
+      transform 180ms cubic-bezier(0.2, 0.8, 0.3, 1),
+      box-shadow 180ms ease;
   }
 
+  .result-card:hover {
+    transform: translate(-2px, -3px);
+    box-shadow: 8px 9px 0 var(--tone);
+  }
+
+  /* An outline numeral bedded into the card, behind the content. */
+  .result-index {
+    position: absolute;
+    right: 8px;
+    bottom: -22px;
+    color: transparent;
+    font-family: var(--font-display);
+    font-size: 5.4rem;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+    -webkit-text-stroke: 1.5px var(--color-hairline-stroke);
+  }
+
+  /* Attribute-free on purpose — SearchResults.test.tsx asserts the bare tag. */
   .result-card h3 {
-    margin: 3px 0 0;
+    position: relative;
+    margin: 0 0 5px;
     color: var(--color-text-strong);
-    font-size: 1rem;
+    font-size: 1.06rem;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+    line-height: 1.32;
     overflow-wrap: anywhere;
     word-break: break-word;
   }
 
   .kind-label {
-    color: var(--color-accent);
-    font-size: 0.84rem;
+    margin: 0 0 8px;
+    color: var(--tone);
+    font-size: 0.68rem;
     font-weight: 800;
+    letter-spacing: 0.18em;
     line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .match-basis {
+    position: relative;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.84rem;
   }
 
   .card-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    margin-top: auto;
   }
 
   .card-actions a {
+    position: relative;
     display: inline-block;
-    padding: 8px 0;
-    color: var(--color-accent-strong);
-    font-size: 0.92rem;
-    font-weight: 700;
+    padding: 8px 0 2px;
+    border-bottom: 2px solid var(--tone);
+    color: var(--color-text-strong);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
     text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .card-actions a:hover {
+    color: var(--tone);
   }
 
   .empty-group {
     max-width: none;
-    border: 1px dashed var(--color-border-default);
-    border-radius: 8px;
+    border: 2px dashed var(--color-border-dashed);
+    border-radius: var(--radius-surface);
     background: var(--color-bg-surface-muted);
-    color: var(--color-text-subtle);
-    padding: 14px;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    padding: 20px;
   }
 
   .sr-only {
@@ -383,7 +649,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   @media (prefers-reduced-motion: reduce) {
     .search-hero,
     .filters button,
-    .result-card {
+    .result-card,
+    .search-field,
+    .status-panel button,
+    .results-status button {
       animation: none;
       transition: none;
     }
@@ -395,16 +664,16 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       padding: 64px 0 72px;
     }
 
-    .search-experience[data-has-results="true"] .search-hero {
-      padding: 64px 0 72px;
+    /* Tighter than desktop's collapsed hero: on a phone the header, the field
+       and the filters are already most of the viewport, so every pixel above
+       the first card is one the parent has to scroll past. */
+    .search-experience[data-has-results="true"] .search-hero,
+    :root[data-restoring-results] .search-hero {
+      padding: 16px 0 20px;
     }
 
     .search-copy {
       justify-items: start;
-      text-align: left;
-    }
-
-    .freshness-line {
       text-align: left;
     }
 
@@ -418,7 +687,6 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       white-space: normal;
     }
 
-    .result-card,
     .results-status.error {
       align-items: flex-start;
       flex-direction: column;
