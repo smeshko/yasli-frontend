@@ -1,0 +1,137 @@
+---
+/* Three explicit states rather than a two-way switch: "system" has to be
+   reachable again once a parent has picked light or dark by hand. Only light
+   and dark are persisted — "system" is the absence of a stored preference,
+   which is also what the inline <head> script in BaseLayout reads. */
+---
+
+<div class="theme-toggle" role="group" aria-label="Тема">
+  <button aria-label="Светла тема" aria-pressed="false" data-theme-option="light" title="Светла" type="button">
+    <svg aria-hidden="true" fill="none" height="16" viewBox="0 0 16 16" width="16">
+      <circle cx="8" cy="8" r="3.25" stroke="currentColor" stroke-width="1.5"></circle>
+      <path
+        d="M8 1.25v1.5M8 13.25v1.5M1.25 8h1.5M13.25 8h1.5M3.4 3.4l1.05 1.05M11.55 11.55l1.05 1.05M12.6 3.4l-1.05 1.05M4.45 11.55L3.4 12.6"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="1.5"></path>
+    </svg>
+  </button>
+
+  <button aria-label="Системна тема" aria-pressed="false" data-theme-option="system" title="Системна" type="button">
+    <svg aria-hidden="true" fill="none" height="16" viewBox="0 0 16 16" width="16">
+      <rect height="8.5" rx="1.25" stroke="currentColor" stroke-width="1.5" width="12.5" x="1.75" y="2.25"></rect>
+      <path d="M5.5 13.75h5" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"></path>
+    </svg>
+  </button>
+
+  <button aria-label="Тъмна тема" aria-pressed="false" data-theme-option="dark" title="Тъмна" type="button">
+    <svg aria-hidden="true" fill="none" height="16" viewBox="0 0 16 16" width="16">
+      <path
+        d="M13.5 9.6A5.75 5.75 0 0 1 6.4 2.5a5.75 5.75 0 1 0 7.1 7.1Z"
+        stroke="currentColor"
+        stroke-linejoin="round"
+        stroke-width="1.5"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+  const STORAGE_KEY = "yasli:theme";
+  const root = document.documentElement;
+  const buttons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-theme-option]"),
+  );
+
+  function storedTheme(): string {
+    try {
+      const value = window.localStorage.getItem(STORAGE_KEY);
+      return value === "light" || value === "dark" ? value : "system";
+    } catch {
+      return "system";
+    }
+  }
+
+  function apply(theme: string) {
+    if (theme === "light" || theme === "dark") {
+      root.dataset.theme = theme;
+    } else {
+      delete root.dataset.theme;
+    }
+
+    for (const button of buttons) {
+      const isActive = button.dataset.themeOption === theme;
+      button.setAttribute("aria-pressed", String(isActive));
+    }
+  }
+
+  for (const button of buttons) {
+    button.addEventListener("click", () => {
+      const theme = button.dataset.themeOption ?? "system";
+
+      try {
+        if (theme === "system") {
+          window.localStorage.removeItem(STORAGE_KEY);
+        } else {
+          window.localStorage.setItem(STORAGE_KEY, theme);
+        }
+      } catch {
+        /* private mode or quota — the theme still applies for this page */
+      }
+
+      apply(theme);
+    });
+  }
+
+  apply(storedTheme());
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 999px;
+    padding: 2px;
+    background: var(--color-bg-surface);
+  }
+
+  .theme-toggle button {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text-faint);
+    cursor: pointer;
+    padding: 0;
+    transition:
+      color 140ms ease,
+      background-color 140ms ease;
+  }
+
+  .theme-toggle button[aria-pressed="true"] {
+    background: var(--color-bg-accent-soft);
+    color: var(--color-section-nursery);
+  }
+
+  .theme-toggle button:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .theme-toggle button:hover {
+      color: var(--color-text-strong);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle button {
+      transition: none;
+    }
+  }
+</style>
