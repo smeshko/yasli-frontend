@@ -12,7 +12,9 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     display: grid;
     min-height: 100%;
     grid-template-rows: 1fr auto;
-    background: var(--color-bg-page);
+    /* Transparent on purpose: an opaque fill here would paint over the three
+       section-hue tint circles that live behind the page. */
+    background: transparent;
   }
 
   .search-experience[data-has-results="true"] {
@@ -40,18 +42,31 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   .search-copy h1 {
-    max-width: 720px;
+    max-width: 760px;
+    margin: 0;
     color: var(--color-text-display);
-    font-size: clamp(2.5rem, 5vw, 3.25rem);
-    font-weight: 800;
-    line-height: 1.12;
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 6vw, 4.2rem);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+  }
+
+  .search-copy h1 em {
+    font-style: italic;
+    color: var(--color-section-nursery);
+  }
+
+  /* A printed highlight under the noun, in the kindergarten hue. */
+  .search-copy h1 .headline-mark {
+    box-shadow: inset 0 -0.1em 0 rgba(43, 82, 201, 0.35);
   }
 
   .search-copy p {
-    max-width: 760px;
-    color: var(--color-text-subtle);
-    font-size: 1.08rem;
-    line-height: 1.55;
+    max-width: 54ch;
+    color: var(--color-text-muted);
+    font-size: 1.02rem;
+    line-height: 1.62;
   }
 
   .search-panel {
@@ -61,16 +76,25 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .search-field {
     display: grid;
-    min-height: 60px;
+    min-height: 62px;
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: 14px;
-    border: 2px solid var(--color-border-accent);
-    border-radius: 9px;
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
     background: var(--color-bg-surface);
     box-shadow: var(--shadow-field);
-    color: var(--color-accent);
-    padding: 0 18px;
+    color: var(--color-section-nursery);
+    padding: 0 26px;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  /* The field shifts into its own printed shadow on focus. */
+  .search-field:focus-within {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-hard-sm);
   }
 
   .search-field input {
@@ -80,25 +104,27 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     background: transparent;
     color: var(--color-text-strong);
     font: inherit;
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.02rem;
+    /* 700 was body weight on an input — the design puts weight on the card
+       names instead. */
+    font-weight: 500;
   }
 
   .search-field input::placeholder {
     color: var(--color-text-faint);
-    font-weight: 500;
+    font-weight: 400;
   }
 
   .suggestion-panel {
     position: absolute;
     z-index: 10;
-    top: calc(100% + 10px);
+    top: calc(100% + 12px);
     left: 0;
     width: 100%;
     max-height: min(376px, 52dvh);
     overflow-y: auto;
-    border: 1px solid var(--color-border-soft);
-    border-radius: 10px;
+    border: 2px solid var(--color-ink);
+    border-radius: 18px;
     margin: 0;
     padding: 8px;
     background: var(--color-bg-surface);
@@ -112,21 +138,22 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 14px;
-    border-radius: 8px;
-    color: var(--color-text-subtle);
+    border-radius: 12px;
+    color: var(--color-text-muted);
     cursor: pointer;
-    padding: 9px 12px;
+    padding: 11px 14px;
   }
 
-  .suggestion-panel li.active {
+  .suggestion-panel li[data-active] {
     background: var(--color-bg-accent-soft);
-    color: var(--color-accent);
+    box-shadow: inset 0 0 0 1.5px var(--color-section-nursery);
+    color: var(--color-text-strong);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .suggestion-panel li:hover {
-      background: var(--color-bg-accent-soft);
-      color: var(--color-accent);
+      background: var(--color-bg-accent-softer);
+      color: var(--color-text-strong);
     }
   }
 
@@ -168,28 +195,38 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .status-panel button,
   .results-status button {
-    border: 0;
-    border-radius: 7px;
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
     background: var(--color-accent);
     color: var(--color-text-on-accent);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
-    padding: 8px 12px;
+    padding: 9px 16px;
+    box-shadow: var(--shadow-hard-sm);
+    transition:
+      transform 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  .status-panel button:hover,
+  .results-status button:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--color-ink);
   }
 
   .validation-message {
     margin-top: 12px;
     color: var(--color-text-error-strong);
     font-size: 0.94rem;
+    font-weight: 600;
   }
 
   .freshness-line {
     max-width: none;
-    margin-top: 14px;
-    color: var(--color-text-subtle);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    font-size: 0.78rem;
+    margin-top: 16px;
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
     text-align: center;
   }
 

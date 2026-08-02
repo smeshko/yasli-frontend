@@ -251,7 +251,11 @@ export function SearchExperience() {
     <div className="search-experience" data-has-results={hasResults ? "true" : undefined}>
       <section className="search-hero" aria-labelledby="search-title">
         <div className="search-copy">
-          <h1 id="search-title">Коя е моята градина?</h1>
+          {/* Split so `моята` can take the italic display face and `градина`
+              the printed underline. The words and their order are unchanged. */}
+          <h1 id="search-title">
+            Коя е <em>моята</em> <span className="headline-mark">градина</span>?
+          </h1>
           <p>Въведете адреса си в полето и ще видите списък на всички детски градини и ясли, за които можете да кандидатствате</p>
         </div>
 
@@ -297,6 +301,7 @@ export function SearchExperience() {
                   key={suggestion.id}
                   aria-selected={index === activeIndex}
                   className={index === activeIndex ? "active" : undefined}
+                  data-active={index === activeIndex ? "" : undefined}
                   role="option"
                   onMouseDown={(event) => {
                     event.preventDefault();
