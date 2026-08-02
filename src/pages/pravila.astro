@@ -708,7 +708,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .summary-chevron,
+    /* .summary-chevron never existed — the chevron is summary::after, and the
+       summary's own colour transition was uncovered too. */
+    .info-details > summary,
+    .info-details > summary::after,
     .info-details::details-content {
       transition: none;
     }
