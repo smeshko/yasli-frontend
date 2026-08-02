@@ -41,7 +41,7 @@ whatever a local Postgres happens to hold.
       | S6 | `FIXTURE_SCENARIO=S6` | any | `/api/institutions` items carry `last_seen_at` 30 days old | stale banner (threshold is 14 days) |
       | S7 | `FIXTURE_SCENARIO=S7` | any | `/api/match` returns HTTP 500 | match **error message only** — this state has no retry control |
       | S8 | `FIXTURE_SCENARIO=S8` | any | `/api/match` returns HTTP 404, body exactly `{"error":"address_not_found"}` | stale-address state **with** the `Презареди адресите` button |
-      | S9 | `FIXTURE_SCENARIO=S9` | n/a | `/api/streets` returns HTTP 500 | reference-data error panel with the `Опитайте пак` retry |
+      | S9 | `FIXTURE_SCENARIO=S9` | n/a | `/api/streets` returns HTTP 500 on the **first** call, then 200 on every later call | reference-data error panel with the `Опитайте пак` retry, and a recoverable retry that repopulates the suggestions |
 
 - [ ] S8's body is byte-exact. `client.ts:113-126` only maps to
       `address_not_found` when the status is 404 **and** the parsed body is
@@ -49,6 +49,14 @@ whatever a local Postgres happens to hold.
       and the wrong state renders
 - [ ] S6 drives staleness from `/api/institutions` `last_seen_at` — the match
       response has no bearing on the banner (`newestFreshnessDate`)
+- [ ] **`last_seen_at` is computed at server startup, relative to now** — never
+      a hardcoded date in the committed JSON. `shouldShowStaleBanner` compares
+      against `new Date()` (`src/lib/search/results.ts:75`) with a 14-day
+      threshold, so frozen timestamps would silently cross it and every
+      baseline scenario would start rendering S6's stale banner. S1-S5 and S9
+      emit `now - 2 days`; S6 emits `now - 30 days`
+- [ ] The fixture server logs the resolved `last_seen_at` on startup, so a
+      screenshot's freshness line can be tied back to the run that produced it
 - [ ] S9 fails `/api/streets`, not `/api/match` — the `Опитайте пак` retry
       belongs to the reference-data panel in `SearchExperience`, and no retry
       control exists on the match-error state
@@ -74,7 +82,8 @@ taken against it.
       exact endpoints, query shapes and response types used:
       `/api/streets`, `/api/addresses`, `/api/institutions`, and
       `/api/match?address_id=<n>`
-- [ ] Write the fixture dataset covering S1–S9
+- [ ] Write the fixture dataset covering S1–S9, with every `last_seen_at`
+      derived from the process start time
 - [ ] Write the server: CORS headers on every response, scenario selection by
       `FIXTURE_SCENARIO`, and the exact status/body shapes above
 - [ ] Confirm each scenario renders its intended state in the browser

@@ -36,6 +36,9 @@ page, without changing a single behaviour, ARIA contract or keyboard path.
   `role="option"` / `aria-selected` / keyboard contract is untouched.
 - A new in-repo `docs/design/` holding the shipped direction and the approved
   reference, so the design system travels with the code (see Out of Scope).
+  Its input is versioned with this plan at
+  `docs/artifacts/plans/dvorat-design/assets/approved-concepts.html` — the
+  parent workspace is not available to a clean checkout.
 
 ## Out of Scope
 
@@ -92,6 +95,10 @@ See [RESEARCH.md](./RESEARCH.md). The three findings that shaped this plan:
   blue). Two rules are explicitly superseded and recorded as deliberate: the
   hard offset shadow is a risograph print device, not elevation; and 700 on
   card names is the approved hierarchy, not body weight.
+- **The approved reference is vendored into the plan, not referenced in place.**
+  `assets/approved-concepts.html` is the immutable input; the parent
+  `design-concepts/` directory is a working file that a fresh clone will not
+  have.
 - **Cards keep a bare `<h3>`.** Styling goes on `.result-card h3`. This is what
   keeps the existing suite green without editing assertions.
 - **Class names are kept** where they already exist (`.result-card`,
@@ -133,7 +140,13 @@ See [RESEARCH.md](./RESEARCH.md). The three findings that shaped this plan:
 - [ ] Every text/background pair in the shipped palette meets WCAG AA
       (4.5:1 body, 3:1 large/UI), verified by computed ratios in TASK-008.
 - [ ] `npm run test`, `npm run lint`, `npm run check` and `npm run build` all
-      pass, with no test assertions edited to accommodate the restyle.
+      pass. Exactly **one** test assertion may change:
+      `SearchExperience.test.tsx:10` asserts the contiguous string
+      `Коя е моята градина?`, which cannot survive the H1 being split into
+      spans. It is updated to assert the same words semantically (e.g. against
+      the text content with tags stripped), never loosened to a substring that
+      would pass on a broken headline. Every other assertion — in particular
+      `SearchResults.test.tsx:198`'s bare `<h3>` — stays byte-identical.
 - [ ] Search, autocomplete (mouse + ArrowUp/ArrowDown/Enter/Escape), filters,
       freshness line, stale banner, district-fallback and missing-district
       notices, all three empty states and sessionStorage persistence behave

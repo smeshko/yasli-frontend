@@ -47,8 +47,9 @@ FIXTURE_SCENARIO=S9 npm run fixtures   # reference-data failure
 
 | PLAN criterion | Scenario / check | Evidence |
 |---|---|---|
-| No third-party font requests | any page, DevTools network filtered to `fonts.` | network panel screenshot showing zero `googleapis`/`gstatic` rows |
-| Bulgarian letterforms everywhere | `/`, `/pravila`, 404 | screenshot of `вгдж икпт цщ ю` on each |
+| No third-party font requests | **each** of `/`, `/pravila`, 404 — DevTools network, no filter | three screenshots showing zero `googleapis`/`gstatic` rows **and** the local `/fonts/*.woff2` rows actually fetched. Absence of remote rows alone does not prove the local files are the ones in use |
+| Fonts work offline | reload each route with the network blocked (DevTools Offline, service-worker-free) | three screenshots rendering in Sofia Sans / Cormorant, not a system fallback. Confirm via `getComputedStyle(document.body).fontFamily` and `document.fonts.check("1em 'Sofia Sans'")` in the console |
+| Bulgarian letterforms everywhere | `/`, `/pravila`, 404 | the smoke string is not page content, so inject it reproducibly per route: `document.title=''; document.body.insertAdjacentHTML('afterbegin','<p id=smoke style="font:46px Sofia Sans">вгдж икпт цщ ю</p>')` in the console, screenshot, then reload to discard. Repeat with `Cormorant Garamond`. `git status` must be clean afterwards — nothing is edited on disk |
 | True italic `моята` | `/` idle | network row for the italic woff2 + zoomed headline screenshot |
 | No retired colours/fonts | `grep -rn "2563eb\|1d4ed8\|3b82f6\|60a5fa\|Inter" src/ public/` | empty output |
 | Favicon on new palette | browser tab + header brand | screenshot |
@@ -65,8 +66,9 @@ FIXTURE_SCENARIO=S9 npm run fixtures   # reference-data failure
 | Missing-district notice | S5 | screenshot |
 | Stale banner | S6 | screenshot |
 | Match error state | S7 | screenshot of the error message; note that this state has no retry control by design |
-| Stale-address state + retry | S8 | screenshot showing the `Презареди адресите` button, plus a second shot after clicking it |
-| Reference-data failure + retry | S9 | screenshot of the `Опитайте пак` panel, plus a second shot after clicking it with the server switched back to S1 |
+| Stale-address state + retry | S8 | screenshot showing the `Презареди адресите` button; then click it and capture the **network panel** showing fresh `/api/streets` and `/api/addresses` requests. Note: `retryReferences` reloads reference data and deliberately leaves `matchState` as `stale`, so the panel looks unchanged — a second screenshot of the same panel proves nothing. Restart the server on S1 and reselect the address to capture recovery |
+| Reference-data failure + retry | S9 | screenshot of the `Опитайте пак` panel; click it and capture the suggestions repopulating (S9 serves 500 once, then 200) |
+| Freshness stays fresh in baseline scenarios | S1 | screenshot showing the freshness line **without** the stale banner, proving the fixture timestamps are startup-relative rather than aged |
 | Freshness line | S1 | screenshot of the dated line |
 | Filters switch groups | S1 | one screenshot per filter (4) |
 | sessionStorage persistence | S1, then reload | screenshot after reload showing results restored |

@@ -17,7 +17,11 @@ All paths are **new**, inside this repo:
   research lives
 - `docs/design/DESIGN-SYSTEM.md` — new: the shipped Дворът system
 - `docs/design/dvorat-reference.html` — new: the approved concept, extracted
-  from `../design-concepts/index.html` (parent directory, concept `#opt-b`)
+  from the versioned input
+  `docs/artifacts/plans/dvorat-design/assets/approved-concepts.html`
+  (concept `#opt-b`). That asset is committed with this plan precisely so a
+  clean checkout can run this task; do **not** read from the parent
+  `design-concepts/` directory, which a fresh clone will not have
 
 ## Acceptance
 
@@ -48,7 +52,7 @@ repo showing the approved design.
 - [ ] Create `docs/design/` and write `README.md` explaining the split
 - [ ] Write `DESIGN-SYSTEM.md` from the tokens as shipped — read them out of
       `BaseLayout.astro` rather than from the plan, so the doc cannot drift
-- [ ] Extract concept `#opt-b` from `../design-concepts/index.html` into
+- [ ] Extract concept `#opt-b` from `assets/approved-concepts.html` into
       `dvorat-reference.html`: drop the `.chrome` switcher, the `#opt-s` and
       `#opt-k` sections and their CSS, and the view-toggle script
 - [ ] Verify the extracted file still renders and its search still works

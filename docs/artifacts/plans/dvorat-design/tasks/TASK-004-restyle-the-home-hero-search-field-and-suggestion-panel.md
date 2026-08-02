@@ -44,7 +44,12 @@ suggestion panel.
       exactly as before
 - [ ] The hero still collapses when `[data-has-results]` is set
 - [ ] Reduced-motion users get no transition on the collapse
-- [ ] `npm run test` passes untouched
+- [ ] `npm run test` passes. Splitting the H1 breaks
+      `SearchExperience.test.tsx:10`, which asserts the contiguous string
+      `Коя е моята градина?` — React inserts tags between those words. Update
+      that single assertion to compare the headline's *text content* with tags
+      stripped, so it still fails if the words or their order change. This is
+      the only assertion the plan permits changing
 
 Evidence: screenshots of idle hero, open autocomplete with an active row, and
 the collapsed hero with results; a keyboard walk-through recorded as a GIF or
@@ -75,5 +80,6 @@ design.
 The mock's centred hero left-aligns below 620px — keep that; rule 10 of the
 anti-slop doc wants the field reachable on mobile.
 
-`SearchExperience.test.tsx` is a 13-line smoke test; check it still passes
-after the H1 is split.
+`SearchExperience.test.tsx` is a 13-line smoke test. Line 10 is the assertion
+that must be adapted — see Acceptance. Do not delete it, and do not weaken it
+to a partial match.
