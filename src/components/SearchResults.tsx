@@ -120,8 +120,16 @@ function ResultGroup({
     kind === "preschool" && groupState?.hasDistrictFallback === true;
 
   return (
-    <section className="result-group" aria-labelledby={`result-group-${kind}`}>
-      <h2 id={`result-group-${kind}`}>{labelForReceptionKind(kind)}</h2>
+    <section
+      className="result-group"
+      aria-labelledby={`result-group-${kind}`}
+      data-kind={kind}
+    >
+      <h2 id={`result-group-${kind}`}>
+        {labelForReceptionKind(kind)}
+        <span className="group-count">{institutions.length}</span>
+      </h2>
+      <div className="group-rule" aria-hidden="true"></div>
       {kind === "nursery" ? (
         <p className="group-note">
           Яслите не са по адрес, имате право да кандидатствате във всяка, но получавате
@@ -151,9 +159,17 @@ function ResultGroup({
                 key={`${kind}-${institution.institution_kind}-${institution.offering}-${institution.id}`}
                 style={{ "--result-delay": `${index * 40}ms` } as React.CSSProperties}
               >
+                <span className="result-index" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
                 <div>
                   <p className="kind-label">{labelForReceptionKind(institution.institution_kind)}</p>
                   <h3>{displayName}</h3>
+                  <p className="match-basis">
+                    {institution.match_basis === "district"
+                      ? "по вашия район"
+                      : "по вашия адрес"}
+                  </p>
                 </div>
                 <div className="card-actions">
                   <a href={institution.source_url} target="_blank" rel="noreferrer">
