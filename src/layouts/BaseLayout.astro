@@ -18,6 +18,9 @@ const normalizePath = (path: string) => {
 
 const pathname = normalizePath(Astro.url.pathname);
 
+// Temporarily hidden while the /pravila copy is being reworked.
+const showNav = false;
+
 const navItems = [
   { href: "/", label: "Търсене" },
   { href: "/pravila", label: "Правила за прием" },
@@ -41,33 +44,37 @@ const navItems = [
       <a class="brand" href="/" aria-label="Начало">
         <img alt="" height="32" src="/favicon.svg" width="32" />
       </a>
-      <button
-        aria-controls="site-nav"
-        aria-expanded="false"
-        aria-label="Отвори меню"
-        class="nav-toggle"
-        data-nav-toggle
-        type="button"
-      >
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-      </button>
-      <nav aria-label="Основна навигация" data-site-nav id="site-nav">
-        {
-          navItems.map((item) => (
-            <a aria-current={item.active ? "page" : undefined} href={item.href}>
-              {item.label}
-            </a>
-          ))
-        }
-        <SiteFooter class="site-footer--mobile" />
-      </nav>
+      {
+        showNav && (
+          <Fragment>
+            <button
+              aria-controls="site-nav"
+              aria-expanded="false"
+              aria-label="Отвори меню"
+              class="nav-toggle"
+              data-nav-toggle
+              type="button"
+            >
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+            </button>
+            <nav aria-label="Основна навигация" data-site-nav id="site-nav">
+              {navItems.map((item) => (
+                <a aria-current={item.active ? "page" : undefined} href={item.href}>
+                  {item.label}
+                </a>
+              ))}
+              <SiteFooter class="site-footer--mobile" />
+            </nav>
+          </Fragment>
+        )
+      }
     </header>
     <main>
       <slot />
     </main>
-    <SiteFooter class="site-footer--desktop" />
+    <SiteFooter class={showNav ? "site-footer--desktop" : undefined} />
     <script>
       const header = document.querySelector(".site-header");
       const nav = document.querySelector("[data-site-nav]");
