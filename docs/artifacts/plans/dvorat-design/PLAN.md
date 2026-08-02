@@ -166,7 +166,7 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 
 - [x] TASK-001: Self-host Sofia Sans and Cormorant Garamond, retire Inter
 - [x] TASK-002: Replace the design tokens in BaseLayout with the Дворът system (depends on TASK-001)
-- [ ] TASK-009: Add a deterministic API fixture harness for runtime verification (depends on TASK-002)
+- [x] TASK-009: Add a deterministic API fixture harness for runtime verification (depends on TASK-002)
 - [ ] TASK-003: Restyle the site chrome: header, brand, favicon, footer, hidden nav (depends on TASK-002)
 - [ ] TASK-004: Restyle the home hero, search field and suggestion panel (depends on TASK-002)
 - [ ] TASK-005: Restyle results: filters, group headings, cards and empty states (depends on TASK-004,TASK-009)

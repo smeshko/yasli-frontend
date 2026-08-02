@@ -13,7 +13,8 @@
     "check": "astro check",
     "lint": "eslint .",
     "test": "vitest run",
-    "api:types": "node ./scripts/generate-api-types.mjs"
+    "api:types": "node ./scripts/generate-api-types.mjs",
+    "fixtures": "node scripts/fixture-server.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.0",
