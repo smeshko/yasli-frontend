@@ -1,6 +1,6 @@
 # TASK-005: Restyle results: filters, group headings, cards and empty states
 
-Depends on: TASK-004
+Depends on: TASK-004, TASK-009
 Suggested commit: `Restyle result groups and cards`
 
 ## Goal
@@ -35,9 +35,10 @@ a count chip and a coloured rule, riso cards, and the three empty states.
 - [ ] Cards animate in staggered, and not at all under reduced motion
 - [ ] `npm run test` passes with zero assertion edits
 
-Evidence: screenshots of a full three-group result, a result with an empty
-nursery group, a district-fallback result, the stale banner, and the error
-state; plus `npm run test` output.
+Evidence: screenshots of scenarios S1, S2, S3, S5 and S6 (see
+`../SCENARIOS.md`) taken against the TASK-009 fixture server, plus
+`npm run test` output. The fixture server must be running — result states are
+not otherwise reproducible.
 
 ## Steps
 

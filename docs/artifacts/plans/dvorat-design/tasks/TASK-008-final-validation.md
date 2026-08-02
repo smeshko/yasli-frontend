@@ -15,7 +15,8 @@ criterion — not with a catch-all smoke test.
 
 ## Gates
 
-- [ ] All task checkboxes in `PLAN.md` are ticked
+- [ ] Every **prior** task is ticked in `PLAN.md` (TASK-001 through
+      TASK-007 and TASK-009). This task is the last to be ticked
 - [ ] `npm run lint` passes
 - [ ] `npm run check` passes
 - [ ] `npm run test` passes, and `git diff main -- 'src/**/*.test.*'` is empty
@@ -33,6 +34,17 @@ criterion — not with a catch-all smoke test.
 Run `npm run fixtures` (TASK-009) alongside `npm run dev`, then capture each
 row. Scenario ids are defined in `SCENARIOS.md`.
 
+Scenario selection is read at startup, so S6-S9 each need their own server
+restart:
+
+```bash
+FIXTURE_SCENARIO=S1 npm run fixtures   # S1-S5
+FIXTURE_SCENARIO=S6 npm run fixtures   # stale banner
+FIXTURE_SCENARIO=S7 npm run fixtures   # match error
+FIXTURE_SCENARIO=S8 npm run fixtures   # address_not_found
+FIXTURE_SCENARIO=S9 npm run fixtures   # reference-data failure
+```
+
 | PLAN criterion | Scenario / check | Evidence |
 |---|---|---|
 | No third-party font requests | any page, DevTools network filtered to `fonts.` | network panel screenshot showing zero `googleapis`/`gstatic` rows |
@@ -41,7 +53,7 @@ row. Scenario ids are defined in `SCENARIOS.md`.
 | No retired colours/fonts | `grep -rn "2563eb\|1d4ed8\|3b82f6\|60a5fa\|Inter" src/ public/` | empty output |
 | Favicon on new palette | browser tab + header brand | screenshot |
 | Palette meets AA | `node scripts/check-contrast.mjs` | full pass table |
-| Autocomplete: mouse | S1 | screenshot of open panel with a hovered row |
+| Autocomplete: mouse | S1 | three screenshots: panel open, row under the cursor, and the results rendered **after clicking** it — a hover shot alone does not exercise selection |
 | Autocomplete: ArrowDown/ArrowUp | S1 | two screenshots showing the active row moving |
 | Autocomplete: Enter selects | S1 | results screenshot after Enter |
 | Autocomplete: Escape closes | S1 | screenshot of closed panel, query retained |
@@ -52,14 +64,17 @@ row. Scenario ids are defined in `SCENARIOS.md`.
 | Kindergarten empty state | S4 | screenshot |
 | Missing-district notice | S5 | screenshot |
 | Stale banner | S6 | screenshot |
-| Error + retry state | S7 | screenshot |
-| Stale-address state | S8 | screenshot |
+| Match error state | S7 | screenshot of the error message; note that this state has no retry control by design |
+| Stale-address state + retry | S8 | screenshot showing the `Презареди адресите` button, plus a second shot after clicking it |
+| Reference-data failure + retry | S9 | screenshot of the `Опитайте пак` panel, plus a second shot after clicking it with the server switched back to S1 |
 | Freshness line | S1 | screenshot of the dated line |
 | Filters switch groups | S1 | one screenshot per filter (4) |
 | sessionStorage persistence | S1, then reload | screenshot after reload showing results restored |
 | Reduced motion honoured | S1 with `--force-prefers-reduced-motion` | screenshot with no entry animation |
 | Pages consistent at 1440 and 390 | `/`, `/pravila`, 404 | 6 screenshots |
+| Nav unchanged in behaviour | `git diff main -- src/layouts/BaseLayout.astro` reviewed for the nav block | the diff touches only styles — no change to `navItems`, the toggle handler, `aria-expanded`/`aria-label` updates, or the Escape listener |
 | `showNav` still false | `grep -n "const showNav" src/layouts/BaseLayout.astro` | shows `= false` |
+| Nav renders correctly when enabled | flip `showNav` to `true` locally, screenshot desktop + 390px, then revert | two screenshots + `git diff` confirming the flag is back to `false` |
 | In-repo docs describe Дворът | `docs/design/` | rendered docs + reference html |
 
 ## Steps
