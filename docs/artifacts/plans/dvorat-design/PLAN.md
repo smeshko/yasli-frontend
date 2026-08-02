@@ -1,6 +1,7 @@
 # Plan: Migrate frontend to the Дворът visual design
 
-Status: draft
+Status: in-progress
+Branch: feat/dvorat-design
 Risk: medium
 Epic: none
 Phase: none
@@ -163,7 +164,7 @@ See [RESEARCH.md](./RESEARCH.md). The three findings that shaped this plan:
 Task state lives here. Tasks are appended by `scripts/add_task.py` and
 `scripts/add_final_task.py`. Update the checkboxes as work progresses.
 
-- [ ] TASK-001: Self-host Sofia Sans and Cormorant Garamond, retire Inter
+- [x] TASK-001: Self-host Sofia Sans and Cormorant Garamond, retire Inter
 - [ ] TASK-002: Replace the design tokens in BaseLayout with the Дворът system (depends on TASK-001)
 - [ ] TASK-009: Add a deterministic API fixture harness for runtime verification (depends on TASK-002)
 - [ ] TASK-003: Restyle the site chrome: header, brand, favicon, footer, hidden nav (depends on TASK-002)
