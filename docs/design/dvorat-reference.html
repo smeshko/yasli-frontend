@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Дворът — approved design reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Sofia+Sans:wght@300;400;500;600;700;800&family=Rubik:wght@300;400;500;600;700;800;900&family=Comfortaa:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #f4ecdf; }
+.stage { min-height: 100dvh; display: flex; flex-direction: column; }
+.stage > div[class$="-wrap"] { flex: 1; display: flex; flex-direction: column; }
+.stage footer { margin-top: auto; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ============================================================
+   OPTION 1 — «ДВОРЪТ»
+   Risograph neighbourhood guide. Cream stock, grain, hard offset
+   shadows, Cormorant italic display over a Cyrillic grotesque.
+   ============================================================ */
+#opt-b {
+  --cream: #f4ecdf;
+  --cream-2: #fbf6ee;
+  --ink: #201c17;
+  --ink-2: #5d554a;
+  /* One value per section, used for both graphics and text.
+     All three pass WCAG AA (>=4.5:1) as small text on cream and on the
+     card surface, and carry white text at >=5.2:1 on chips and buttons. */
+  --tomato: #c7361f;  /* ясли          — 4.50:1 on cream */
+  --cobalt: #2b52c9;  /* детски градини — 5.68:1 on cream */
+  --moss: #4a7550;    /* подготвителни  — 4.53:1 on cream */
+
+  background: var(--cream);
+  color: var(--ink);
+  font-family: "Sofia Sans", sans-serif;
+  position: relative; overflow-x: hidden;
+}
+#opt-b::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3; opacity: .5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+}
+/* The circles carry the same three hues as the result sections, so the
+   background reads as a key to the grouping rather than decoration. */
+#opt-b .b-blob { position: absolute; border-radius: 50%; filter: blur(1px); mix-blend-mode: multiply; pointer-events: none; z-index: 0; }
+#opt-b .b-blob--1 { width: 380px; height: 380px; background: color-mix(in srgb, var(--tomato) 42%, transparent); top: -120px; right: -90px; }
+#opt-b .b-blob--2 { width: 300px; height: 300px; background: color-mix(in srgb, var(--cobalt) 38%, transparent); top: 180px; left: -140px; }
+#opt-b .b-blob--3 { width: 190px; height: 190px; background: color-mix(in srgb, var(--moss) 46%, transparent); top: 420px; right: 12%; }
+
+#opt-b .b-wrap { position: relative; z-index: 2; width: min(100% - 40px, 1020px); margin: 0 auto; }
+
+#opt-b .b-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 0 0; }
+#opt-b .b-mark { display: inline-flex; align-items: center; gap: 9px; font-weight: 800; letter-spacing: .04em; font-size: .95rem; }
+#opt-b .b-mark span { width: 26px; height: 26px; border-radius: 50%; background: var(--tomato); box-shadow: 2px 2px 0 var(--ink); }
+#opt-b .b-nav { display: flex; gap: 20px; font-size: .82rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+#opt-b .b-nav a { color: var(--ink-2); text-decoration: none; padding-bottom: 2px; }
+#opt-b .b-nav a[aria-current] { color: var(--ink); box-shadow: inset 0 -6px 0 rgba(224,80,58,.4); }
+
+#opt-b .b-hero { padding: 74px 0 0; text-align: center; }
+#opt-b[data-state="results"] .b-hero { padding-top: 40px; }
+#opt-b .b-kicker { font-size: .72rem; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; color: var(--tomato); margin: 0 0 18px; }
+#opt-b h1 {
+  margin: 0; font-family: "Cormorant Garamond", serif; font-weight: 500;
+  font-size: clamp(2.9rem, 8vw, 5.6rem); line-height: 1.02; letter-spacing: -.01em;
+}
+#opt-b h1 em { font-style: italic; color: var(--tomato); }
+#opt-b h1 u { text-decoration: none; box-shadow: inset 0 -.1em 0 rgba(43,82,201,.35); }
+#opt-b .b-lede { max-width: 52ch; margin: 20px auto 0; color: var(--ink-2); font-size: 1.02rem; line-height: 1.62; }
+#opt-b[data-state="results"] h1 { font-size: clamp(1.9rem, 4vw, 2.7rem); }
+#opt-b[data-state="results"] .b-lede { display: none; }
+
+#opt-b .b-search { position: relative; max-width: 640px; margin: 38px auto 0; }
+#opt-b .b-field {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  background: var(--cream-2); border: 2px solid var(--ink); border-radius: 999px;
+  padding: 6px 8px 6px 22px; box-shadow: 5px 5px 0 var(--ink);
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+#opt-b .b-field:focus-within { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
+#opt-b .b-field input {
+  width: 100%; border: 0; outline: 0; background: transparent; padding: 15px 0;
+  font-family: "Sofia Sans", sans-serif; font-size: 1.02rem; font-weight: 500; color: var(--ink);
+}
+#opt-b .b-field input::placeholder { color: #a2988a; font-weight: 400; }
+#opt-b .b-go {
+  border: 2px solid var(--ink); background: var(--tomato); color: #fff;
+  width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 18px;
+  display: grid; place-items: center; transition: background-color .16s ease, transform .16s ease;
+}
+#opt-b .b-go:hover { background: var(--cobalt); transform: rotate(8deg); }
+#opt-b .b-pin { font-size: 15px; color: var(--tomato); }
+
+#opt-b .b-suggest {
+  position: absolute; z-index: 20; top: calc(100% + 12px); left: 0; right: 0;
+  list-style: none; margin: 0; padding: 8px;
+  background: var(--cream-2); border: 2px solid var(--ink); border-radius: 18px;
+  box-shadow: 6px 6px 0 rgba(32,28,23,.22); text-align: left;
+  max-height: 46vh; overflow-y: auto;
+}
+#opt-b .b-suggest li {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 12px; cursor: pointer;
+}
+#opt-b .b-suggest li b { font-weight: 700; font-size: 1rem; display: block; }
+#opt-b .b-suggest li small { color: var(--ink-2); font-size: .8rem; }
+#opt-b .b-suggest li i { font-style: normal; color: var(--tomato); font-size: 1rem; }
+#opt-b .b-suggest li[data-active] { background: rgba(224,80,58,.13); box-shadow: inset 0 0 0 1.5px var(--tomato); }
+#opt-b .b-empty-suggest { padding: 14px; color: var(--ink-2); font-size: .92rem; }
+
+#opt-b .b-results { padding: 40px 0 90px; }
+#opt-b .b-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; font-size: .88rem; color: var(--ink-2); }
+#opt-b .b-meta b { color: var(--ink); font-weight: 700; }
+#opt-b .b-filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 30px; }
+#opt-b .b-filters button {
+  appearance: none; border: 2px solid var(--ink); background: var(--cream-2); color: var(--ink);
+  font-family: inherit; font-size: .84rem; font-weight: 700; letter-spacing: .04em;
+  border-radius: 999px; padding: 9px 16px; cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
+  transition: transform .14s ease, box-shadow .14s ease, background-color .14s ease, color .14s ease;
+}
+#opt-b .b-filters button:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--ink); }
+#opt-b .b-filters button[aria-pressed="true"] { background: var(--ink); color: var(--cream); box-shadow: 3px 3px 0 var(--tomato); }
+
+#opt-b .b-group { margin-bottom: 42px; }
+#opt-b .b-group h2 {
+  display: flex; align-items: baseline; gap: 12px; margin: 0 0 6px;
+  font-family: "Cormorant Garamond", serif; font-weight: 600; font-size: 2rem;
+}
+#opt-b .b-group h2 span {
+  font-family: "Sofia Sans", sans-serif; font-size: .68rem; font-weight: 800;
+  letter-spacing: .2em; text-transform: uppercase; color: #fff;
+  background: var(--tone); border-radius: 999px; padding: 4px 10px; transform: translateY(-4px);
+}
+#opt-b .b-group[data-kind="nursery"] { --tone: var(--tomato); }
+#opt-b .b-group[data-kind="kindergarten"] { --tone: var(--cobalt); }
+#opt-b .b-group[data-kind="preschool"] { --tone: var(--moss); }
+#opt-b .b-rule { height: 3px; background: var(--tone); margin-bottom: 18px; border-radius: 2px; }
+#opt-b .b-note {
+  background: color-mix(in srgb, var(--tone) 11%, #fbf6ee); border-left: 4px solid var(--tone);
+  padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 0 0 16px;
+  font-size: .94rem; line-height: 1.55; color: var(--ink-2);
+}
+#opt-b .b-note--warn { color: #8c2f1e; }
+
+#opt-b .b-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 16px; }
+#opt-b .b-card {
+  position: relative; background: var(--cream-2); border: 2px solid var(--ink);
+  border-radius: 16px; padding: 20px 18px 16px; box-shadow: 5px 5px 0 var(--ink);
+  transition: transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .18s ease; overflow: hidden;
+}
+#opt-b .b-card:hover { transform: translate(-2px, -3px) rotate(-.5deg); box-shadow: 8px 9px 0 var(--tone); }
+#opt-b .b-card__n {
+  position: absolute; bottom: -22px; right: 8px; font-family: "Cormorant Garamond", serif;
+  font-size: 5.4rem; font-weight: 700; line-height: 1; pointer-events: none;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(32,28,23,.13);
+}
+#opt-b .b-card__kind {
+  font-size: .68rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--tone); margin: 0 0 8px; padding-right: 8px;
+}
+#opt-b .b-card h3 {
+  margin: 0 0 5px; font-family: "Sofia Sans", sans-serif; font-weight: 700;
+  font-size: 1.06rem; line-height: 1.32; letter-spacing: -.012em;
+}
+#opt-b .b-card p { margin: 0 0 14px; font-size: .84rem; color: var(--ink-2); }
+#opt-b .b-card a {
+  display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink); text-decoration: none;
+  border-bottom: 2px solid var(--tone); padding-bottom: 2px;
+}
+#opt-b .b-card a:hover { color: var(--tone); }
+#opt-b .b-void {
+  border: 2px dashed rgba(32,28,23,.32); border-radius: 16px; padding: 20px;
+  color: var(--ink-2); font-size: .95rem; line-height: 1.6; background: rgba(255,255,255,.34);
+}
+#opt-b .b-foot {
+  border-top: 2px solid var(--ink); padding: 16px 0 34px; display: flex; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; font-size: .8rem; color: var(--ink-2);
+}
+#opt-b .b-foot a { color: var(--tomato); font-weight: 700; text-decoration: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  #opt-b .b-card { animation: bPop .5s cubic-bezier(.2,.8,.3,1) both; animation-delay: var(--d, 0ms); }
+  @keyframes bPop { from { opacity: 0; transform: translateY(14px) rotate(1.2deg); } to { opacity: 1; transform: none; } }
+}
+@media (max-width: 620px) {
+  #opt-b .b-nav { display: none; }
+  #opt-b .b-hero { text-align: left; }
+  #opt-b .b-lede { margin-left: 0; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ==================== OPTION 1 — ДВОРЪТ ==================== -->
+<main class="stage" id="opt-b" data-state="idle">
+  <div class="b-blob b-blob--1"></div>
+  <div class="b-blob b-blob--2"></div>
+  <div class="b-blob b-blob--3"></div>
+  <div class="b-wrap">
+    <header class="b-top">
+      <div class="b-mark"><span></span>Ясли Варна</div>
+      <nav class="b-nav">
+        <a href="#" aria-current="page">Търсене</a>
+        <a href="#">Правила за прием</a>
+      </nav>
+    </header>
+
+    <section class="b-hero">
+      <p class="b-kicker">Прием 2026 / 2027</p>
+      <h1>Коя е <em>моята</em><br><u>градина</u>?</h1>
+      <p class="b-lede">
+        Въведете адреса си и ще видите списък на всички детски градини и ясли,
+        за които можете да кандидатствате.
+      </p>
+
+      <div class="b-search">
+        <label class="sr-only" for="b-input">Адрес във Варна</label>
+        <div class="b-field">
+          <span class="b-pin">◎</span>
+          <input id="b-input" type="search" autocomplete="off" placeholder="ул. Преслав 12" data-input />
+          <button class="b-go" type="button" aria-label="Търси" data-go>→</button>
+        </div>
+        <ul class="b-suggest" role="listbox" hidden data-suggestions></ul>
+      </div>
+    </section>
+
+    <section class="b-results" data-results aria-live="polite"></section>
+    <footer class="b-foot">
+      <span>Данни: dg.uslugi.io и newkg.uslugi.io. Проверявайте официалния източник преди кандидатстване.</span>
+      <a href="#">Built by ivotsonev.com</a>
+    </footer>
+  </div>
+</main>
+
+<script>
+/* ============================================================
+   Демо данни. Имената са илюстративни — структурата следва
+   реалния snapshot v2 (kind, source_url, match_basis, offering).
+   ============================================================ */
+const KIND = {
+  nursery:      { label: "Ясла",                plural: "Ясли" },
+  kindergarten: { label: "Детска градина",      plural: "Детски градини" },
+  preschool:    { label: "Подготвителна група", plural: "Подготвителни групи" },
+};
+const ORDER = ["nursery", "kindergarten", "preschool"];
+
+const SETS = {
+  s1: {
+    nursery: [
+      { name: "ДЯ №4 „Пчелица“", basis: "district", url: "#" },
+      { name: "ДЯ №9 „Детелина“", basis: "district", url: "#" },
+      { name: "ДЯ №11 „Иглика“", basis: "district", url: "#" },
+    ],
+    kindergarten: [
+      { name: "ДГ №14 „Дружба“", basis: "address", url: "#" },
+      { name: "ДГ №31 „Крилатко“", basis: "address", url: "#" },
+      { name: "ДГ №5 „Слънчо“", basis: "address", offering: "infant_group", url: "#" },
+    ],
+    preschool: [
+      { name: "ОУ „Захари Стоянов“ — ПГ", basis: "address", url: "#" },
+    ],
+  },
+  s2: {
+    nursery: [
+      { name: "ДЯ №1 „Щастливо детство“", basis: "district", url: "#" },
+      { name: "ДЯ №7 „Роза“", basis: "district", url: "#" },
+    ],
+    kindergarten: [
+      { name: "ДГ №2 „Бриз“", basis: "address", url: "#" },
+      { name: "ДГ №27 „Успех“", basis: "address", offering: "infant_group", url: "#" },
+    ],
+    preschool: [],
+  },
+  s3: {
+    nursery: [],
+    kindergarten: [
+      { name: "ДГ №39 „Пламъче“", basis: "district", url: "#" },
+      { name: "ДГ №44 „Валентина Терешкова“", basis: "district", url: "#" },
+      { name: "ДГ №18 „Радост“", basis: "district", url: "#" },
+    ],
+    preschool: [
+      { name: "СУ „Найден Геров“ — ПГ", basis: "address", url: "#" },
+      { name: "ОУ „Стефан Караджа“ — ПГ", basis: "address", url: "#" },
+    ],
+  },
+};
+
+const ADDRESSES = [
+  { id: "1042", label: "ул. Преслав 12",               district: "Одесос",              set: "s1" },
+  { id: "1043", label: "ул. Преслав 27",               district: "Одесос",              set: "s1" },
+  { id: "2210", label: "бул. Сливница 84",             district: "Одесос",              set: "s2" },
+  { id: "2211", label: "бул. Сливница 137",            district: "Приморски",           set: "s2" },
+  { id: "3301", label: "ж.к. Чайка бл. 67",            district: "Приморски",           set: "s1" },
+  { id: "3302", label: "ж.к. Чайка бл. 12",            district: "Приморски",           set: "s3" },
+  { id: "4405", label: "ул. Дрин 5",                   district: "Владислав Варненчик", set: "s3" },
+  { id: "4406", label: "бул. Владислав Варненчик 85",  district: "Владислав Варненчик", set: "s3" },
+  { id: "5501", label: "ул. Македония 118",            district: "Одесос",              set: "s2" },
+  { id: "5502", label: "ул. Патриарх Евтимий 30",      district: "Одесос",              set: "s1" },
+  { id: "6601", label: "ж.к. Младост бл. 141",         district: "Младост",             set: "s2" },
+  { id: "6602", label: "ул. Ана Феликсова 8",          district: "Младост",             set: "s3" },
+  { id: "7701", label: "ул. Народни будители 22",      district: "Аспарухово",          set: "s3" },
+  { id: "7702", label: "бул. Първи май 45",            district: "Аспарухово",          set: "s2" },
+  { id: "8801", label: "бул. Осми приморски полк 128", district: "Приморски",           set: "s1" },
+  { id: "8802", label: "ул. Генерал Колев 12",         district: "Одесос",              set: "s1" },
+];
+
+const NOTE_NURSERY =
+  "Яслите не са по адрес — имате право да кандидатствате във всяка, но получавате предимство в тези, които са във вашия район.";
+const NOTE_FALLBACK =
+  "Няма адресно съвпадение за тази група. Показваме резултати по район.";
+const VOID_TEXT = {
+  nursery: "Няма ясла за този адрес в източника. Покритието за ясли е непълно и това може да е реална липса на данни.",
+  kindergarten: "Няма детска градина за този адрес.",
+  preschool: "Няма подготвителна група за този адрес.",
+};
+
+/* ---------- search ---------- */
+const LATIN = { a:"а",b:"б",c:"к",d:"д",e:"е",f:"ф",g:"г",h:"х",i:"и",j:"й",k:"к",l:"л",m:"м",
+  n:"н",o:"о",p:"п",q:"к",r:"р",s:"с",t:"т",u:"у",v:"в",w:"в",x:"х",y:"й",z:"з" };
+const DIGRAPHS = [[/sht/gi,"щ"],[/sh/gi,"ш"],[/ch/gi,"ч"],[/ts/gi,"ц"],[/zh/gi,"ж"],[/yu/gi,"ю"],[/ya/gi,"я"]];
+
+function translit(v) {
+  let r = v;
+  for (const [re, to] of DIGRAPHS) r = r.replace(re, to);
+  return r.replace(/[a-z]/gi, (ch) => LATIN[ch.toLowerCase()] || ch);
+}
+function norm(v) {
+  return translit(v).normalize("NFC").toLocaleUpperCase("bg-BG")
+    .replace(/[^\p{Script=Cyrillic}\d]+/gu, " ").replace(/\s+/g, " ").trim();
+}
+function searchAddresses(q, limit = 6) {
+  const nq = norm(q);
+  if (nq.length < 2) return [];
+  const terms = nq.split(" ").filter(Boolean);
+  return ADDRESSES
+    .map((a) => {
+      const hay = norm(a.label + " " + a.district + " " + a.id);
+      const words = hay.split(" ");
+      let score = 0;
+      if (hay.startsWith(nq)) score = 100 + nq.length;
+      else if (terms.every((t) => words.some((w) => w.startsWith(t)))) score = 75 + nq.length;
+      else if (terms.every((t) => hay.includes(t))) score = 50 + nq.length;
+      return { a, score };
+    })
+    .filter((x) => x.score > 0)
+    .sort((x, y) => y.score - x.score || x.a.label.localeCompare(y.a.label, "bg"))
+    .slice(0, limit)
+    .map((x) => x.a);
+}
+const pad = (n) => String(n).padStart(2, "0");
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const isFallback = (list) => list.length > 0 && list.every((i) => i.basis === "district");
+const kindsFor = (filter) => filter === "all" ? ORDER : [filter];
+const totalOf = (set) => ORDER.reduce((n, k) => n + set[k].length, 0);
+
+/* ---------- controller ---------- */
+function mount(rootId, render) {
+  const root = document.getElementById(rootId);
+  const input = root.querySelector("[data-input]");
+  const listEl = root.querySelector("[data-suggestions]");
+  const outEl = root.querySelector("[data-results]");
+  const state = { q: "", active: 0, open: false, addr: null, filter: "all" };
+
+  function drawSuggestions() {
+    const items = state.open ? searchAddresses(state.q) : [];
+    if (!state.open || !state.q.trim()) { listEl.hidden = true; listEl.innerHTML = ""; return; }
+    if (items.length === 0) { listEl.hidden = false; listEl.innerHTML = render.emptySuggest(); return; }
+    state.active = Math.min(state.active, items.length - 1);
+    listEl.hidden = false;
+    listEl.innerHTML = items.map((a, i) => render.suggestion(a, i, i === state.active)).join("");
+    listEl.querySelectorAll("li").forEach((li, i) => {
+      li.addEventListener("mousedown", (e) => { e.preventDefault(); select(items[i]); });
+      li.addEventListener("mouseenter", () => { state.active = i; drawSuggestions(); });
+    });
+  }
+
+  function select(addr) {
+    state.addr = addr;
+    state.q = addr.label;
+    state.filter = "all";
+    state.open = false;
+    input.value = addr.label;
+    drawSuggestions();
+    draw();
+  }
+
+  function reset() {
+    state.addr = null; state.q = ""; state.open = false; state.filter = "all";
+    input.value = "";
+    drawSuggestions();
+    draw();
+  }
+
+  function draw() {
+    root.dataset.state = state.addr ? "results" : "idle";
+    outEl.innerHTML = state.addr ? render.results(state.addr, SETS[state.addr.set], state.filter) : "";
+    outEl.querySelectorAll("[data-filter]").forEach((btn) => {
+      btn.addEventListener("click", () => { state.filter = btn.dataset.filter; draw(); });
+    });
+  }
+
+  input.addEventListener("input", () => { state.q = input.value; state.open = true; state.active = 0; drawSuggestions(); });
+  input.addEventListener("focus", () => { state.open = true; drawSuggestions(); });
+  input.addEventListener("blur", () => { setTimeout(() => { state.open = false; drawSuggestions(); }, 120); });
+  input.addEventListener("keydown", (e) => {
+    const items = searchAddresses(state.q);
+    if (e.key === "ArrowDown") { e.preventDefault(); state.active = Math.min(state.active + 1, items.length - 1); drawSuggestions(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); state.active = Math.max(state.active - 1, 0); drawSuggestions(); }
+    else if (e.key === "Escape") { state.open = false; drawSuggestions(); }
+    else if (e.key === "Enter") { e.preventDefault(); if (items[state.active]) select(items[state.active]); }
+  });
+  const go = root.querySelector("[data-go]");
+  if (go) go.addEventListener("click", () => {
+    const items = searchAddresses(state.q);
+    if (items[0]) select(items[0]); else input.focus();
+  });
+
+  return { select, reset };
+}
+
+/* ============ OPTION 1 renderer — ДВОРЪТ ============ */
+const appB = mount("opt-b", {
+  emptySuggest: () => '<li class="b-empty-suggest">Няма точен адрес за това търсене.</li>',
+  suggestion: (a, i, active) => `
+    <li role="option" aria-selected="${active}" ${active ? "data-active" : ""}>
+      <span><b>${esc(a.label)}</b><small>гр. Варна · район ${esc(a.district)}</small></span>
+      <i>→</i>
+    </li>`,
+  results: (addr, set, filter) => {
+    const filters = [["all", "Всички"], ...ORDER.map((k) => [k, KIND[k].label])]
+      .map(([v, l]) => `<button type="button" data-filter="${v}" aria-pressed="${v === filter}">${l}</button>`).join("");
+
+    const groups = kindsFor(filter).map((kind) => {
+      const list = set[kind];
+      const cards = list.map((inst, i) => `
+        <article class="b-card" style="--d:${i * 70}ms">
+          <span class="b-card__n">${pad(i + 1)}</span>
+          <p class="b-card__kind">${KIND[kind].label}</p>
+          <h3>${esc(inst.name)}${inst.offering === "infant_group" ? " (яслена група)" : ""}</h3>
+          <p>${inst.basis === "district" ? "по вашия район" : "по вашия адрес"}</p>
+          <a href="${inst.url}">Източник <span aria-hidden="true">↗</span></a>
+        </article>`).join("");
+
+      return `
+        <section class="b-group" data-kind="${kind}">
+          <h2>${KIND[kind].plural}<span>${list.length}</span></h2>
+          <div class="b-rule"></div>
+          ${kind === "nursery" ? `<p class="b-note">${NOTE_NURSERY}</p>` : ""}
+          ${isFallback(list) && kind !== "nursery" ? `<p class="b-note b-note--warn">${NOTE_FALLBACK}</p>` : ""}
+          ${list.length ? `<div class="b-cards">${cards}</div>` : `<p class="b-void">${VOID_TEXT[kind]}</p>`}
+        </section>`;
+    }).join("");
+
+    return `
+      <div class="b-meta">
+        <span>Избран адрес: <b>${esc(addr.label)}</b></span>
+        <span>район <b>${esc(addr.district)}</b></span>
+        <span><b>${totalOf(set)}</b> възможности</span>
+        <span>обновено 02.08.2026</span>
+      </div>
+      <div class="b-filters">${filters}</div>
+      ${groups}`;
+  },
+});
+
+/* Render the approved default state on load. */
+appB.select(ADDRESSES[0]);
+document.documentElement.style.background = "#f4ecdf";
+</script>
+</body>
+</html>

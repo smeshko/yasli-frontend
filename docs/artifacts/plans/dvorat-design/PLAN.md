@@ -171,5 +171,5 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 - [x] TASK-004: Restyle the home hero, search field and suggestion panel (depends on TASK-002)
 - [x] TASK-005: Restyle results: filters, group headings, cards and empty states (depends on TASK-004,TASK-009)
 - [x] TASK-006: Restyle the pravila and 404 pages (depends on TASK-002)
-- [ ] TASK-007: Create in-repo docs/design describing Дворът (depends on TASK-005,TASK-006)
+- [x] TASK-007: Create in-repo docs/design describing Дворът (depends on TASK-005,TASK-006)
 - [ ] TASK-008: Final Validation
