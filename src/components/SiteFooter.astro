@@ -10,6 +10,11 @@ const { class: className } = Astro.props;
   <a href="https://ivotsonev.com" rel="noreferrer" target="_blank">
     Built by ivotsonev.com
   </a>
+  {/* Filled in by the SearchExperience island once /api/institutions answers —
+      the freshness date is site chrome, not part of the search, so it lives
+      down here rather than under the field. Empty and hidden on pages that
+      never mount the island. */}
+  <span class="site-footer__freshness" data-footer-freshness hidden></span>
 </footer>
 
 <style is:global>
@@ -30,6 +35,24 @@ const { class: className } = Astro.props;
     font-family: inherit;
     font-size: 0.82rem;
     padding: 10px 16px;
+  }
+
+  /* Quieter than the credit next to it — it is a footnote about the data, not
+     something to click. The separator hangs off the span so it disappears with
+     it when there is no date. */
+  .site-footer__freshness {
+    color: var(--color-text-faint);
+    font-size: 0.78rem;
+  }
+
+  .site-footer__freshness[hidden] {
+    display: none;
+  }
+
+  .site-footer__freshness::before {
+    content: "·";
+    margin-right: 14px;
+    color: var(--color-border-subtle);
   }
 
   .site-footer a {
