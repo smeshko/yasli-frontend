@@ -518,18 +518,21 @@ const navItems = [
 
   .eyebrow {
     margin: 0;
-    color: var(--color-text-eyebrow);
-    font-size: 0.9rem;
-    font-weight: 700;
+    color: var(--color-section-nursery);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
   }
 
   h1 {
     margin: 0;
     color: var(--color-text-display);
-    font-size: clamp(2rem, 6vw, 4.5rem);
-    line-height: 1;
-    letter-spacing: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 500;
+    line-height: 1.06;
+    letter-spacing: -0.01em;
   }
 
   p {
@@ -549,16 +552,30 @@ const navItems = [
 
   .button {
     display: inline-flex;
-    min-height: 44px;
+    min-height: 46px;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-accent);
-    border-radius: 8px;
-    padding: 0 16px;
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
+    padding: 0 22px;
     background: var(--color-accent);
+    box-shadow: var(--shadow-hard-sm);
     color: var(--color-text-on-accent);
     font-weight: 700;
     text-decoration: none;
+    transition:
+      transform 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  .button:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--color-ink);
+  }
+
+  .button:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
   }
 
   .status-badge {
