@@ -59,7 +59,8 @@ const navItems = [
     <div aria-hidden="true" class="page-tint page-tint--preschool"></div>
     <header class="site-header">
       <a class="brand" href="/" aria-label="Начало">
-        <img alt="" height="32" src="/favicon.svg" width="32" />
+        <img alt="" height="30" src="/favicon.svg" width="30" />
+        <span>Ясли Варна</span>
       </a>
       {
         showNav && (
@@ -293,7 +294,10 @@ const navItems = [
     pointer-events: none;
   }
 
-  /* The three circles carry the three section hues. */
+  /* The three circles carry the three section hues.
+     Alpha is capped so that even muted body copy laid over a circle still
+     clears 4.5:1 — measured: nursery 4.51, kindergarten 4.52, preschool 4.54.
+     The reference mock used ~0.42, which put muted text at 3.27:1. */
   .page-tint {
     position: fixed;
     z-index: 0;
@@ -308,7 +312,7 @@ const navItems = [
     right: -90px;
     width: 380px;
     height: 380px;
-    background: rgba(199, 54, 31, 0.42);
+    background: rgba(199, 54, 31, 0.22);
   }
 
   .page-tint--kindergarten {
@@ -316,7 +320,7 @@ const navItems = [
     left: -140px;
     width: 300px;
     height: 300px;
-    background: rgba(43, 82, 201, 0.38);
+    background: rgba(43, 82, 201, 0.21);
   }
 
   .page-tint--preschool {
@@ -324,7 +328,7 @@ const navItems = [
     right: 12%;
     width: 190px;
     height: 190px;
-    background: rgba(74, 117, 80, 0.46);
+    background: rgba(74, 117, 80, 0.24);
   }
 
   @media (max-width: 720px) {
@@ -370,20 +374,36 @@ const navItems = [
     justify-content: space-between;
     gap: 24px;
     min-height: 66px;
+    /* An ink hairline on the cream stock, not a white bar floating above it.
+       Opaque on purpose: a tint circle bleeding under the nav dropped muted
+       link text to 3.27:1. */
     border-bottom: 1px solid var(--color-border-subtle);
-    background: var(--color-bg-surface);
+    background: var(--color-bg-page);
     padding: 0 48px;
   }
 
   .brand {
     display: inline-flex;
     align-items: center;
+    gap: 10px;
     color: var(--color-text-strong);
+    font-weight: 800;
+    font-size: 0.98rem;
+    letter-spacing: -0.01em;
     text-decoration: none;
   }
 
   .brand img {
     display: block;
+    /* The mark carries its own offset; this is the printed drop next to it. */
+    filter: drop-shadow(2px 2px 0 rgba(32, 28, 23, 0.9));
+  }
+
+  .brand:focus-visible,
+  .site-footer a:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 
   .nav-toggle {
@@ -415,10 +435,12 @@ const navItems = [
   nav {
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 22px;
     color: var(--color-text-muted);
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   nav a {
@@ -429,25 +451,34 @@ const navItems = [
     transition: color 160ms ease;
   }
 
+  /* A printed highlight swipe rather than a hairline rule. */
   nav a::after {
     content: "";
     position: absolute;
     right: 0;
-    bottom: -2px;
+    bottom: 0;
     left: 0;
-    height: 2px;
-    border-radius: 1px;
-    background: var(--color-accent);
+    height: 6px;
+    background: var(--color-bg-accent-soft);
     opacity: 0;
     transition: opacity 160ms ease;
   }
 
   nav a[aria-current="page"] {
-    color: var(--color-accent);
+    color: var(--color-ink);
   }
 
   nav a[aria-current="page"]::after {
     opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    nav a,
+    nav a::after,
+    .nav-toggle span,
+    nav {
+      transition: none;
+    }
   }
 
   .site-footer.site-footer--mobile {
