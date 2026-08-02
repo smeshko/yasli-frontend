@@ -25,7 +25,17 @@ page, without changing a single behaviour, ARIA contract or keyboard path.
 - Restyle of `index.astro` (hero, search field, suggestion panel, results),
   `SearchResults.tsx` (filters, group headings, cards, notes, empty states),
   `SiteFooter.astro`, `pravila.astro`, `404.astro`.
-- `docs/design/` updated so the repo documents what is actually shipped.
+- Replacement of `public/favicon.svg`, which today carries `#2563eb` and
+  `font-family="Inter"` and doubles as the header brand image
+  (`BaseLayout.astro:45`). The retired palette ships on every page until it goes.
+- Two narrowly-scoped markup changes in `SearchExperience.tsx`, authorised here
+  because the design cannot be reached with CSS alone:
+  (a) wrapping words of the H1 so `моята` can be italic and `градина`
+  underlined, and (b) adding a `data-active` attribute alongside the existing
+  `className="active"` on the active option. Both are additive; the
+  `role="option"` / `aria-selected` / keyboard contract is untouched.
+- A new in-repo `docs/design/` holding the shipped direction and the approved
+  reference, so the design system travels with the code (see Out of Scope).
 
 ## Out of Scope
 
@@ -36,6 +46,14 @@ page, without changing a single behaviour, ARIA contract or keyboard path.
   removed, not ported.
 - New content or copy. Every Bulgarian string ships unchanged.
 - The other two concepts (Шевица, Първи ден). Not implemented, not kept.
+- Editing the advisory design docs in the **parent** `yasli/docs/design/`.
+  That directory is outside this git repo, so changes there cannot ship on this
+  branch. The superseding direction is written into a new in-repo
+  `frontend/docs/design/` instead; the parent copies stay as historical
+  research.
+- Adding a submit/go button to the search field. The reference mock draws one,
+  but the live component has never had it and selection is already handled by
+  click and Enter. Adding a control is a behaviour change, not a restyle.
 
 ## Research Summary
 
@@ -92,14 +110,26 @@ See [RESEARCH.md](./RESEARCH.md). The three findings that shaped this plan:
   final task captures every page at desktop and mobile, plus each result state.
 - **`color-mix()` support.** Used for the note tints in the mock. Mitigation:
   resolve to static hex values at author time — no runtime dependency.
+- **Every result state depends on a backend this repo does not contain.**
+  `PUBLIC_YASLI_API_BASE_URL` defaults to `http://localhost:8000`, so
+  screenshots of results, empty groups and fallbacks would otherwise depend on
+  whatever data a local Postgres happens to hold. Mitigation: TASK-009 adds a
+  deterministic fixture server with fixed scenario addresses, and TASK-008
+  maps each acceptance criterion to a named scenario.
+- **The italic display face is load-bearing.** `моята` is italic Cormorant and
+  `font-synthesis: none` (`BaseLayout.astro:153`) forbids a synthesised
+  oblique, so a roman-only subset silently ships the wrong headline.
+  Mitigation: TASK-001 subsets and verifies a separate italic face.
 
 ## Acceptance Criteria
 
 - [ ] No page requests `fonts.googleapis.com` or `fonts.gstatic.com`; both
       families load from `public/fonts/` and render with the network blocked.
 - [ ] `вгдж икпт цщ ю` renders with Bulgarian letterforms on every page.
-- [ ] No occurrence of `Inter`, `#2563eb`, `#1d4ed8` or `#3b82f6` remains under
-      `src/`.
+- [ ] No occurrence of `Inter`, `#2563eb`, `#1d4ed8`, `#3b82f6` or `#60a5fa`
+      remains under `src/` **or** `public/` — including inside
+      `public/favicon.svg`.
+- [ ] The favicon and the header brand render in the Дворът palette.
 - [ ] Every text/background pair in the shipped palette meets WCAG AA
       (4.5:1 body, 3:1 large/UI), verified by computed ratios in TASK-008.
 - [ ] `npm run test`, `npm run lint`, `npm run check` and `npm run build` all
@@ -110,7 +140,10 @@ See [RESEARCH.md](./RESEARCH.md). The three findings that shaped this plan:
       exactly as before, demonstrated at runtime.
 - [ ] Home, pravila and 404 are visually consistent at 1440px and 390px.
 - [ ] `showNav` is still `false` and the nav markup is unchanged in behaviour.
-- [ ] `docs/design/` describes Дворът, not the old blue system.
+- [ ] An in-repo `docs/design/` describes Дворът, not the old blue system, and
+      contains the approved reference rendering.
+- [ ] Italic Cormorant Garamond loads as its own face; `моята` renders as a
+      true italic, not a synthesised one.
 
 ## Tasks
 
@@ -119,9 +152,10 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 
 - [ ] TASK-001: Self-host Sofia Sans and Cormorant Garamond, retire Inter
 - [ ] TASK-002: Replace the design tokens in BaseLayout with the Дворът system (depends on TASK-001)
-- [ ] TASK-003: Restyle the site chrome: header, brand, footer, hidden nav (depends on TASK-002)
+- [ ] TASK-009: Add a deterministic API fixture harness for runtime verification (depends on TASK-002)
+- [ ] TASK-003: Restyle the site chrome: header, brand, favicon, footer, hidden nav (depends on TASK-002)
 - [ ] TASK-004: Restyle the home hero, search field and suggestion panel (depends on TASK-002)
-- [ ] TASK-005: Restyle results: filters, group headings, cards and empty states (depends on TASK-004)
+- [ ] TASK-005: Restyle results: filters, group headings, cards and empty states (depends on TASK-004,TASK-009)
 - [ ] TASK-006: Restyle the pravila and 404 pages (depends on TASK-002)
-- [ ] TASK-007: Update docs/design to describe Дворът and record the superseded rules (depends on TASK-005,TASK-006)
+- [ ] TASK-007: Create in-repo docs/design describing Дворът (depends on TASK-005,TASK-006)
 - [ ] TASK-008: Final Validation

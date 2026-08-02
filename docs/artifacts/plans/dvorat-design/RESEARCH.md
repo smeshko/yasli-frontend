@@ -5,7 +5,8 @@ against the code or by rendering, not assumed.
 
 ## 1. Bulgarian letterforms — the mock's UI face fails
 
-`docs/design/01-typography-bulgarian-cyrillic.md` makes Bulgarian `locl` forms
+The parent repo's `yasli/docs/design/01-typography-bulgarian-cyrillic.md` makes
+Bulgarian `locl` forms
 mandatory: Inter ships none, so `<html lang="bg">` (BaseLayout.astro:34)
 currently has zero visible effect. The approved Дворът mock used **Golos Text**
 for UI and card names.
@@ -73,7 +74,7 @@ server-rendered string assertions only.
 - ~40 function-named custom properties (`--color-bg-page`, `--color-accent`, …)
   and a full `@media (prefers-color-scheme: dark)` override block.
 - Accent `#2563eb` / `#1d4ed8` (light) and `#3b82f6` / `#60a5fa` (dark) — the
-  exact indigo/blue `docs/design/anti-slop-rules.md` rule C1 bans.
+  exact indigo/blue the parent's `docs/design/anti-slop-rules.md` rule C1 bans.
 - `font-family: Inter, ui-sans-serif, system-ui, …` — no `@font-face`, so Inter
   only ever renders where locally installed; most visitors already get a
   system fallback.
@@ -99,10 +100,28 @@ from line 480. Both redefine spacing rather than importing tokens.
   `showNav = false` while the приемът copy is reworked. The mobile footer used
   to live inside that nav, so `SiteFooter` now renders once at every width.
 - No fonts are self-hosted yet; `public/` contains only `favicon.svg`.
-- The approved reference mock is `../../../../design-concepts/index.html` in the
-  parent directory, concept `#opt-b`. It is outside version control, so
-  TASK-007 copies the Дворът concept into `docs/design/` where it can be
-  reviewed alongside the code.
+- The approved reference mock is `design-concepts/index.html` in the **parent**
+  `yasli/` directory (i.e. `../design-concepts/index.html` relative to this
+  repo root), concept `#opt-b`. It is outside version control, so TASK-007
+  copies the Дворът concept into a new in-repo `docs/design/`.
+- **There is no `docs/design/` in this repo.** `frontend/docs/` contains only
+  `ARCHITECTURE.md`. The design research (`DESIGN-SYSTEM.md`,
+  `anti-slop-rules.md`, `01`–`05`) lives in the parent `yasli/docs/design/`,
+  which is not a git repo — so edits there cannot ship on this branch.
+- **`public/favicon.svg` carries the retired identity**: `fill="#2563eb"` and
+  `font-family="Inter, system-ui, sans-serif"`. It is served as the favicon and
+  rendered as the header brand image at `BaseLayout.astro:45`.
+- **`font-synthesis: none` is at `BaseLayout.astro:153`** (`:145` is
+  `--shadow-field`). A roman-only Cormorant subset cannot fake the italic the
+  design needs.
+- **`SearchExperience.tsx` today**: `:254` is a single unsplit
+  `<h1 id="search-title">Коя е моята градина?</h1>`; `:299` marks the active
+  option with `className={index === activeIndex ? "active" : undefined}`;
+  the only `<button>` is the reference-data retry at `:287` — there is no go
+  button.
+- **Result states need a backend.** `src/lib/api/config.ts` defaults
+  `PUBLIC_YASLI_API_BASE_URL` to `http://localhost:8000`. Nothing in this repo
+  serves it, so runtime evidence needs the TASK-009 fixture server.
 
 ## Useful Commands
 
@@ -113,8 +132,12 @@ npm run check    # astro check
 npm run lint     # eslint
 npm run build    # static build to dist/
 
-# contrast check used throughout this plan
-python3 -c "..."  # see TASK-008 for the ratio script
+# contrast check used throughout this plan — the script lives at
+# scripts/check-contrast.mjs once TASK-008 lands
+node scripts/check-contrast.mjs
+
+# deterministic fixture backend for runtime evidence (TASK-009)
+node scripts/fixture-server.mjs   # serves the API contract on :8000
 
 # headless screenshots (no browser extension needed)
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
@@ -132,7 +155,9 @@ python3 -c "..."  # see TASK-008 for the ratio script
 
 ## References
 
-- `docs/design/01-typography-bulgarian-cyrillic.md` — the Sofia Sans case
-- `docs/design/anti-slop-rules.md` — testable rules, C1 blue ban
-- `docs/design/DESIGN-SYSTEM.md` — advisory direction brief being superseded
+All three live in the **parent** `yasli/docs/design/`, outside this git repo:
+
+- `01-typography-bulgarian-cyrillic.md` — the Sofia Sans case
+- `anti-slop-rules.md` — testable rules, C1 blue ban
+- `DESIGN-SYSTEM.md` — advisory direction brief being superseded
 - Approved reference: `design-concepts/index.html`, concept `#opt-b` (Дворът)

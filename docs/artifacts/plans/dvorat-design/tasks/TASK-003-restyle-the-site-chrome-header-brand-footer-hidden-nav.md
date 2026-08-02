@@ -1,4 +1,4 @@
-# TASK-003: Restyle the site chrome: header, brand, footer, hidden nav
+# TASK-003: Restyle the site chrome: header, brand, favicon, footer, hidden nav
 
 Depends on: TASK-002
 Suggested commit: `Restyle header, brand and footer for Дворът`
@@ -12,6 +12,9 @@ header, and the footer that now renders at every width.
 
 - `src/layouts/BaseLayout.astro` — header, brand, nav styles
 - `src/components/SiteFooter.astro` — footer styles
+- `public/favicon.svg` — rewritten: it currently hardcodes `fill="#2563eb"` and
+  `font-family="Inter, system-ui, sans-serif"`, and is rendered as the header
+  brand image at `BaseLayout.astro:45`
 
 ## Acceptance
 
@@ -23,6 +26,10 @@ header, and the footer that now renders at every width.
 - [ ] `showNav` is still `false`; nav and `.nav-toggle` markup and JS unchanged
 - [ ] Nav styles are updated in place so they are correct whenever the flag is
       flipped back on
+- [ ] `public/favicon.svg` carries no retired colour or font: it uses the
+      nursery hue `#c7361f` and either Sofia Sans or a converted outline, so
+      the mark does not depend on a font the viewer lacks
+- [ ] `grep -rn "2563eb\|1d4ed8\|3b82f6\|60a5fa\|Inter" public/` is empty
 - [ ] Focus rings are visible on the brand and footer link against cream
 - [ ] `npm run check`, `npm run lint`, `npm run build` pass
 
@@ -37,6 +44,9 @@ the nav renders correctly on the new system.
 
 ### GREEN
 - [ ] Restyle `.site-header`, `.brand`, `nav`, `.nav-toggle`
+- [ ] Rewrite `public/favicon.svg` on the new palette. Convert the `Я` to a
+      path or accept a generic fallback — an SVG favicon cannot rely on a
+      self-hosted webfont
 - [ ] Restyle `.site-footer` and its link
 - [ ] Verify the footer still renders once at every width (the `--desktop`
       class is only applied when `showNav` is true — see commit 00394e2)

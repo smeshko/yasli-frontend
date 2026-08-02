@@ -13,15 +13,28 @@ suggestion panel.
 
 - `src/pages/index.astro` — hero, `.search-field`, `.suggestion-panel`,
   `.validation-message`, `.freshness-line` styles
-- `src/components/SearchExperience.tsx` — only if a wrapper element is needed
-  for the kicker; no behavioural change
+- `src/components/SearchExperience.tsx` — two authorised, additive markup
+  changes, both required because the design is unreachable with CSS alone:
+  1. `:254` is today a single text node,
+     `<h1 id="search-title">Коя е моята градина?</h1>`. Split it into spans so
+     `моята` can be italic and `градина` underlined. `id="search-title"` and
+     the `aria-labelledby` link stay exactly as they are.
+  2. `:299` marks the active option with
+     `className={index === activeIndex ? "active" : undefined}`. Add a
+     `data-active` attribute alongside it and style off that. `role="option"`,
+     `aria-selected` and the keyboard handler are untouched.
+  No other behavioural change.
 
 ## Acceptance
 
 - [ ] H1 renders in Cormorant Garamond with `моята` italic in the nursery hue
       and `градина` underlined in the kindergarten hue
 - [ ] Search field is the cream pill with a 2px ink border and a 5px hard
-      offset shadow; focus-within shifts it 2px and shrinks the shadow
+      offset shadow; focus-within shifts it 2px and shrinks the shadow.
+      **No go button is added** — the reference mock draws one, but the live
+      component has never had it and selection already works by click and
+      Enter. Adding a control would be a behaviour change (see PLAN Out of
+      Scope)
 - [ ] Input font-weight is 500 (not the old 700) and the placeholder is legible
       at AA
 - [ ] Suggestion panel is the rounded card with the ink border; the active row
@@ -43,8 +56,9 @@ as a sequence of screenshots.
 - [ ] Capture the current hero, open panel and collapsed states
 
 ### GREEN
-- [ ] Restyle the hero copy block and headline
-- [ ] Restyle `.search-field`, its focus state and the go button
+- [ ] Split the H1 into spans and restyle the hero copy block
+- [ ] Add `data-active` to the active suggestion row
+- [ ] Restyle `.search-field` and its focus state
 - [ ] Restyle `.suggestion-panel` rows, the active state and the status rows
       (`Зареждаме адресите…`, error + retry, `Няма точен адрес…`)
 - [ ] Re-verify keyboard and mouse selection by hand
@@ -60,3 +74,6 @@ design.
 
 The mock's centred hero left-aligns below 620px — keep that; rule 10 of the
 anti-slop doc wants the field reachable on mobile.
+
+`SearchExperience.test.tsx` is a 13-line smoke test; check it still passes
+after the H1 is split.
