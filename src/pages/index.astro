@@ -91,10 +91,16 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       box-shadow 160ms ease;
   }
 
-  /* The field shifts into its own printed shadow on focus. */
+  /* The field shifts into its own printed shadow on focus, and takes a real
+     focus ring. The 2px shift alone is a weak focus indicator for keyboard
+     users — the ring is what satisfies "focus visible". */
   .search-field:focus-within {
     transform: translate(2px, 2px);
-    box-shadow: var(--shadow-hard-sm);
+    box-shadow:
+      var(--shadow-hard-sm),
+      0 0 0 4px var(--color-bg-accent-soft);
+    outline: 2px solid var(--color-section-nursery);
+    outline-offset: 2px;
   }
 
   .search-field input {
@@ -291,6 +297,14 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .filters button:hover {
     transform: translate(1px, 1px);
     box-shadow: 2px 2px 0 var(--color-ink);
+  }
+
+  .filters button:focus-visible,
+  .card-actions a:focus-visible,
+  .status-panel button:focus-visible,
+  .results-status button:focus-visible {
+    outline: 2px solid var(--color-section-nursery);
+    outline-offset: 3px;
   }
 
   .filters button.active {
