@@ -54,6 +54,9 @@ const navItems = [
     <title>{title}</title>
   </head>
   <body>
+    <div aria-hidden="true" class="page-tint page-tint--nursery"></div>
+    <div aria-hidden="true" class="page-tint page-tint--kindergarten"></div>
+    <div aria-hidden="true" class="page-tint page-tint--preschool"></div>
     <header class="site-header">
       <a class="brand" href="/" aria-label="Начало">
         <img alt="" height="32" src="/favicon.svg" width="32" />
@@ -187,7 +190,10 @@ const navItems = [
   }
 
   :root {
-    color-scheme: light dark;
+    /* Дворът: a risograph neighbourhood guide printed on cream stock.
+       Light only — the design is committed to paper, ink and grain, so there
+       is no dark variant to translate it into. */
+    color-scheme: light;
 
     /* Sofia Sans carries the UI; Cormorant Garamond is display only. */
     --font-ui:
@@ -195,41 +201,76 @@ const navItems = [
       "Segoe UI", sans-serif;
     --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
 
-    --color-bg-page: #f4f7fb;
-    --color-bg-surface: #ffffff;
-    --color-bg-surface-muted: rgba(255, 255, 255, 0.72);
-    --color-bg-accent-soft: #e7f0ff;
-    --color-bg-accent-softer: #eef4ff;
-    --color-bg-error-soft: #fff7ed;
-    --color-bg-warn-soft: #fef9c3;
+    /* --- ground and ink ------------------------------------------------ */
+    /* Cream stock. Everything else is measured against this. */
+    --color-bg-page: #f4ecdf;
+    /* Card and panel surface — a half-step lighter than the stock, so cards
+       read as paper laid on paper rather than as floating rectangles. */
+    --color-bg-surface: #fbf6ee;
+    --color-bg-surface-muted: rgba(251, 246, 238, 0.72);
+    /* Warm near-black. 14.45:1 on the cream ground. */
+    --color-ink: #201c17;
+    /* Secondary copy. 6.82:1 on the card surface. */
+    --color-ink-muted: #5d554a;
 
-    --color-border-subtle: #d6dfeb;
-    --color-border-default: #cbd5e1;
-    --color-border-soft: #c9d8ef;
-    --color-border-card: #d6e0ee;
-    --color-border-status: #cbd7d0;
-    --color-border-accent: #6fa3ff;
-    --color-border-error: #f3b4a6;
-    --color-border-warn: #d8b84c;
+    /* --- section hues --------------------------------------------------- */
+    /* One value per section, used for BOTH graphics and text. Each passes
+       WCAG AA as small text on cream and on the card surface, and carries
+       white text on a chip. The background circles use these same three hues,
+       so the decoration reads as a key to the result grouping. */
+    --color-section-nursery: #c7361f; /* ясли — 4.50:1 on cream */
+    --color-section-kindergarten: #2b52c9; /* детски градини — 5.68:1 */
+    --color-section-preschool: #4a7550; /* подготвителни групи — 4.53:1 */
 
-    --color-text-strong: #0f172a;
-    --color-text-display: #081225;
-    --color-text-muted: #475569;
-    --color-text-subtle: #59677d;
-    --color-text-faint: #7d8ba4;
-    --color-text-eyebrow: #5b6861;
-    --color-text-status: #30514a;
-    --color-text-error: #9a3412;
-    --color-text-error-strong: #b42318;
-    --color-text-group-note: #1e3a8a;
-    --color-text-warn: #713f12;
+    /* --- semantic feedback, kept off the section axis -------------------- */
+    --color-bg-accent-soft: #f6e2d8;
+    --color-bg-accent-softer: #faeee7;
+    --color-bg-error-soft: #f8e3dc;
+    --color-bg-warn-soft: #f6ead0;
+
+    /* --- borders: ink at low alpha, never a separate grey ramp ---------- */
+    --color-border-subtle: rgba(32, 28, 23, 0.14);
+    --color-border-default: rgba(32, 28, 23, 0.22);
+    --color-border-soft: rgba(32, 28, 23, 0.16);
+    /* Cards and controls are drawn with a real 2px ink line — the riso look
+       comes from the outline, not from a shadow. */
+    --color-border-card: #201c17;
+    --color-border-status: rgba(32, 28, 23, 0.22);
+    --color-border-accent: #201c17;
+    --color-border-error: #c7361f;
+    --color-border-warn: #b07f22;
+
+    /* --- text ----------------------------------------------------------- */
+    --color-text-strong: #201c17;
+    --color-text-display: #1a1712;
+    --color-text-muted: #5d554a;
+    --color-text-subtle: #6b6255;
+    /* 4.6:1 on cream — the old #7d8ba4 was 3.44:1 and failed the floor. */
+    --color-text-faint: #7a7061;
+    --color-text-eyebrow: #5d554a;
+    --color-text-status: #4a7550;
+    --color-text-error: #9c2a17;
+    --color-text-error-strong: #9c2a17;
+    --color-text-group-note: #5d554a;
+    --color-text-warn: #7a5514;
     --color-text-on-accent: #ffffff;
 
-    --color-accent: #2563eb;
-    --color-accent-strong: #1d4ed8;
+    /* Primary action colour. The nursery hue doubles as the brand accent —
+       it is the first group a parent looks for. */
+    --color-accent: #c7361f;
+    --color-accent-strong: #a72c18;
 
-    --shadow-field: 0 0 0 1px rgba(52, 108, 255, 0.04);
-    --shadow-panel: 0 22px 44px rgba(31, 55, 88, 0.12);
+    /* --- elevation: print offset, not depth ----------------------------- */
+    /* A hard, un-blurred offset is a risograph misregistration device. It is
+       deliberately not the soft "floating card" shadow this design replaced. */
+    --shadow-hard: 5px 5px 0 var(--color-ink);
+    --shadow-hard-sm: 3px 3px 0 var(--color-ink);
+    --shadow-field: 5px 5px 0 var(--color-ink);
+    --shadow-panel: 6px 6px 0 rgba(32, 28, 23, 0.22);
+
+    /* --- radii: two values, assigned by role ---------------------------- */
+    --radius-control: 999px; /* the address field and filter pills */
+    --radius-surface: 16px; /* cards and panels */
 
     color: var(--color-text-strong);
     background: var(--color-bg-page);
@@ -239,42 +280,56 @@ const navItems = [
     text-rendering: optimizeLegibility;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-bg-page: #0b1220;
-      --color-bg-surface: #131c2f;
-      --color-bg-surface-muted: rgba(19, 28, 47, 0.72);
-      --color-bg-accent-soft: rgba(96, 165, 250, 0.18);
-      --color-bg-accent-softer: rgba(96, 165, 250, 0.1);
-      --color-bg-error-soft: rgba(180, 83, 36, 0.2);
-      --color-bg-warn-soft: rgba(202, 138, 4, 0.18);
+  /* Grain over the whole page. One inline SVG turbulence, fixed and
+     pointer-events-none, so it never repaints on scroll. */
+  body::before {
+    content: "";
+    position: fixed;
+    z-index: 3;
+    inset: 0;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
 
-      --color-border-subtle: #1f2a44;
-      --color-border-default: #2a3654;
-      --color-border-soft: #2a3654;
-      --color-border-card: #28324d;
-      --color-border-status: #2a3a36;
-      --color-border-accent: #60a5fa;
-      --color-border-error: rgba(244, 162, 97, 0.45);
-      --color-border-warn: rgba(250, 204, 21, 0.45);
+  /* The three circles carry the three section hues. */
+  .page-tint {
+    position: fixed;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(1px);
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
 
-      --color-text-strong: #f1f5f9;
-      --color-text-display: #ffffff;
-      --color-text-muted: #cbd5e1;
-      --color-text-subtle: #94a3b8;
-      --color-text-faint: #64748b;
-      --color-text-eyebrow: #a3b3c5;
-      --color-text-status: #c1d6cf;
-      --color-text-error: #fdba74;
-      --color-text-error-strong: #fca5a5;
-      --color-text-group-note: #bfdbfe;
-      --color-text-warn: #fde68a;
+  .page-tint--nursery {
+    top: -120px;
+    right: -90px;
+    width: 380px;
+    height: 380px;
+    background: rgba(199, 54, 31, 0.42);
+  }
 
-      --color-accent: #3b82f6;
-      --color-accent-strong: #60a5fa;
+  .page-tint--kindergarten {
+    top: 180px;
+    left: -140px;
+    width: 300px;
+    height: 300px;
+    background: rgba(43, 82, 201, 0.38);
+  }
 
-      --shadow-field: 0 0 0 1px rgba(96, 165, 250, 0.1);
-      --shadow-panel: 0 22px 44px rgba(0, 0, 0, 0.45);
+  .page-tint--preschool {
+    top: 420px;
+    right: 12%;
+    width: 190px;
+    height: 190px;
+    background: rgba(74, 117, 80, 0.46);
+  }
+
+  @media (max-width: 720px) {
+    .page-tint--preschool {
+      display: none;
     }
   }
 
@@ -295,6 +350,14 @@ const navItems = [
 
   .site-header {
     flex: 0 0 auto;
+  }
+
+  /* Content sits above the tint circles (z 0) and below the grain (z 3). */
+  .site-header,
+  main,
+  .site-footer {
+    position: relative;
+    z-index: 1;
   }
 
   a {
