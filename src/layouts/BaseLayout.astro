@@ -473,14 +473,21 @@ const navItems = [
     box-sizing: border-box;
   }
 
+  /* The document scrolls, not an inner pane. This used to be a locked shell —
+     `height: 100dvh` plus `overflow: hidden`, with <main> as the scroller —
+     and iOS made a mess of it: dvh does not shrink when the soft keyboard
+     opens, so Safari scroll-shifted the visual viewport to reveal the focused
+     field, found nothing scrollable underneath, and rubber-banded straight
+     back. The search bar sat half off-screen until the keyboard was dismissed,
+     and the bottom of <main> stayed parked behind the keyboard. Letting the
+     document scroll hands all of that back to the browser. */
   body {
     display: flex;
     min-width: 320px;
-    height: 100vh;
-    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     flex-direction: column;
     margin: 0;
-    overflow: hidden;
     background: var(--color-bg-page);
   }
 
@@ -500,7 +507,12 @@ const navItems = [
     color: inherit;
   }
 
+  /* Sticky now that the document scrolls — it was effectively pinned when the
+     shell was locked, and losing the brand on scroll would be a regression. */
   .site-header {
+    position: sticky;
+    z-index: 2;
+    top: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -634,11 +646,13 @@ const navItems = [
     }
   }
 
+  /* Grows to push the footer down on short pages, and is a column so the
+     search experience can still fill the height it is given. No overflow of
+     its own — see the note on body. */
   main {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
   }
 
   .section-stack {

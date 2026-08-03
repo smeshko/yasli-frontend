@@ -10,7 +10,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 <style is:global>
   .search-experience {
     display: grid;
-    min-height: 100%;
+    /* Fills whatever <main> is given rather than chasing a percentage of it —
+       main is a flex column now, so a percentage height has nothing definite
+       to resolve against. */
+    flex: 1;
     grid-template-rows: 1fr auto;
     /* Transparent on purpose: an opaque fill here would paint over the three
        section-hue tint circles that live behind the page. */
@@ -105,10 +108,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .search-field {
     display: grid;
     min-height: 62px;
-    /* Third column is the clear button; it collapses to nothing while the
-       field is empty, so the input keeps the full width until there is
-       something to clear. */
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
     align-items: center;
     gap: 14px;
     border: 2px solid var(--color-ink);
@@ -146,48 +146,6 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   .search-field input::placeholder {
     color: var(--color-text-faint);
     font-weight: 400;
-  }
-
-  /* WebKit draws its own clear affordance on type="search", but only on
-     desktop — two of them side by side on a Mac, none at all on a phone. */
-  .search-field input::-webkit-search-cancel-button {
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  /* 44px of target hung on a 18px glyph, pulled into the field's own padding
-     so the cross still sits where the native one did. */
-  .clear-button {
-    display: grid;
-    width: 44px;
-    height: 44px;
-    place-items: center;
-    border: 0;
-    border-radius: 999px;
-    margin-right: -12px;
-    background: transparent;
-    color: var(--color-text-faint);
-    cursor: pointer;
-    padding: 0;
-    transition: color 140ms ease, background-color 140ms ease;
-  }
-
-  .clear-button:focus-visible {
-    outline: 2px solid var(--color-section-nursery);
-    outline-offset: 2px;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .clear-button:hover {
-      background: var(--color-bg-accent-softer);
-      color: var(--color-text-strong);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .clear-button {
-      transition: none;
-    }
   }
 
   .suggestion-panel {

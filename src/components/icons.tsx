@@ -12,20 +12,6 @@ export function SearchIcon() {
   );
 }
 
-export function ClearIcon() {
-  return (
-    <svg aria-hidden="true" className="clear-icon" fill="none" height="18" viewBox="0 0 24 24" width="18">
-      <path
-        d="M6 6l12 12M18 6 6 18"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2.2"
-      />
-    </svg>
-  );
-}
-
 export function MapPinIcon() {
   return (
     <svg aria-hidden="true" className="row-icon" fill="none" height="18" viewBox="0 0 24 24" width="18">

@@ -18,7 +18,7 @@ import {
   type ResultFilter,
 } from "@/lib/search/results";
 
-import { ArrowRightIcon, ClearIcon, MapPinIcon, SearchIcon } from "./icons";
+import { ArrowRightIcon, MapPinIcon, SearchIcon } from "./icons";
 import { SearchResults } from "./SearchResults";
 
 type ReferenceStatus = "idle" | "loading" | "ready" | "error";
@@ -89,7 +89,6 @@ export function SearchExperience() {
      which is the one moment that is genuinely a fresh start. */
   const [hasSearched, setHasSearched] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const visibleSuggestions = useMemo(
     () => searchExactAddressSuggestions(suggestions, query),
@@ -267,14 +266,6 @@ export function SearchExperience() {
     });
   }
 
-  /* Same path as typing the field empty, so the hero, the results and the
-     latch all reset together. Focus goes back to the input: the button is
-     about to unmount, and a phone keyboard staying up is the point. */
-  function clearQuery() {
-    handleQueryChange("");
-    inputRef.current?.focus();
-  }
-
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (!isAutocompleteOpen && event.key !== "Enter") {
       return;
@@ -355,7 +346,6 @@ export function SearchExperience() {
             <div className="search-field">
               <SearchIcon />
               <input
-                ref={inputRef}
                 id="address-search"
                 type="search"
                 autoComplete="off"
@@ -369,19 +359,6 @@ export function SearchExperience() {
                 onFocus={() => setIsAutocompleteOpen(true)}
                 onKeyDown={handleKeyDown}
               />
-              {/* Ours, not WebKit's: the native type="search" clear button is
-                  desktop-only, so on a phone — where retyping a long address
-                  is worst — there was nothing to clear with. */}
-              {hasQuery ? (
-                <button
-                  aria-label="Изчисти адреса"
-                  className="clear-button"
-                  type="button"
-                  onClick={clearQuery}
-                >
-                  <ClearIcon />
-                </button>
-              ) : null}
             </div>
 
             {referenceStatus === "ready" && isAutocompleteOpen && visibleSuggestions.length > 0 ? (
