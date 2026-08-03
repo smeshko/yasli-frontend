@@ -186,11 +186,11 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     border-top: 1px solid var(--color-border-subtle);
   }
 
-  /* A marker in the margin instead of a full outline — an outlined row is a
-     card, an inset edge is a highlighted menu entry. */
+  /* The tint alone carries the highlight. A coral edge here — as a ring around
+     the row or as a bar down its margin — is the loudest thing in the panel,
+     and the panel is not where the eye should be caught. */
   .suggestion-panel li[data-active] {
     background: var(--color-bg-accent-soft);
-    box-shadow: inset 3px 0 0 var(--color-section-nursery);
     color: var(--color-text-strong);
   }
 
@@ -706,8 +706,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       flex-direction: column;
     }
 
-    /* Three pills at desktop metrics wrap onto a second row on a 390px screen,
-       and that row is pure cost above the first card. */
+    /* The row wraps on its own — it is a plain flex-wrap, not a fixed count —
+       but at desktop metrics the three pills overshot a 390px screen by about
+       6px, so it wrapped for want of almost nothing. These get them onto one
+       line at 390px and up; narrower phones still wrap, which is fine. */
     .filters {
       gap: 6px;
       margin: 16px 0;
@@ -716,7 +718,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     .filters button {
       min-height: 40px;
       font-size: 0.84rem;
-      padding: 0 12px;
+      padding: 0 10px;
     }
 
     /* On a phone the cards are a single column, so every card's dead space is

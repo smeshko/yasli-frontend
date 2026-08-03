@@ -34,9 +34,12 @@ export interface MatchState {
 
 const STORAGE_KEY = "yasli:search-state:v2";
 
+/* The filter is deliberately not in here. It is a way of looking at one set of
+   results, not part of the search — coming back to the tab with two of the
+   three groups silently hidden reads as missing data, not as a filter someone
+   left on. Restoring the address and its results is the useful half. */
 interface StoredSearchState {
   query: string;
-  filter: ResultFilter;
   matchState: MatchState | null;
 }
 
@@ -104,7 +107,6 @@ export function SearchExperience() {
 
     if (stored) {
       setQuery(stored.query);
-      setFilter(stored.filter);
 
       if (stored.matchState && stored.matchState.status !== "loading") {
         setMatchState(stored.matchState);
@@ -122,8 +124,8 @@ export function SearchExperience() {
     }
 
     const persistableMatch = matchState.status === "loading" ? null : matchState;
-    saveStoredState({ query, filter, matchState: persistableMatch });
-  }, [hasHydrated, query, filter, matchState]);
+    saveStoredState({ query, matchState: persistableMatch });
+  }, [hasHydrated, query, matchState]);
 
   /* The pre-paint hint BaseLayout put on <html> has done its job by now: this
      runs in the same commit that first renders data-compact, so the hero never
