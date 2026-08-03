@@ -12,10 +12,11 @@ import {
 
 import type { MatchState } from "./SearchExperience";
 
-const FILTER_TABS: ReadonlyArray<{ value: ResultFilter; label: string }> = [
-  { value: "all", label: "Всички" },
-  ...receptionKindOrder.map((kind) => ({ value: kind, label: labelForReceptionKind(kind) })),
-];
+/* No "Всички" tab: with three kinds, a fourth pill for "no filter" is a row of
+   its own on a phone, and it is redundant — pressing the active kind again
+   clears the filter, which is the same thing. */
+const FILTER_TABS: ReadonlyArray<{ value: ReceptionKind; label: string }> =
+  receptionKindOrder.map((kind) => ({ value: kind, label: labelForReceptionKind(kind) }));
 
 /* A standing explanation of how nursery admission works — true of every search,
    so printing it above the cards buried the answer the parent came for. It sits
@@ -106,16 +107,24 @@ function FilterTabs({
 }) {
   return (
     <div className="filters" aria-label="Филтър по тип">
-      {FILTER_TABS.map((item) => (
-        <button
-          key={item.value}
-          type="button"
-          className={item.value === currentFilter ? "active" : undefined}
-          onClick={() => onFilterChange(item.value)}
-        >
-          {item.label}
-        </button>
-      ))}
+      {FILTER_TABS.map((item) => {
+        const isActive = item.value === currentFilter;
+
+        return (
+          <button
+            key={item.value}
+            type="button"
+            aria-pressed={isActive}
+            className={isActive ? "active" : undefined}
+            data-filter={item.value}
+            /* Toggle, not a radio: pressing the active kind again goes back to
+               "all", which is what the removed "Всички" tab used to do. */
+            onClick={() => onFilterChange(isActive ? "all" : item.value)}
+          >
+            {item.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -167,15 +176,13 @@ function ResultGroup({
                 <span className="result-index" aria-hidden="true">
                   {String(index + 1).padStart(2, "0")}
                 </span>
+                {/* No match-basis line. "по вашия адрес" was true of every card
+                    in an address search, and "по вашия район" of nearly every
+                    other — either way it cost a row on each card and said
+                    nothing the group's own notes do not already say. */}
                 <div>
                   <p className="kind-label">{labelForReceptionKind(institution.institution_kind)}</p>
                   <h3>{displayName}</h3>
-                  {/* Only the district basis is worth a line. "по вашия адрес"
-                      was true of every card in an address search, so it said
-                      nothing and cost a row on each one. */}
-                  {institution.match_basis === "district" ? (
-                    <p className="match-basis">по вашия район</p>
-                  ) : null}
                 </div>
                 <div className="card-actions">
                   <a href={institution.source_url} target="_blank" rel="noreferrer">

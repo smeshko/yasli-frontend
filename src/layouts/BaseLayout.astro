@@ -340,6 +340,18 @@ const navItems = [
     --color-accent: light-dark(#c7361f, #d9765c);
     --color-accent-strong: light-dark(#a72c18, #e8907a);
 
+    /* The selected filter pill. On cream it is ink with cream lettering, the
+       plate printed solid. That inverts badly on dark stock: --color-ink there
+       is a muted #4a4238, so a selected pill was a grey slab carrying
+       near-black text at 2.4:1, and the coral offset behind it was the
+       brightest object on the page. Dark therefore fills with the accent and
+       letters it in the stock colour (5.5:1), and drops the offset to shadow
+       ink so the pill reads as pressed rather than as glowing. */
+    --color-filter-active-bg: light-dark(#201c17, #d9765c);
+    --color-filter-active-text: light-dark(#f4ecdf, #1a1712);
+    --color-filter-active-border: light-dark(#201c17, #b8563c);
+    --color-filter-active-shadow: light-dark(#c7361f, rgba(0, 0, 0, 0.45));
+
     /* Decoration that used to be hard-coded, so it can invert too. */
     --color-headline-mark: light-dark(rgba(43, 82, 201, 0.35), rgba(128, 152, 216, 0.32));
     --color-hairline-stroke: light-dark(rgba(32, 28, 23, 0.13), rgba(242, 233, 220, 0.09));
@@ -524,6 +536,22 @@ const navItems = [
     border-bottom: 1px solid var(--color-border-subtle);
     background: var(--color-bg-page);
     padding: 0 48px;
+  }
+
+  /* iOS Safari with the bottom address bar paints the document all the way up
+     under the status bar, but pins `top: 0` sticky elements below it — so the
+     band between the clock and the header showed scrolled cards sliding past.
+     This carries the header's own stock upward over that band. Above the
+     document's first pixel everywhere else, so it costs nothing on desktop. */
+  .site-header::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    left: 0;
+    height: 140px;
+    background: var(--color-bg-page);
+    pointer-events: none;
   }
 
   .brand {

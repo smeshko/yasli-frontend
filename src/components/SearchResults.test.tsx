@@ -81,10 +81,11 @@ describe("SearchResults", () => {
     );
 
     /* The search field above still shows the address, so the results do not
-       echo it — and a district match is the only basis worth printing. */
+       echo it — and the match basis is not printed on the cards at all: it was
+       the same line on nearly every one. */
     expect(html).not.toContain("Избран адрес");
     expect(html).not.toContain("по вашия адрес");
-    expect(html).toContain("по вашия район");
+    expect(html).not.toContain("по вашия район");
     expect(html.indexOf("Ясла")).toBeLessThan(html.indexOf("Детска градина"));
     expect(html.indexOf("Детска градина")).toBeLessThan(html.indexOf("Подготвителна група"));
     expect(html).toContain("ДГ Тест");

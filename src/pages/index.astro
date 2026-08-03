@@ -148,20 +148,26 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     font-weight: 400;
   }
 
+  /* Deliberately not card-shaped. It used to be surface paper inside a 2px ink
+     outline with a printed offset and rounded row chips — the same object as a
+     result card, stacked directly above result cards, and one of the chips even
+     carried a coral outline like a highlighted card. It is a menu, not a
+     result: cut into the stock rather than laid on it (page background, not
+     surface), full-bleed rows divided by hairlines, and a shallow offset. */
   .suggestion-panel {
     position: absolute;
     z-index: 10;
-    top: calc(100% + 12px);
+    top: calc(100% + 8px);
     left: 0;
     width: 100%;
     max-height: min(376px, 52dvh);
-    overflow-y: auto;
+    overflow: hidden auto;
     border: 2px solid var(--color-ink);
-    border-radius: 18px;
+    border-radius: 14px;
     margin: 0;
-    padding: 8px;
-    background: var(--color-bg-surface);
-    box-shadow: var(--shadow-panel);
+    padding: 0;
+    background: var(--color-bg-page);
+    box-shadow: var(--shadow-hard-sm);
     list-style: none;
   }
 
@@ -171,15 +177,20 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 14px;
-    border-radius: 12px;
     color: var(--color-text-muted);
     cursor: pointer;
-    padding: 11px 14px;
+    padding: 10px 16px;
   }
 
+  .suggestion-panel li + li {
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
+  /* A marker in the margin instead of a full outline — an outlined row is a
+     card, an inset edge is a highlighted menu entry. */
   .suggestion-panel li[data-active] {
     background: var(--color-bg-accent-soft);
-    box-shadow: inset 0 0 0 1.5px var(--color-section-nursery);
+    box-shadow: inset 3px 0 0 var(--color-section-nursery);
     color: var(--color-text-strong);
   }
 
@@ -328,9 +339,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   }
 
   .filters button.active {
-    background: var(--color-ink);
-    color: var(--color-bg-page);
-    box-shadow: 3px 3px 0 var(--color-section-nursery);
+    border-color: var(--color-filter-active-border);
+    background: var(--color-filter-active-bg);
+    color: var(--color-filter-active-text);
+    box-shadow: 3px 3px 0 var(--color-filter-active-shadow);
   }
 
   .result-groups {
@@ -526,9 +538,15 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       box-shadow 180ms ease;
   }
 
-  .result-card:hover {
-    transform: translate(-2px, -3px);
-    box-shadow: 8px 9px 0 var(--tone);
+  /* Gated like every other hover in this file. Ungated, a tap on a phone left
+     the card stuck in its lifted state with a full-hue offset behind it — the
+     top card of a result list kept a coral halo long after the tap, reading as
+     a selection the card does not have. */
+  @media (hover: hover) and (pointer: fine) {
+    .result-card:hover {
+      transform: translate(-2px, -3px);
+      box-shadow: 8px 9px 0 var(--tone);
+    }
   }
 
   /* An outline numeral bedded into the card, behind the content. */
@@ -548,7 +566,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
   /* Attribute-free on purpose — SearchResults.test.tsx asserts the bare tag. */
   .result-card h3 {
     position: relative;
-    margin: 0 0 5px;
+    margin: 0;
     color: var(--color-text-strong);
     font-size: 1.06rem;
     font-weight: 700;
@@ -566,13 +584,6 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     letter-spacing: 0.18em;
     line-height: 1.3;
     text-transform: uppercase;
-  }
-
-  .match-basis {
-    position: relative;
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: 0.84rem;
   }
 
   .card-actions {
@@ -693,6 +704,42 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     .results-status.error {
       align-items: flex-start;
       flex-direction: column;
+    }
+
+    /* Three pills at desktop metrics wrap onto a second row on a 390px screen,
+       and that row is pure cost above the first card. */
+    .filters {
+      gap: 6px;
+      margin: 16px 0;
+    }
+
+    .filters button {
+      min-height: 40px;
+      font-size: 0.84rem;
+      padding: 0 12px;
+    }
+
+    /* On a phone the cards are a single column, so every card's dead space is
+       paid for again on the next scroll. The name and its source link belong
+       to the same object — the desktop gap was letting them drift apart. */
+    .result-card {
+      gap: 2px;
+      padding: 16px 16px 12px;
+    }
+
+    .kind-label {
+      margin-bottom: 5px;
+    }
+
+    .card-actions a {
+      padding-top: 6px;
+    }
+
+    /* Follows the card in: at 5.4rem the numeral was half the height of a card
+       that just lost a third of its own. */
+    .result-index {
+      bottom: -16px;
+      font-size: 4.2rem;
     }
   }
 </style>
