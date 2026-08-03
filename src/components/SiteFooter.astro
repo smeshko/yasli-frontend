@@ -18,7 +18,18 @@ const { class: className } = Astro.props;
 </footer>
 
 <style is:global>
+  /* Pinned to the bottom of the viewport. Not sticky: the footer is the last
+     thing in the document, so there is nothing after it inside its containing
+     block for it to be held back by, and `bottom: 0` never engages. Fixed
+     takes it out of flow instead, and <body> reserves the strip it now covers
+     with a padding-bottom matching --footer-height. Above the content it
+     floats over, below the grain. */
   .site-footer {
+    position: fixed;
+    z-index: 2;
+    right: 0;
+    bottom: 0;
+    left: 0;
     display: flex;
     flex: 0 0 auto;
     min-height: 46px;

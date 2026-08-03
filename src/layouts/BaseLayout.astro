@@ -534,24 +534,41 @@ const navItems = [
      back. The search bar sat half off-screen until the keyboard was dismissed,
      and the bottom of <main> stayed parked behind the keyboard. Letting the
      document scroll hands all of that back to the browser. */
+  /* The footer is fixed, so this padding is the strip it sits in — without it
+     the last card would end up underneath it. box-sizing is border-box for
+     everything, so the padding comes out of the 100dvh rather than adding to
+     it, and a short page still fits the viewport exactly with no scrollbar.
+     The one value that has to track the footer: it wraps to two lines at the
+     320px floor, which is the only width where 46px is not enough. */
   body {
+    --footer-height: 46px;
+
     display: flex;
     min-width: 320px;
     min-height: 100vh;
     min-height: 100dvh;
     flex-direction: column;
     margin: 0;
+    padding-bottom: var(--footer-height);
     background: var(--color-bg-page);
+  }
+
+  @media (max-width: 359px) {
+    body {
+      --footer-height: 66px;
+    }
   }
 
   .site-header {
     flex: 0 0 auto;
   }
 
-  /* Content sits above the tint circles (z 0) and below the grain (z 3). */
+  /* Content sits above the tint circles (z 0) and below the grain (z 3).
+     The footer is not in this list: it positions itself (fixed, z 2), and
+     this rule loading after SiteFooter's would have quietly reset it to
+     relative — which is exactly what it did until it was caught. */
   .site-header,
-  main,
-  .site-footer {
+  main {
     position: relative;
     z-index: 1;
   }
@@ -868,7 +885,10 @@ const navItems = [
       display: none;
     }
 
+    /* This copy lives inside the nav dropdown, so it must stay in flow — the
+       pinned one at the end of the document is the fixed one. */
     .site-footer.site-footer--mobile {
+      position: static;
       display: flex;
       justify-content: flex-start;
       margin-top: 8px;

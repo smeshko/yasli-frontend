@@ -235,6 +235,11 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     margin-top: 12px;
   }
 
+  /* Carries its own padding. It borrows .suggestion-panel for the printed box,
+     and that panel keeps no inner padding of its own any more — the rows are
+     full-bleed so their dividers can reach both edges. This panel has no rows,
+     so without this its text sat flush against the border and the pill
+     collapsed to the height of a single line. */
   .status-panel {
     display: flex;
     align-items: center;
@@ -242,6 +247,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     gap: 16px;
     color: var(--color-text-muted);
     font-size: 0.94rem;
+    padding: 13px 18px;
   }
 
   .status-panel button,
