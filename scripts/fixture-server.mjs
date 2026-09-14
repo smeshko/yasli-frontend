@@ -14,7 +14,7 @@
  *   FIXTURE_SCENARIO=S1 node scripts/fixture-server.mjs
  *
  * Scenarios are documented in
- * docs/artifacts/plans/dvorat-design/SCENARIOS.md
+ * docs/artifacts/plans/archive/2026-08-02-dvorat-design/SCENARIOS.md
  */
 
 import { createServer } from "node:http";
