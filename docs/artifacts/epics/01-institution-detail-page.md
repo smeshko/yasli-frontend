@@ -3,9 +3,9 @@
 Status: planned
 Created: 2026-08-17
 Depends on: backend epic 01 (all phases)
-Project: none
-Linear: none
-Milestone: none
+Project: institution-profiles
+Linear: YAS-4 (https://linear.app/ivo-tsonev/issue/YAS-4)
+Milestone: 6250a9a8-d9a6-4875-98f6-95751d8616b1
 
 ## Overview
 
@@ -49,7 +49,7 @@ pattern.
 
 **Plan**: _not yet created_
 
-**Linear**: none
+**Linear**: YAS-11 (https://linear.app/ivo-tsonev/issue/YAS-11)
 
 **Goal**: Every institution has a prerendered, shareable detail page showing its identity, contacts, catchment and branches, without a backend at build time.
 
@@ -82,7 +82,7 @@ Screenshot the page for one kindergarten with branches, one nursery and one pres
 
 **Plan**: _not yet created_
 
-**Linear**: none
+**Linear**: YAS-12 (https://linear.app/ivo-tsonev/issue/YAS-12)
 
 **Goal**: The detail page shows the institution on a map with its branch buildings, and hands off to the parent's own map app for directions.
 
@@ -115,7 +115,7 @@ Screenshots in both themes at mobile and desktop width, plus a screenshot with J
 
 **Plan**: _not yet created_
 
-**Linear**: none
+**Linear**: YAS-13 (https://linear.app/ivo-tsonev/issue/YAS-13)
 
 **Goal**: Nursery pages and district-routed preschool pages shade the район they actually serve, and say nothing when the polygon does not cover the address.
 

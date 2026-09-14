@@ -3,9 +3,9 @@
 Status: planned
 Created: 2026-08-17
 Depends on: Epic 01; backend epic 02 (for phase 2.2)
-Project: none
-Linear: none
-Milestone: none
+Project: institution-profiles
+Linear: YAS-5 (https://linear.app/ivo-tsonev/issue/YAS-5)
+Milestone: 4a808348-f6ad-4507-b30b-e2cc6b276c55
 
 ## Overview
 
@@ -46,7 +46,7 @@ visible date rather than borrowing the snapshot's freshness.
 
 **Plan**: _not yet created_
 
-**Linear**: none
+**Linear**: YAS-14 (https://linear.app/ivo-tsonev/issue/YAS-14)
 
 **Goal**: Parents can reach every institution without searching an address, including the ones with no published catchment.
 
@@ -77,7 +77,7 @@ Screenshots at mobile and desktop width in both themes, plus the nav in its open
 
 **Plan**: _not yet created_
 
-**Linear**: none
+**Linear**: YAS-15 (https://linear.app/ivo-tsonev/issue/YAS-15)
 
 **Goal**: The detail page shows free places per age cohort, dated so a parent can see how current the number is.
 
