@@ -258,7 +258,7 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 `scripts/add_final_task.py`. Update the checkboxes as work progresses.
 
 - [x] TASK-001: Generate and commit the institutions manifest
-- [ ] TASK-002: Add domain helpers: name number, district names, shared stored-search state
+- [x] TASK-002: Add domain helpers: name number, district names, shared stored-search state
 - [ ] TASK-003: Extend the fixture server with detail-page scenarios (depends on TASK-001)
 - [ ] TASK-004: Gate on backend 1.3: regenerate the API types
 - [ ] TASK-005: Add the by-source client wrapper and not-found error code (depends on TASK-004)

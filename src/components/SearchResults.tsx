@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 
 import type { MatchAddressContext } from "@/lib/api/client";
-import { STALE_BANNER_THRESHOLD_DAYS } from "@/lib/domain/freshness";
+import { STALE_BANNER_TEXT } from "@/lib/domain/freshness";
 import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
 import {
   deriveResultGroupState,
@@ -70,9 +70,7 @@ export function SearchResults({
       {matchState.status === "success" && matchState.grouped ? (
         <>
           {staleResults ? (
-            <div className="stale-banner">
-              Данните са по-стари от {STALE_BANNER_THRESHOLD_DAYS} дни. Проверете и официалния източник преди кандидатстване.
-            </div>
+            <div className="stale-banner">{STALE_BANNER_TEXT}</div>
           ) : null}
 
           {matchState.address?.district_code === null &&

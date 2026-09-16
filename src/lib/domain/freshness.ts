@@ -17,3 +17,14 @@ function toUtcStartOfDay(value: Date | string): number {
 
   return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 }
+
+/* Shared by the search results and the institution page. */
+export const STALE_BANNER_TEXT = `Данните са по-стари от ${STALE_BANNER_THRESHOLD_DAYS} дни. Проверете и официалния източник преди кандидатстване.`;
+
+export function formatFreshnessDate(date: Date): string {
+  return new Intl.DateTimeFormat("bg-BG", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}

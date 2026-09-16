@@ -5,6 +5,7 @@ import {
   matchAddress,
   type MatchAddressContext,
 } from "@/lib/api/client";
+import { formatFreshnessDate } from "@/lib/domain/freshness";
 import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
@@ -17,6 +18,7 @@ import {
   type GroupedResults,
   type ResultFilter,
 } from "@/lib/search/results";
+import { loadStoredSearchState, saveStoredSearchState } from "@/lib/search/storedSearch";
 
 import { ArrowRightIcon, MapPinIcon, SearchIcon } from "./icons";
 import { SearchResults } from "./SearchResults";
@@ -30,42 +32,6 @@ export interface MatchState {
   grouped: GroupedResults | null;
   selectedAddress: ExactAddressSuggestion | null;
   message?: string;
-}
-
-const STORAGE_KEY = "yasli:search-state:v2";
-
-/* The filter is deliberately not in here. It is a way of looking at one set of
-   results, not part of the search — coming back to the tab with two of the
-   three groups silently hidden reads as missing data, not as a filter someone
-   left on. Restoring the address and its results is the useful half. */
-interface StoredSearchState {
-  query: string;
-  matchState: MatchState | null;
-}
-
-function loadStoredState(): StoredSearchState | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as StoredSearchState) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveStoredState(state: StoredSearchState): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    /* sessionStorage unavailable or quota exceeded — drop silently */
-  }
 }
 
 export function SearchExperience() {
@@ -103,7 +69,7 @@ export function SearchExperience() {
   const staleResults = shouldShowStaleBanner(freshnessDate);
 
   useEffect(() => {
-    const stored = loadStoredState();
+    const stored = loadStoredSearchState();
 
     if (stored) {
       setQuery(stored.query);
@@ -124,7 +90,7 @@ export function SearchExperience() {
     }
 
     const persistableMatch = matchState.status === "loading" ? null : matchState;
-    saveStoredState({ query, matchState: persistableMatch });
+    saveStoredSearchState({ query, matchState: persistableMatch });
   }, [hasHydrated, query, matchState]);
 
   /* The pre-paint hint BaseLayout put on <html> has done its job by now: this
@@ -158,7 +124,7 @@ export function SearchExperience() {
     const slots = document.querySelectorAll<HTMLElement>("[data-footer-freshness]");
 
     slots.forEach((slot) => {
-      slot.textContent = freshnessDate ? `Last updated: ${formatDate(freshnessDate)}` : "";
+      slot.textContent = freshnessDate ? `Last updated: ${formatFreshnessDate(freshnessDate)}` : "";
       slot.hidden = freshnessDate === null;
     });
   }, [freshnessDate]);
@@ -432,10 +398,3 @@ export function SearchExperience() {
   );
 }
 
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat("bg-BG", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
-}
