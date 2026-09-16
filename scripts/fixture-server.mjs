@@ -13,8 +13,10 @@
  *
  *   FIXTURE_SCENARIO=S1 node scripts/fixture-server.mjs
  *
- * Scenarios are documented in
- * docs/artifacts/plans/archive/2026-08-02-dvorat-design/SCENARIOS.md
+ * Search scenarios (S1–S9) are documented in
+ * docs/artifacts/plans/archive/2026-08-02-dvorat-design/SCENARIOS.md;
+ * institution-page scenarios (D1–D3, the by-source profiles) in
+ * docs/artifacts/plans/institution-detail-route/SCENARIOS.md
  */
 
 import { createServer } from "node:http";
@@ -56,9 +58,11 @@ const ADDRESSES = [
   { id: 8802, street_id: 6, number_int: 12, number_suffix: null, entrance: null },
 ];
 
-const institution = (id, name, kind, basis, offering = "standard") => ({
+const KINDS = ["nursery", "kindergarten", "preschool"];
+
+const institution = (id, externalId, name, kind, basis, offering = "standard") => ({
   id,
-  external_id: String(id),
+  external_id: externalId,
   name,
   institution_kind: kind,
   reception_kind: kind === "kindergarten" && offering === "infant_group" ? "nursery" : kind,
@@ -71,17 +75,21 @@ const institution = (id, name, kind, basis, offering = "standard") => ({
 // --- per-address result sets ------------------------------------------------
 
 const RESULTS = {
-  // S1 — all three groups populated
+  // S1 — all three groups populated. Rows carry real (kind, external_id)
+  // pairs from src/data/institutions-manifest.json so "Детайли" lands on a
+  // page that exists; kindergarten/46, nursery/4 and preschool/12 also have
+  // PROFILES entries. kindergarten/999999 is deliberately NOT in the manifest:
+  // its card renders "Източник" only (the manifest guard on result cards).
   1042: {
     district_code: "01",
     results: [
-      institution(101, "ДЯ №4 „Пчелица“", "nursery", "district"),
-      institution(102, "ДЯ №9 „Детелина“", "nursery", "district"),
-      institution(103, "ДЯ №11 „Иглика“", "nursery", "district"),
-      institution(201, "ДГ №14 „Дружба“", "kindergarten", "address"),
-      institution(202, "ДГ №31 „Крилатко“", "kindergarten", "address"),
-      institution(203, "ДГ №5 „Слънчо“", "kindergarten", "address", "infant_group"),
-      institution(301, "ОУ „Захари Стоянов“ — ПГ", "preschool", "address"),
+      institution(101, "4", 'ДЯ № 4 "Приказен свят"', "nursery", "district"),
+      institution(102, "9", 'ДЯ № 9 "ДЕТЕЛИНА"', "nursery", "district"),
+      institution(103, "11", 'ДЯ № 13 "РУСАЛКА"', "nursery", "district"),
+      institution(201, "46", 'ДГ№13 "Мир"', "kindergarten", "address"),
+      institution(202, "999999", "ДГ „Нова градина“", "kindergarten", "address"),
+      institution(203, "38", 'ДГ№5 "Слънчо"', "kindergarten", "address", "infant_group"),
+      institution(301, "12", 'ОУ "Панайот Волов"', "preschool", "address"),
     ],
   },
   1043: { district_code: "01", results: [] },
@@ -89,10 +97,10 @@ const RESULTS = {
   2210: {
     district_code: "01",
     results: [
-      institution(104, "ДЯ №1 „Щастливо детство“", "nursery", "district"),
-      institution(105, "ДЯ №7 „Роза“", "nursery", "district"),
-      institution(204, "ДГ №2 „Бриз“", "kindergarten", "address"),
-      institution(205, "ДГ №27 „Успех“", "kindergarten", "address", "infant_group"),
+      institution(104, "104", "ДЯ №1 „Щастливо детство“", "nursery", "district"),
+      institution(105, "105", "ДЯ №7 „Роза“", "nursery", "district"),
+      institution(204, "204", "ДГ №2 „Бриз“", "kindergarten", "address"),
+      institution(205, "205", "ДГ №27 „Успех“", "kindergarten", "address", "infant_group"),
     ],
   },
   // S3 — nursery group empty, and every remaining result matched by district,
@@ -100,30 +108,30 @@ const RESULTS = {
   4405: {
     district_code: "04",
     results: [
-      institution(206, "ДГ №39 „Пламъче“", "kindergarten", "district"),
-      institution(207, "ДГ №44 „Валентина Терешкова“", "kindergarten", "district"),
-      institution(208, "ДГ №18 „Радост“", "kindergarten", "district"),
-      institution(302, "СУ „Найден Геров“ — ПГ", "preschool", "district"),
+      institution(206, "206", "ДГ №39 „Пламъче“", "kindergarten", "district"),
+      institution(207, "207", "ДГ №44 „Валентина Терешкова“", "kindergarten", "district"),
+      institution(208, "208", "ДГ №18 „Радост“", "kindergarten", "district"),
+      institution(302, "302", "СУ „Найден Геров“ — ПГ", "preschool", "district"),
     ],
   },
   // S4 — kindergarten group empty
   5501: {
     district_code: "01",
     results: [
-      institution(106, "ДЯ №2 „Мечо Пух“", "nursery", "district"),
-      institution(303, "ОУ „Стефан Караджа“ — ПГ", "preschool", "address"),
+      institution(106, "106", "ДЯ №2 „Мечо Пух“", "nursery", "district"),
+      institution(303, "303", "ОУ „Стефан Караджа“ — ПГ", "preschool", "address"),
     ],
   },
   // S5 — no confirmed district for the address
   3302: {
     district_code: null,
-    results: [institution(209, "ДГ №21 „Калинка“", "kindergarten", "address")],
+    results: [institution(209, "209", "ДГ №21 „Калинка“", "kindergarten", "address")],
   },
   8802: {
     district_code: "01",
     results: [
-      institution(107, "ДЯ №4 „Пчелица“", "nursery", "district"),
-      institution(210, "ДГ №14 „Дружба“", "kindergarten", "address"),
+      institution(107, "107", "ДЯ №4 „Пчелица“", "nursery", "district"),
+      institution(210, "210", "ДГ №14 „Дружба“", "kindergarten", "address"),
     ],
   },
 };
@@ -137,6 +145,114 @@ const INSTITUTIONS = [
   source_url: `https://dg.uslugi.io/institution/${item.id}`,
   last_seen_at: lastSeenAt(SCENARIO === "S6" ? STALE_DAYS : FRESH_DAYS),
 }));
+
+// --- institution profiles (backend phase 1.3 contract) ----------------------
+//
+// Served by GET /api/institutions/by-source/:kind/:external_id. Keys are REAL
+// (kind, external_id) pairs from src/data/institutions-manifest.json: `astro
+// dev` only serves the slugs getStaticPaths returns, so a profile keyed to a
+// made-up id would be unreachable in the browser. The content is synthetic
+// (Мир-shaped for kindergarten/46), not real data — the real-backend check
+// lives in the plan's final validation.
+//
+// Deliberately absent: kindergarten/35 (ДГ№2 "Щастливо детство") — a real
+// manifest slug with a page but no profile, so the page renders its in-page
+// not-found state. kindergarten/999999 (the S1 card outside the manifest) is
+// absent here too and has no page at all.
+
+const coverageGroup = (street, rows) => ({
+  street,
+  addresses: rows.map(([id, number_int, number_suffix = null, entrance = null]) => ({
+    id,
+    number_int,
+    number_suffix,
+    entrance,
+  })),
+});
+
+const profile = (fields) => ({
+  address: null,
+  phone: null,
+  email: null,
+  director: null,
+  website: null,
+  district_code: null,
+  location: null,
+  coverage: [],
+  branches: [],
+  ...fields,
+});
+
+const PROFILES = {
+  // Full: address, all four contacts, three streets (server order, with a
+  // suffix and an entrance), district 01, four branches (one label-only).
+  "kindergarten/46": profile({
+    id: 31,
+    external_id: "46",
+    name: 'ДГ№13 "Мир"',
+    kind: "kindergarten",
+    source_url: "https://dg.uslugi.io/lv/documents/garden/varna/rajon/46.html",
+    address: 'гр. Варна, ул. "Преслав" № 14',
+    phone: "052 612 345",
+    email: "dg13mir@example.bg",
+    director: "Мария Иванова",
+    website: "dg13mir.bg",
+    district_code: "01",
+    location: { lat: 43.2041, lon: 27.9108, precision: "building" },
+    coverage: [
+      coverageGroup(STREETS[0], [[1, 14], [2, 14, "А"], [3, 15, null, "А"], [4, 16]]),
+      coverageGroup(STREETS[1], [[5, 84], [6, 86], [7, 88, "Б"]]),
+      coverageGroup(STREETS[5], [[8, 12], [9, 12, null, "Б"], [10, 13]]),
+    ],
+    branches: [
+      {
+        label: "Филиал „Изгрев“",
+        address: 'ул. "Сливница" № 84',
+        location: { lat: 43.2102, lon: 27.9187, precision: "building" },
+      },
+      {
+        label: "Филиал „Люлин“",
+        address: 'ул. "Генерал Колев" № 12',
+        location: { lat: 43.2011, lon: 27.9042, precision: "building" },
+      },
+      { label: "Яслена група", address: 'ул. "Преслав" № 16', location: null },
+      { label: "Филиал „Морско конче“", address: null, location: null },
+    ],
+  }),
+  // Nursery: address and phone only, district 02, no catchment, no branches.
+  "nursery/4": profile({
+    id: 5,
+    external_id: "4",
+    name: 'ДЯ № 4 "Приказен свят"',
+    kind: "nursery",
+    source_url: "https://dg.uslugi.io/lv/documents/infant/varna/rajon/4.html",
+    address: 'гр. Варна, ул. "Дрин" № 5',
+    phone: "052 654 321",
+    district_code: "02",
+    location: { lat: 43.2155, lon: 27.9231, precision: "building" },
+  }),
+  // Preschool: address and website only, no published catchment, no district.
+  "preschool/12": profile({
+    id: 12,
+    external_id: "12",
+    name: 'ОУ "Панайот Волов"',
+    kind: "preschool",
+    source_url: "https://dg.uslugi.io/lv/documents/preschool/varna/rajon/12.html",
+    address: 'гр. Варна, ж.к. "Чайка" № 12',
+    website: "https://ou-volov.bg/",
+    location: { lat: 43.2189, lon: 27.9312, precision: "building" },
+  }),
+  // The "nothing published" edge: every contact null, no address, no
+  // catchment, no branches.
+  "kindergarten/34": profile({
+    id: 19,
+    external_id: "34",
+    name: 'ДГ№1 "Светулка"',
+    kind: "kindergarten",
+    source_url: "https://dg.uslugi.io/lv/documents/garden/varna/rajon/34.html",
+    district_code: "03",
+  }),
+};
 
 // --- scenario-driven failure injection --------------------------------------
 
@@ -192,6 +308,41 @@ const server = createServer((req, res) => {
     return;
   }
 
+  const bySource = url.pathname.match(/^\/api\/institutions\/by-source\/([^/]+)\/([^/]+)$/);
+
+  if (bySource) {
+    if (SCENARIO === "D3") {
+      send(res, 500, { error: "internal_error" });
+      return;
+    }
+
+    const kind = decodeURIComponent(bySource[1]);
+    const externalId = decodeURIComponent(bySource[2]);
+
+    if (!KINDS.includes(kind)) {
+      // FastAPI's enum validation shape, so an invalid kind is a 422, not a 404.
+      send(res, 422, {
+        detail: [{ type: "enum", loc: ["path", "kind"], msg: "Input should be 'nursery', 'kindergarten' or 'preschool'" }],
+      });
+      return;
+    }
+
+    const entry = PROFILES[`${kind}/${externalId}`];
+
+    if (!entry) {
+      // Byte-exact, like S8: the client maps a 404 to `institution_not_found`
+      // only when the body is exactly {"error":"institution_not_found"}.
+      send(res, 404, { error: "institution_not_found" });
+      return;
+    }
+
+    send(res, 200, {
+      ...entry,
+      last_seen_at: lastSeenAt(SCENARIO === "D2" ? STALE_DAYS : FRESH_DAYS),
+    });
+    return;
+  }
+
   if (url.pathname === "/api/match") {
     if (SCENARIO === "S7") {
       send(res, 500, { error: "internal_error" });
@@ -236,4 +387,6 @@ server.listen(PORT, () => {
   if (SCENARIO === "S7") console.log("  -> /api/match returns 500: error message, no retry control");
   if (SCENARIO === "S8") console.log("  -> /api/match returns address_not_found: retry button shown");
   if (SCENARIO === "S9") console.log("  -> /api/streets fails once, then recovers");
+  if (SCENARIO === "D2") console.log(`  -> by-source profiles are ${STALE_DAYS} days old: stale banner expected on institution pages`);
+  if (SCENARIO === "D3") console.log("  -> /api/institutions/by-source returns 500: error state with retry");
 });
