@@ -47,7 +47,7 @@ pattern.
 
 ## Phase 1.1 — Detail route and page content
 
-**Plan**: _not yet created_
+**Plan**: [institution-detail-route](../plans/institution-detail-route/PLAN.md) · status: planned
 
 **Linear**: YAS-11 (https://linear.app/ivo-tsonev/issue/YAS-11)
 
@@ -60,7 +60,7 @@ pattern.
 - Page sections: header (name, kind badge, ДГ/ДЯ number parsed from the name — **not** `DZ_NUMBER`, which tracks the internal id), physical address, contacts (phone as `tel:`, e-mail as `mailto:`, director, website for schools), the catchment grouped by street with natural number ordering, the branch list as text, `last_seen_at` freshness plus the >14-day stale banner, and the outbound source link marked external.
 - Per-kind empty states: nurseries explain district routing instead of showing an empty catchment; preschools reuse the copy from `PRESCHOOL_COVERAGE_RESEARCH.md` §5.
 - "Serves your address" context when the parent arrives from a result — carry the matched address and `match_basis` (`address` vs `district`) across the navigation, reusing the existing sessionStorage restore mechanism in `SearchExperience.tsx`.
-- Re-add the "Детайли" link on result cards in `SearchResults.tsx` alongside the existing "Източник" link.
+- Re-add the "Детайли" link on result cards in `SearchResults.tsx` alongside the existing "Източник" link — only for institutions present in the committed manifest, so a result the manifest does not know gets no link rather than a link to a static 404.
 - Loading, not-found and API-error states, matching how the search screen already handles them.
 
 ### Acceptance criteria
@@ -68,7 +68,7 @@ pattern.
 - [ ] `npm run build` succeeds with **no backend running** and emits one page per institution in the manifest
 - [ ] A direct visit to `/institution/kindergarten-46/` renders ДГ№13 "Мир" with its address, contacts, catchment and its 4 branch addresses as text
 - [ ] A nursery page shows the district it serves and no empty catchment list; a preschool page with no published catchment shows the §5 copy, not a generic "no results"
-- [ ] Arriving from a search result shows which address the parent searched and whether the match was address- or district-based; arriving directly shows neither and nothing looks broken
+- [ ] Arriving from a search result shows which address the parent searched and whether the match was address- or district-based; arriving directly with no matching stored search shows neither and nothing looks broken (a same-tab direct visit after a search that included this institution keeps showing the context — by design, see the plan's `DECISIONS.md`)
 - [ ] An unknown slug renders the 404 page rather than an error state
 - [ ] Keyboard-only navigation reaches every link with a visible focus indicator; the page passes `npm run lint`, `npm run check` and `npm run test`
 
