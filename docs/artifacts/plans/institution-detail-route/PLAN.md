@@ -1,6 +1,6 @@
 # Plan: Institution detail route and page content
 
-Status: draft
+Status: in-progress
 Branch: feature/yas-11-institution-detail-route
 Risk: medium
 Epic: 01 — Institution detail page with map ([epic](../../epics/01-institution-detail-page.md))
@@ -257,7 +257,7 @@ rest:
 Task state lives here. Tasks are appended by `scripts/add_task.py` and
 `scripts/add_final_task.py`. Update the checkboxes as work progresses.
 
-- [ ] TASK-001: Generate and commit the institutions manifest
+- [x] TASK-001: Generate and commit the institutions manifest
 - [ ] TASK-002: Add domain helpers: name number, district names, shared stored-search state
 - [ ] TASK-003: Extend the fixture server with detail-page scenarios (depends on TASK-001)
 - [ ] TASK-004: Gate on backend 1.3: regenerate the API types

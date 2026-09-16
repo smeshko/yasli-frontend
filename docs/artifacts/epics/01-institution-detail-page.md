@@ -47,7 +47,7 @@ pattern.
 
 ## Phase 1.1 — Detail route and page content
 
-**Plan**: [institution-detail-route](../plans/institution-detail-route/PLAN.md) · status: planned
+**Plan**: [institution-detail-route](../plans/institution-detail-route/PLAN.md) · status: in-progress
 
 **Linear**: YAS-11 (https://linear.app/ivo-tsonev/issue/YAS-11)
 

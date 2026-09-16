@@ -30,11 +30,13 @@ The frontend is the only browser-facing surface of yasli. It has no server runti
 ```
 src/
 ├── components/         React: SearchExperience, StatusBadge
+├── data/               institutions-manifest.json (generated, committed)
 ├── layouts/            BaseLayout.astro (shell, global CSS, nav)
 ├── pages/              Astro routes: /, /about, 404
 └── lib/
     ├── api/            client.ts (fetch wrappers), config.ts (base URL resolver), types.ts (generated)
     ├── domain/         kinds.ts (ReceptionKind enum), freshness.ts (14-day staleness)
+    ├── institutions/   manifest.ts (slug, page path and getStaticPaths helpers over the manifest)
     └── search/         addressSuggestions.ts, referenceData.ts, results.ts
 ```
 
@@ -72,6 +74,16 @@ Free-text submission without selecting a suggestion is intentionally **not** sup
 - Writes `src/lib/api/types.ts` (committed to the repo).
 
 The build does **not** call this script. Workflow: backend changes its OpenAPI → run `npm run api:types` locally → commit the regenerated `types.ts`.
+
+## Institution manifest
+
+`scripts/generate-institutions-manifest.mjs` follows the same committed-generated-artifact rule:
+
+- Reads `YASLI_INSTITUTIONS_URL` (defaults to `http://localhost:8000/api/institutions`) with the global `fetch`.
+- Keeps `kind`, `external_id` and `name` per row, sorted by kind order (`nursery`, `kindergarten`, `preschool`) then numeric `external_id`, and writes `src/data/institutions-manifest.json` (committed to the repo).
+- Exits non-zero on a non-200 status, invalid JSON, an empty or non-array payload, a row missing a field, an unknown `kind` or a duplicate `(kind, external_id)`.
+
+The build does **not** call this script, and CI never runs it. `src/lib/institutions/manifest.ts` turns the rows into slugs (`<kind>-<external_id>`), page paths (`/institution/<slug>/`) and `getStaticPaths` rows, so the institution pages exist exactly for the manifest's rows. Workflow: the institution list changes → run `npm run institutions:manifest` against the deployed backend → commit the regenerated file → redeploy.
 
 ## Build output
 
