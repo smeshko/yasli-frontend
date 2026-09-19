@@ -334,8 +334,13 @@ const server = createServer((req, res) => {
     const entry = PROFILES[`${kind}/${externalId}`];
 
     if (!entry) {
-      // Byte-exact, like S8: the client maps a 404 to `institution_not_found`
-      // only when the body is exactly {"error":"institution_not_found"}.
+      // This is the body the real backend sends, so it is what the fixture
+      // sends. Unlike the match route (S8), by-source is NOT byte-exact any
+      // more: the client maps *any* 404 on this route to
+      // `institution_not_found`, because a backend deployed before phase 1.3
+      // has no such route and answers FastAPI's {"detail":"Not Found"} —
+      // which has to reach the page as the not-found state, not as an error
+      // state whose retry could never succeed.
       send(res, 404, { error: "institution_not_found" });
       return;
     }

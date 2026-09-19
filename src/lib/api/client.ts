@@ -71,12 +71,16 @@ export function getInstitutionBySource(
   kind: ReceptionKind,
   externalId: string,
 ): Promise<ApiResult<InstitutionProfile>> {
-  /* Any 404 here is "no profile at this slug", whatever the body says. The
-     backend's own miss is `{"error":"institution_not_found"}`, but a backend
-     deployed before phase 1.3 has no `by-source` route at all and answers
-     FastAPI's `{"detail":"Not Found"}`. Without the fallback that lands in the
-     error state, whose retry can never succeed; the not-found state at least
-     says what happened and offers a way back. */
+  /* A 404 here with no recognised `error` code means "no profile at this
+     slug". The backend's own miss is `{"error":"institution_not_found"}`, but
+     a backend deployed before phase 1.3 has no `by-source` route at all and
+     answers FastAPI's `{"detail":"Not Found"}`. Without the fallback that
+     lands in the error state, whose retry can never succeed; the not-found
+     state at least says what happened and offers a way back.
+
+     A body that does carry a recognised code is still taken at its word — see
+     readNotFoundCode — so the other route's code would pass through here. The
+     backend never sends it on this route. */
   return requestJson<InstitutionProfile>(buildInstitutionBySourcePath(kind, externalId), {
     notFoundFallback: "institution_not_found",
   });
