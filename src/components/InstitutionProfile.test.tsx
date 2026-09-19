@@ -332,6 +332,37 @@ describe("InstitutionProfileView search context", () => {
   });
 });
 
+describe("InstitutionProfileView contact links", () => {
+  /* The verbatim live TEL for ДЯ № 4 (DZ_ID 4 → the real page nursery/4).
+     The whole value used to become one 19-digit tel: href that dials
+     nothing, while the text still read as two correct numbers. */
+  it("links only the first of two numbers and still shows both", () => {
+    const html = renderView({
+      profile: profile({ phone: "052 820758 0885665404" }),
+    });
+
+    expect(html).toContain('href="tel:052820758"');
+    expect(html).not.toContain("0528207580885665404");
+    expect(html).toContain("052 820758 0885665404");
+  });
+
+  it("links only the first of two addresses and still shows both", () => {
+    const html = renderView({
+      profile: profile({ email: "dg13mir@example.bg, dg13@example.bg" }),
+    });
+
+    expect(html).toContain('href="mailto:dg13mir@example.bg"');
+    expect(html).toContain("dg13mir@example.bg, dg13@example.bg");
+  });
+
+  it("shows an unparsable phone as text rather than a partial tel: href", () => {
+    const html = renderView({ profile: profile({ phone: "по обяд" }) });
+
+    expect(html).not.toContain("tel:");
+    expect(html).toContain("по обяд");
+  });
+});
+
 describe("InstitutionProfileView website safety", () => {
   it("drops a javascript: website entirely rather than linking it", () => {
     const html = renderView({

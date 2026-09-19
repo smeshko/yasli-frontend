@@ -4,6 +4,7 @@ import {
   getInstitutionBySource,
   type InstitutionProfile as InstitutionProfileData,
 } from "@/lib/api/client";
+import { splitEmail, splitPhone } from "@/lib/domain/contacts";
 import { labelForDistrict } from "@/lib/domain/districts";
 import {
   STALE_BANNER_TEXT,
@@ -172,8 +173,13 @@ function AddressSection({ address }: { address: string | null }) {
 }
 
 function ContactsSection({ profile }: { profile: InstitutionProfileData }) {
-  const phone = present(profile.phone);
-  const email = present(profile.email);
+  /* The raw field can hold more than one number or address; only the first
+     parsed one becomes an href, and the full published value stays as the
+     link text so nothing the source gave is hidden. */
+  const rawPhone = present(profile.phone);
+  const rawEmail = present(profile.email);
+  const phone = rawPhone ? splitPhone(rawPhone) : null;
+  const email = rawEmail ? splitEmail(rawEmail) : null;
   const director = present(profile.director);
   /* Never the raw value: `website` is a scraped string, so only an http(s)
      URL may reach an href. Anything else is treated as absent. */
@@ -189,7 +195,7 @@ function ContactsSection({ profile }: { profile: InstitutionProfileData }) {
             <>
               <dt>{COPY.phoneLabel}</dt>
               <dd>
-                <a href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
+                {phone.dial ? <a href={`tel:${phone.dial}`}>{phone.display}</a> : phone.display}
               </dd>
             </>
           ) : null}
@@ -197,7 +203,11 @@ function ContactsSection({ profile }: { profile: InstitutionProfileData }) {
             <>
               <dt>{COPY.emailLabel}</dt>
               <dd>
-                <a href={`mailto:${email}`}>{email}</a>
+                {email.address ? (
+                  <a href={`mailto:${email.address}`}>{email.display}</a>
+                ) : (
+                  email.display
+                )}
               </dd>
             </>
           ) : null}
