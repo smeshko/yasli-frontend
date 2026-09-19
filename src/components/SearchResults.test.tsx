@@ -103,9 +103,12 @@ describe("SearchResults", () => {
     expect(html).toContain("ДГ Тест");
     expect(html).toContain("Я Тест");
     expect(html).toContain("ПГ Тест");
-    expect(html).toContain('href="https://example.test/source"');
     expect(html).toContain('href="/institution/kindergarten-42/"');
     expect(html).toContain('href="/institution/nursery-43/"');
+    // Every pair here has a page, so the card itself navigates and no card
+    // carries a source link.
+    expect(html).not.toContain("Източник");
+    expect(html).not.toContain('href="https://example.test/source"');
   });
 
   it("renders generic missing-district copy for a city address", () => {
@@ -216,7 +219,9 @@ describe("SearchResults", () => {
     );
 
     expect(html).toContain("ДГ Тест (яслена група)");
+    // The link wraps the text block, so the heading itself stays bare.
     expect(html).toContain("<h3>ДГ Тест</h3>");
+    expect(html).toContain('<a class="card-link" href="/institution/kindergarten-42/">');
     // The href uses institution_kind, so the infant-group row listed under
     // nurseries points at the kindergarten's own page, not a nursery slug.
     expect(html.match(/href="\/institution\/kindergarten-42\/"/g)).toHaveLength(2);
@@ -337,35 +342,43 @@ describe("SearchResults detail links", () => {
     expect(html).not.toContain("/institution/kindergarten-999999/");
   });
 
-  it("gives a card outside the manifest its source link and nothing else", () => {
+  it("falls back to source links for every card when no page exists", () => {
+    const html = render(new Set());
+
+    expect(html).not.toContain("/institution/");
+    expect(html).not.toContain("card-link");
+    expect(html.match(/Източник/g)).toHaveLength(2);
+  });
+
+  it("keeps the source link on a card with no page, so it is never a dead end", () => {
     const html = render(new Set(["kindergarten-42"]));
     const cards = html.split('class="result-card"');
     const unknownCard = cards.find((card) => card.includes("ДГ Нова"));
 
     expect(unknownCard).toBeDefined();
     expect(unknownCard).toContain("Източник");
-    expect(unknownCard).not.toContain("Детайли");
+    expect(unknownCard).toContain('target="_blank"');
     expect(unknownCard).not.toContain("/institution/");
+    expect(unknownCard).not.toContain("card-link");
+    expect(unknownCard).not.toContain("data-linked");
   });
 
-  it("renders Детайли before Източник on a linked card", () => {
+  it("makes the name the card's only control on a linked card", () => {
     const html = render(new Set(["kindergarten-42"]));
-    // Scoped to the linked card: the unlinked card sorts first by name, so a
-    // whole-document indexOf would compare its Източник against this card's
-    // Детайли.
     const linkedCard = html
       .split('class="result-card"')
       .find((card) => card.includes("ДГ Тест"));
 
     expect(linkedCard).toBeDefined();
-    expect(linkedCard!.indexOf("Детайли")).toBeLessThan(linkedCard!.indexOf("Източник"));
+    // One link, stretched over the card by CSS, labelled with the
+    // institution's name. No separate Детайли, no source link.
+    expect(linkedCard!.match(/<a /g)).toHaveLength(1);
+    expect(linkedCard).toContain('class="card-link"');
+    expect(linkedCard).toContain('href="/institution/kindergarten-42/"');
+    expect(linkedCard).not.toContain("Детайли");
+    expect(linkedCard).not.toContain("Източник");
+    expect(linkedCard).toContain('data-linked=""');
   });
 
-  it("renders no detail link at all for an empty manifest", () => {
-    const html = render(new Set());
 
-    expect(html).not.toContain("Детайли");
-    expect(html).not.toContain("/institution/");
-    expect(html).toContain("Източник");
-  });
 });

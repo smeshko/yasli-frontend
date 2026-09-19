@@ -175,9 +175,15 @@ function ResultGroup({
             const displayName = institution.offering === "infant_group"
               ? `${institution.name} (яслена група)`
               : institution.name;
+            const slug = buildInstitutionSlug(
+              institution.institution_kind,
+              institution.external_id,
+            );
+            const hasPage = pageSlugs.has(slug);
             return (
               <article
                 className="result-card"
+                data-linked={hasPage ? "" : undefined}
                 key={`${kind}-${institution.institution_kind}-${institution.offering}-${institution.id}`}
                 style={{ "--result-delay": `${index * 40}ms` } as React.CSSProperties}
               >
@@ -188,30 +194,42 @@ function ResultGroup({
                     in an address search, and "по вашия район" of nearly every
                     other — either way it cost a row on each card and said
                     nothing the group's own notes do not already say. */}
-                <div>
-                  <p className="kind-label">{labelForReceptionKind(institution.institution_kind)}</p>
-                  <h3>{displayName}</h3>
-                </div>
-                <div className="card-actions">
-                  {/* institution_kind, not reception_kind: an infant-group row
-                      listed under nurseries belongs to a kindergarten, and its
-                      page is the kindergarten's. */}
-                  {pageSlugs.has(
-                    buildInstitutionSlug(institution.institution_kind, institution.external_id),
-                  ) ? (
-                    <a
-                      href={institutionPath(
-                        institution.institution_kind,
-                        institution.external_id,
-                      )}
-                    >
-                      Детайли
-                    </a>
-                  ) : null}
-                  <a href={institution.source_url} target="_blank" rel="noreferrer">
-                    Източник <span aria-hidden="true">↗</span>
+                {/* The link wraps the whole text block rather than sitting
+                    inside the <h3>: h3 is position:relative, so an overlay
+                    anchored from inside it would cover only the name. As a
+                    direct child of the card, the link's stretched ::after
+                    resolves against the card and the whole card is clickable. */}
+                {hasPage ? (
+                  <a
+                    className="card-link"
+                    href={institutionPath(
+                      institution.institution_kind,
+                      institution.external_id,
+                    )}
+                  >
+                    <p className="kind-label">
+                      {labelForReceptionKind(institution.institution_kind)}
+                    </p>
+                    <h3>{displayName}</h3>
                   </a>
-                </div>
+                ) : (
+                  <div>
+                    <p className="kind-label">
+                      {labelForReceptionKind(institution.institution_kind)}
+                    </p>
+                    <h3>{displayName}</h3>
+                  </div>
+                )}
+                {/* institution_kind, not reception_kind: an infant-group row
+                    listed under nurseries belongs to a kindergarten, and its
+                    page is the kindergarten's. */}
+                {hasPage ? null : (
+                  <div className="card-actions">
+                    <a href={institution.source_url} target="_blank" rel="noreferrer">
+                      Източник <span aria-hidden="true">↗</span>
+                    </a>
+                  </div>
+                )}
               </article>
             );
           })}
