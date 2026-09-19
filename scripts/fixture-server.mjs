@@ -177,6 +177,9 @@ const profile = (fields) => ({
   director: null,
   website: null,
   district_code: null,
+  // Shipped by backend 1.3 but not rendered by the detail page; present so a
+  // profile matches the real InstitutionDetail schema field for field.
+  has_infant_group: false,
   location: null,
   coverage: [],
   branches: [],
@@ -198,6 +201,7 @@ const PROFILES = {
     director: "Мария Иванова",
     website: "dg13mir.bg",
     district_code: "01",
+    has_infant_group: true,
     location: { lat: 43.2041, lon: 27.9108, precision: "building" },
     coverage: [
       coverageGroup(STREETS[0], [[1, 14], [2, 14, "А"], [3, 15, null, "А"], [4, 16]]),

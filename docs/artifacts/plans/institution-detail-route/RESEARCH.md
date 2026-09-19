@@ -87,27 +87,47 @@ Curated findings only — no raw conversation transcripts.
     NULLS LAST. 404 body `{"error": "institution_not_found"}`.
   - `(external_id, kind)` is the unique constraint; `external_id` alone repeats
     across kinds.
-- **Backend phase 1.3 contract** (`backend/docs/artifacts/epics/01-institution-data-foundation.md` §1.3,
-  `planned`, Linear YAS-8; the epic links a plan `institution-profile-endpoint`
-  that has no directory on the backend checkout as of 2026-09-16, so the epic
-  text is the only contract). The detail response
-  gains, with `null` (never omitted) where absent:
+- **Backend phase 1.3 contract** — **confirmed against the shipped schema in
+  TASK-004** (2026-09-19). Backend 1.3 is merged on the backend's `staging`
+  (`507ebe1 feat(api): add GET /institutions/by-source/{kind}/{external_id}`,
+  epic phase 1.3 `status: done`, YAS-8). The schema below was read from a local
+  run of that branch; it matches what the plan assumed, plus the two additive
+  fields marked **(not anticipated)**. The detail response gains, with `null`
+  (never omitted) where absent:
   - `address: string | null`
   - `phone: string | null`, `email: string | null`, `director: string | null`,
     `website: string | null`
   - `district_code: "01"|"02"|"03"|"04"|"05" | null`
-  - `location: {lat, lon, precision} | null`
-  - `branches: [{label, address, location | null}]` — label or address may be
-    empty/null (three real branches have a name and no address; one has no
-    coordinate)
+  - `location: {lat: number, lon: number, precision: "building" | "approximate"} | null`
+    — schema name `Location`
+  - `branches: [{label: string | null, address: string | null, location: Location | null}]`
+    — schema name `Branch`; label or address may be empty/null (three real
+    branches have a name and no address; one has no coordinate)
+  - `has_infant_group: boolean` — **(not anticipated)**; additive and not
+    rendered by this phase (the search screen already derives the яслена група
+    suffix from `MatchResult`). Recorded so a later phase does not rediscover it.
   - and `GET /api/institutions/by-source/{kind}/{external_id}` returning the
     same payload; unknown pair → 404 with the id route's body shape; invalid
     `kind` → 422. Its acceptance names `by-source/kindergarten/46` → ДГ№13
     „Мир“ with 4 branches, and requires regenerating the frontend types.
   - `kind` enum: `"nursery" | "kindergarten" | "preschool"` (`models/types.py:21`).
-- Backend epic 01 status: 1.1 done (DB columns only, nothing exposed), 1.2
-  in-progress on `feature/yas-7-institution-locations-dataset` (final
-  validation open, unmerged), 1.3 planned.
+  - The route also accepts an optional `If-None-Match` request header (ETag
+    revalidation, like the list route). The client wrapper does not send it.
+  - OpenAPI documents only `200` and `422` for both institution routes; the
+    `404` is returned at runtime with the byte-exact body
+    `{"error":"institution_not_found"}` (verified by `curl` in TASK-004), so
+    the generated types carry no 404 response type. `readNotFoundCode` matches
+    on the body, not on a generated type, so this costs nothing.
+- **The list response also gained `has_infant_group` and `location`**
+  (`InstitutionListItem`) — **(not anticipated)**; backend epic §1.3 made this
+  conditional on frontend epic 01 needing it. It is additive and the manifest
+  script keeps only `kind`, `external_id` and `name`, so
+  `src/data/institutions-manifest.json` is unaffected.
+- Backend epic 01 status: 1.1 done, 1.2 done (merged, PR #2), 1.3 done
+  (merged, PR #3). **Not yet deployed**: Railway's `backend-api` service
+  deploys from the backend's `main` branch, and 1.3 sits on `staging` only, so
+  `https://yasli-backend-production.up.railway.app` still serves the
+  pre-1.3 contract. See TASK-004's note and the `Risks` entry in `PLAN.md`.
 - `match_basis` on `MatchResult` is exactly `"address" | "district"`;
   `"district"` is how every nursery matches.
 - Contacts are already in the production database: scraper epic 01 (`done`)
@@ -172,13 +192,26 @@ npm run preview                               # serves dist/, 404 for unknown sl
 
 ## Uncertainty
 
-- Exact TypeScript names the regenerated `types.ts` will use for the
-  `by-source` operation and any new schema — unknown until backend 1.3 ships.
-  TASK-004 records them here and TASK-005 uses them.
-- Whether backend 1.3 represents an absent branch label/address as `null` or
-  `""`. The island treats both as absent (`trim()` falsy).
-- Whether nursery `coverage` comes back empty or populated after 1.3. The
-  page never renders it for nurseries either way.
+- ~~Exact TypeScript names the regenerated `types.ts` will use~~ — **resolved
+  in TASK-004** (2026-09-19). TASK-005 uses these names:
+  - operation:
+    `operations["get_institution_by_source_api_institutions_by_source__kind___external_id__get"]`
+  - response schema: `components["schemas"]["InstitutionDetail"]` — the **same**
+    schema as `GET /api/institutions/{institution_id}`, as the plan predicted,
+    so the new fields land on both routes
+  - new schemas: `components["schemas"]["Branch"]` and
+    `components["schemas"]["Location"]`
+- ~~Whether an absent branch label/address is `null` or `""`~~ — the schema
+  types both as `string | null`. The island still treats `""` as absent
+  (`trim()` falsy), because the CSV rows behind the data carry `""`.
+- Whether nursery `coverage` comes back empty or populated after 1.3 — still
+  unknown, because the local database TASK-004 read the schema from has no
+  rows. The page never renders it for nurseries either way, so nothing
+  depends on the answer.
+- **Not yet proven against real data**: that `by-source/kindergarten/46`
+  returns four branches and non-null `phone`/`email`/`director`. TASK-004
+  confirmed the *schema* only; the data path needs the deployed backend
+  (see that task's note and TASK-009's real-backend row).
 - The real `external_id` of a nursery and of a preschool with empty coverage
   for the fixture keys — resolved by reading the committed manifest in
   TASK-003.

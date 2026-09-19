@@ -91,6 +91,11 @@ regression.
   only when the status is 404 *and* the body is exactly
   `{"error":"institution_not_found"}`; anything else is a generic `http_error`
   and the error state renders instead of not-found.
+- **`has_infant_group` is in every profile but on no page.** Backend 1.3 ships
+  it on `InstitutionDetail` (TASK-004 found it; the plan had not anticipated
+  it). The profiles carry it so a fixture response matches the real schema
+  field for field, and `kindergarten/46` sets it `true` because its S1 card is
+  the infant-group row. The detail page renders nothing from it.
 - **The manifest script's default URL is this server.** A bare
   `npm run institutions:manifest` while fixtures are up would replace the
   95-row production manifest with the fixture's three `/api/institutions`
