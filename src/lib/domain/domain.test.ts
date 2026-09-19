@@ -90,6 +90,15 @@ describe("district names", () => {
     expect(labelForDistrict("04")).toBe("Владислав Варненчик");
     expect(labelForDistrict("05")).toBe("Аспарухово");
   });
+
+  /* The code union is compile-time only, over a generated file. A sixth code
+     from the backend used to render the literal "район undefined." */
+  it("returns null for a code it does not know", () => {
+    expect(labelForDistrict("06")).toBeNull();
+    expect(labelForDistrict("")).toBeNull();
+    expect(labelForDistrict(null)).toBeNull();
+    expect(labelForDistrict("toString")).toBeNull();
+  });
 });
 
 describe("normalizeWebsiteUrl", () => {

@@ -233,6 +233,19 @@ describe("InstitutionProfileView per-kind rules", () => {
     expect(html).toContain("Яслите не са по адрес");
   });
 
+  /* A district code the frontend map does not know used to render the literal
+     "Яслата обслужва район undefined." — an English word in Bulgarian copy on
+     a live page. Unknown and absent are the same claim: we cannot confirm it. */
+  it("falls back to the unconfirmed copy for an unknown district code", () => {
+    const html = renderView({
+      kind: "nursery",
+      profile: profile({ kind: "nursery", district_code: "06" as never }),
+    });
+
+    expect(html).not.toContain("undefined");
+    expect(html).toContain("Районът на яслата не е потвърден в източника.");
+  });
+
   it("uses the researched copy for a preschool with no published catchment", () => {
     const html = renderView({
       kind: "preschool",

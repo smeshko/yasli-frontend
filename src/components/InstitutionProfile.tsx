@@ -54,7 +54,9 @@ const COPY = {
 } as const;
 
 function nurseryDistrictText(code: InstitutionProfileData["district_code"]): string {
-  return code ? `Яслата обслужва район ${labelForDistrict(code)}.` : COPY.nurseryDistrictUnknown;
+  const label = labelForDistrict(code);
+
+  return label ? `Яслата обслужва район ${label}.` : COPY.nurseryDistrictUnknown;
 }
 
 function contextText(context: StoredMatchContext): string {
