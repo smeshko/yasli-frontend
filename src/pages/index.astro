@@ -312,9 +312,11 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     outline: none;
   }
 
-  /* The ring goes on the card, since the link covers all of it. */
+  /* The ring goes on the card, since the link covers all of it, and reads
+     from the group's own hue like the hover shadow does — a nursery-coloured
+     ring on a kindergarten card clashed with its own hover state. */
   .result-card:has(.card-link:focus-visible) {
-    outline: 2px solid var(--color-section-nursery);
+    outline: 2px solid var(--tone);
     outline-offset: 3px;
   }
 
