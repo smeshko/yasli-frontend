@@ -51,8 +51,16 @@ export function saveStoredSearchState(state: StoredSearchState): void {
  * last successful search was for, and how this institution matched it. `null`
  * when there is no stored search, it did not succeed, or this institution was
  * not in its results. Matches on `institution_kind`, so an infant-group row
- * listed under nurseries resolves the kindergarten it belongs to; groups are
- * walked in `receptionKindOrder`, so the first row seen wins.
+ * listed under nurseries resolves the kindergarten it belongs to.
+ *
+ * One institution can appear in two groups at once: a kindergarten with an
+ * infant group is a `standard` row under kindergartens and an `infant_group`
+ * row under nurseries, and the two can carry different bases — the
+ * kindergarten serves the address while its infant group is district-routed.
+ * An address match is the stronger, more specific statement and is what the
+ * search screen showed, so it wins regardless of group order; taking the
+ * first row in `receptionKindOrder` would tell the parent "по район" for the
+ * institution that actually covers their street.
  */
 export function findStoredMatchContext(
   stored: StoredSearchState | null,
@@ -71,13 +79,23 @@ export function findStoredMatchContext(
     return null;
   }
 
+  let fallbackBasis: MatchResult["match_basis"] | null = null;
+
   for (const groupKind of receptionKindOrder) {
     for (const result of grouped[groupKind] ?? []) {
-      if (result.institution_kind === kind && result.external_id === externalId) {
-        return { addressLabel: selectedAddress.label, matchBasis: result.match_basis };
+      if (result.institution_kind !== kind || result.external_id !== externalId) {
+        continue;
       }
+
+      if (result.match_basis === "address") {
+        return { addressLabel: selectedAddress.label, matchBasis: "address" };
+      }
+
+      fallbackBasis ??= result.match_basis;
     }
   }
 
-  return null;
+  return fallbackBasis
+    ? { addressLabel: selectedAddress.label, matchBasis: fallbackBasis }
+    : null;
 }
