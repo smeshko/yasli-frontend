@@ -56,6 +56,8 @@ Error codes: `network_error`, `http_error`, `invalid_json`, `address_not_found`,
 
 Both not-found codes come from a byte-exact 404 body (`{"error":"address_not_found"}` from the match route, `{"error":"institution_not_found"}` from the institution routes). `readNotFoundCode` matches that body against a closed list, so a 404 with any other shape stays a generic `http_error` rather than becoming a state the UI treats as authoritative.
 
+`getInstitutionBySource` is the one exception: it opts into `notFoundFallback: "institution_not_found"`, so **any** 404 on `by-source` maps to the not-found state. A backend deployed before phase 1.3 has no such route and answers FastAPI's `{"detail":"Not Found"}`; without the fallback that lands in `http_error`, whose retry button can never succeed. The closed list still governs every other route.
+
 ## Search flow
 
 `SearchExperience.tsx` orchestrates the only user flow:
