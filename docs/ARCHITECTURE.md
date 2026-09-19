@@ -32,7 +32,7 @@ src/
 ├── components/         React: SearchExperience, StatusBadge
 ├── data/               institutions-manifest.json (generated, committed)
 ├── layouts/            BaseLayout.astro (shell, global CSS, nav)
-├── pages/              Astro routes: /, /about, 404
+├── pages/              Astro routes: /, /institution/[slug], /pravila, 404
 └── lib/
     ├── api/            client.ts (fetch wrappers), config.ts (base URL resolver), types.ts (generated)
     ├── domain/         kinds.ts (ReceptionKind enum), freshness.ts (14-day staleness)
@@ -90,7 +90,9 @@ The build does **not** call this script, and CI never runs it. `src/lib/institut
 
 ## Build output
 
-`output: "static"` produces `dist/` with prerendered HTML for every route plus React islands for `SearchExperience`. The `PUBLIC_YASLI_API_BASE_URL` value is **baked in at build time** — changing it requires a redeploy, not just a restart.
+`output: "static"` produces `dist/` with prerendered HTML for every route plus React islands for `SearchExperience` and `InstitutionProfile`.
+
+`/institution/<kind>-<external_id>/` is a dynamic route whose `getStaticPaths` reads the committed manifest, so the build emits exactly one page per manifest row and needs no backend. Each page prerenders its header (kind label, ДГ/ДЯ number parsed from the name, the name as `<h1>`) from the manifest and hydrates the rest from `GET /api/institutions/by-source/{kind}/{external_id}`. A slug outside the manifest has no page and is served the site 404. The `PUBLIC_YASLI_API_BASE_URL` value is **baked in at build time** — changing it requires a redeploy, not just a restart.
 
 ## Deployment
 
