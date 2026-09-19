@@ -1,0 +1,345 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+
+import type { InstitutionProfile as InstitutionProfileData } from "@/lib/api/client";
+import type { StoredMatchContext } from "@/lib/search/storedSearch";
+
+import { InstitutionProfile, InstitutionProfileView } from "./InstitutionProfile";
+
+const NOW = new Date("2026-09-16T12:00:00Z");
+
+function street(id: number, part: string, marker: string | null = "УЛ.") {
+  return {
+    id,
+    city: "ГР.ВАРНА",
+    raw_name: `ГР.ВАРНА ${marker ?? ""}${part}`,
+    street_part: part,
+    type_marker: marker,
+  };
+}
+
+function profile(overrides: Partial<InstitutionProfileData> = {}): InstitutionProfileData {
+  return {
+    id: 31,
+    external_id: "46",
+    name: 'ДГ№13 "Мир"',
+    kind: "kindergarten",
+    source_url: "https://dg.uslugi.io/lv/documents/garden/varna/rajon/46.html",
+    last_seen_at: "2026-09-14T00:00:00Z",
+    address: 'гр. Варна, ул. "Преслав" № 14',
+    phone: "052 612 345",
+    email: "dg13mir@example.bg",
+    director: "Мария Иванова",
+    website: "dg13mir.bg",
+    district_code: "01",
+    has_infant_group: false,
+    location: null,
+    branches: [],
+    coverage: [],
+    ...overrides,
+  };
+}
+
+function renderView(props: Partial<Parameters<typeof InstitutionProfileView>[0]> = {}) {
+  return renderToStaticMarkup(
+    <InstitutionProfileView
+      status="success"
+      profile={profile()}
+      context={null}
+      kind="kindergarten"
+      now={NOW}
+      onRetry={vi.fn()}
+      {...props}
+    />,
+  );
+}
+
+describe("InstitutionProfile island", () => {
+  it("renders the loading state on the server, because effects do not run", () => {
+    const html = renderToStaticMarkup(
+      <InstitutionProfile kind="kindergarten" externalId="46" />,
+    );
+
+    expect(html).toContain('role="status"');
+    expect(html).toContain("Зареждаме данните за институцията…");
+  });
+});
+
+describe("InstitutionProfileView states", () => {
+  it("marks the loading block as a status region", () => {
+    const html = renderView({ status: "loading", profile: null });
+
+    expect(html).toContain('role="status"');
+    expect(html).toContain("Зареждаме данните за институцията…");
+  });
+
+  it("marks the error block as an alert and offers a retry button", () => {
+    const html = renderView({ status: "error", profile: null });
+
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("Не успяхме да заредим данните за институцията.");
+    expect(html).toContain("<button");
+    expect(html).toContain("Опитайте отново");
+  });
+
+  it("offers a way back from the not-found state", () => {
+    const html = renderView({ status: "not_found", profile: null });
+
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("Институцията вече не е в източника.");
+    expect(html).toContain('href="/"');
+    expect(html).toContain("Към търсенето");
+  });
+
+  it("falls back to not-found when success arrives without a profile", () => {
+    const html = renderView({ status: "success", profile: null });
+
+    expect(html).toContain("Институцията вече не е в източника.");
+  });
+});
+
+describe("InstitutionProfileView kindergarten content", () => {
+  const full = profile({
+    coverage: [
+      {
+        street: street(1, "ПРЕСЛАВ"),
+        addresses: [
+          { id: 1, number_int: 14, number_suffix: null, entrance: null },
+          { id: 2, number_int: 14, number_suffix: "А", entrance: null },
+          { id: 3, number_int: 15, number_suffix: null, entrance: "А" },
+        ],
+      },
+      {
+        street: street(2, "СЛИВНИЦА", "БУЛ."),
+        addresses: [{ id: 4, number_int: 84, number_suffix: null, entrance: null }],
+      },
+      {
+        street: street(3, "ГЕНЕРАЛ КОЛЕВ"),
+        addresses: [{ id: 5, number_int: 12, number_suffix: null, entrance: null }],
+      },
+    ],
+    branches: [
+      { label: "Филиал „Изгрев“", address: 'ул. "Сливница" № 84', location: null },
+      { label: "Филиал „Люлин“", address: 'ул. "Генерал Колев" № 12', location: null },
+      { label: "Яслена група", address: 'ул. "Преслав" № 16', location: null },
+      { label: "Филиал „Морско конче“", address: null, location: null },
+    ],
+  });
+
+  it("renders the address, contacts and the source link", () => {
+    const html = renderView({ profile: full });
+
+    expect(html).toContain("гр. Варна, ул. &quot;Преслав&quot; № 14");
+    expect(html).toContain('href="tel:052612345"');
+    expect(html).toContain('href="mailto:dg13mir@example.bg"');
+    expect(html).toContain("Мария Иванова");
+    expect(html).toContain('href="https://dg13mir.bg"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noreferrer"');
+    expect(html).toContain("↗");
+    expect(html).toContain('href="https://dg.uslugi.io/lv/documents/garden/varna/rajon/46.html"');
+    expect(html).toContain("Последна актуализация:");
+  });
+
+  it("keeps the catchment in API order with three-digit numbers", () => {
+    const html = renderView({ profile: full });
+
+    const preslav = html.indexOf("ул. Преслав");
+    const slivnica = html.indexOf("бул. Сливница");
+    const kolev = html.indexOf("ул. Генерал Колев");
+
+    expect(preslav).toBeGreaterThan(-1);
+    expect(preslav).toBeLessThan(slivnica);
+    expect(slivnica).toBeLessThan(kolev);
+    expect(html).toContain("014, 014А, 015 вх.А");
+  });
+
+  it("renders every branch as text, including a label-only one", () => {
+    const html = renderView({ profile: full });
+
+    expect(html).toContain("Филиали");
+    expect(html).toContain("Филиал „Изгрев“ — ул. &quot;Сливница&quot; № 84");
+    expect(html).toContain("Филиал „Люлин“ — ул. &quot;Генерал Колев&quot; № 12");
+    expect(html).toContain("Яслена група — ул. &quot;Преслав&quot; № 16");
+    expect(html).toContain("Филиал „Морско конче“");
+  });
+
+  it("never prints a district name on a kindergarten page", () => {
+    const html = renderView({ profile: full });
+
+    for (const district of [
+      "Одесос",
+      "Приморски",
+      "Младост",
+      "Владислав Варненчик",
+      "Аспарухово",
+    ]) {
+      expect(html).not.toContain(district);
+    }
+  });
+
+  it("renders its own line when the catchment is empty and all contacts are null", () => {
+    const html = renderView({
+      profile: profile({
+        address: null,
+        phone: null,
+        email: null,
+        director: null,
+        website: null,
+        coverage: [],
+        branches: [],
+      }),
+    });
+
+    expect(html).toContain("Няма публикуван район на прием за тази градина в източника.");
+    expect(html).toContain("Няма публикувани контакти.");
+    expect(html).toContain("Адресът не е публикуван в източника.");
+    expect(html).not.toContain("Филиали");
+  });
+});
+
+describe("InstitutionProfileView per-kind rules", () => {
+  it("shows a nursery's district and never its coverage, even when populated", () => {
+    const html = renderView({
+      kind: "nursery",
+      profile: profile({
+        kind: "nursery",
+        district_code: "02",
+        coverage: [
+          {
+            street: street(1, "ПРЕСЛАВ"),
+            addresses: [{ id: 1, number_int: 14, number_suffix: null, entrance: null }],
+          },
+        ],
+      }),
+    });
+
+    expect(html).toContain("Яслата обслужва район Приморски.");
+    expect(html).toContain("Яслите не са по адрес");
+    // The heading carries id="profile-coverage", so assert on the list's
+    // class attribute rather than the bare string.
+    expect(html).not.toContain('class="profile-coverage"');
+    expect(html).not.toContain("<ul");
+    expect(html).not.toContain("ул. Преслав");
+  });
+
+  it("says so plainly when a nursery's district is unconfirmed", () => {
+    const html = renderView({
+      kind: "nursery",
+      profile: profile({ kind: "nursery", district_code: null }),
+    });
+
+    expect(html).toContain("Районът на яслата не е потвърден в източника.");
+    expect(html).toContain("Яслите не са по адрес");
+  });
+
+  it("uses the researched copy for a preschool with no published catchment", () => {
+    const html = renderView({
+      kind: "preschool",
+      profile: profile({ kind: "preschool", district_code: null, coverage: [] }),
+    });
+
+    expect(html).toContain(
+      "Няма публикувано райониране за това адресно местоположение. Подайте заявление в избрано от вас училище — Община Варна не задължава да се запишете в конкретно.",
+    );
+  });
+});
+
+describe("InstitutionProfileView freshness", () => {
+  it("shows the stale banner past fourteen days", () => {
+    const html = renderView({
+      profile: profile({ last_seen_at: "2026-08-17T00:00:00Z" }),
+    });
+
+    expect(html).toContain(
+      "Данните са по-стари от 14 дни. Проверете и официалния източник преди кандидатстване.",
+    );
+  });
+
+  it("shows no banner two days old", () => {
+    const html = renderView({
+      profile: profile({ last_seen_at: "2026-09-14T00:00:00Z" }),
+    });
+
+    expect(html).not.toContain("Данните са по-стари от");
+  });
+
+  it("formats the freshness date day-first", () => {
+    const html = renderView({
+      profile: profile({ last_seen_at: "2026-09-14T00:00:00Z" }),
+    });
+
+    expect(html).toMatch(/Последна актуализация:\s*14\.09\.2026/);
+  });
+});
+
+describe("InstitutionProfileView search context", () => {
+  it("names the searched address for an address match", () => {
+    const context: StoredMatchContext = {
+      addressLabel: "ул. Преслав 012",
+      matchBasis: "address",
+    };
+    const html = renderView({ context });
+
+    expect(html).toContain("Обслужва вашия адрес: ул. Преслав 012.");
+    expect(html).toContain('role="note"');
+  });
+
+  it("explains a district match rather than implying an address match", () => {
+    const context: StoredMatchContext = {
+      addressLabel: "ул. Преслав 012",
+      matchBasis: "district",
+    };
+    const html = renderView({ context, kind: "nursery", profile: profile({ kind: "nursery" }) });
+
+    expect(html).toContain(
+      "Във вашия район — търсихте ул. Преслав 012. Съвпадението е по район, не по точен адрес.",
+    );
+  });
+
+  it("renders no context block without a stored match", () => {
+    const html = renderView({ context: null });
+
+    expect(html).not.toContain("profile-context");
+  });
+});
+
+describe("InstitutionProfileView website safety", () => {
+  it("drops a javascript: website entirely rather than linking it", () => {
+    const html = renderView({
+      profile: profile({
+        phone: null,
+        email: null,
+        director: null,
+        website: "javascript:alert(1)",
+      }),
+    });
+
+    expect(html).not.toContain("Уебсайт");
+    expect(html).not.toContain("javascript:");
+    expect(html).toContain("Няма публикувани контакти.");
+  });
+
+  it("upgrades a bare host to https", () => {
+    const html = renderView({ profile: profile({ website: "dg13.bg" }) });
+
+    expect(html).toContain('href="https://dg13.bg"');
+  });
+
+  it("only ever emits safe href schemes", () => {
+    const html = renderView({
+      profile: profile({
+        website: "dg13.bg",
+        branches: [{ label: "Филиал", address: "ул. Тест 1", location: null }],
+      }),
+      context: { addressLabel: "ул. Преслав 012", matchBasis: "address" },
+    });
+
+    const hrefs = [...html.matchAll(/href="([^"]*)"/g)].map((match) => match[1]);
+
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const href of hrefs) {
+      expect(href).toMatch(/^(https?:\/\/|tel:|mailto:|\/)/);
+    }
+  });
+});

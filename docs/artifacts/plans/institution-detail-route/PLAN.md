@@ -262,7 +262,7 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 - [x] TASK-003: Extend the fixture server with detail-page scenarios (depends on TASK-001)
 - [x] TASK-004: Gate on backend 1.3: regenerate the API types
 - [x] TASK-005: Add the by-source client wrapper and not-found error code (depends on TASK-004)
-- [ ] TASK-006: Build the InstitutionProfile island with every state and section (depends on TASK-002,TASK-005)
+- [x] TASK-006: Build the InstitutionProfile island with every state and section (depends on TASK-002,TASK-005)
 - [ ] TASK-007: Add the prerendered /institution/[slug] route (depends on TASK-001,TASK-003,TASK-006)
 - [ ] TASK-008: Re-add the Детайли link on result cards (depends on TASK-007)
 - [ ] TASK-009: Final Validation
