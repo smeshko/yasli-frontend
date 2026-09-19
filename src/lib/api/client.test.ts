@@ -206,15 +206,22 @@ describe("getInstitutionBySource", () => {
     });
   });
 
-  it("does not map an address_not_found body on the institution route", async () => {
+  /* readNotFoundCode is a closed list of codes, not a per-route map, so a
+     body carrying the other route's code is taken at its word. Harmless
+     today — the island treats anything but institution_not_found as the error
+     state, and the backend never sends this on this route — but the name has
+     to describe what actually happens, not a guard that does not exist. */
+  it("takes a 404 body at its word, even the other route's code", async () => {
     stubFetch(jsonResponse(JSON.stringify({ error: "address_not_found" }), 404));
 
-    const result = await getInstitutionBySource("kindergarten", "35");
-
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.code).toBe("address_not_found");
-    }
+    await expect(getInstitutionBySource("kindergarten", "35")).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "address_not_found",
+        message: "Адресът вече не е наличен в заредените данни.",
+        status: 404,
+      },
+    });
   });
 
   it("maps a 500 to http_error", async () => {
