@@ -285,8 +285,40 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     padding: 0 0 56px;
   }
 
-  .results-status,
-  .stale-banner {
+  /* The whole card navigates. Rather than a click handler on the article,
+     the institution name is a real link whose ::after is stretched over the
+     card: one focusable control, keyboard and middle-click behave like any
+     link, and no interactive element is nested inside another. */
+  .result-card[data-linked] {
+    cursor: pointer;
+  }
+
+  .result-card .card-link {
+    /* Stretch so a long name uses the full card width, and so the link box
+       (not just its text) spans the card horizontally. */
+    align-self: stretch;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .result-card .card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .result-card .card-link:focus-visible {
+    outline: none;
+  }
+
+  /* The ring goes on the card, since the link covers all of it. */
+  .result-card:has(.card-link:focus-visible) {
+    outline: 2px solid var(--color-section-nursery);
+    outline-offset: 3px;
+  }
+
+  .results-status {
     border: 2px solid var(--color-border-card);
     border-radius: var(--radius-surface);
     margin-top: 18px;
@@ -295,8 +327,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     padding: 16px 18px;
   }
 
-  .results-status.error,
-  .stale-banner {
+  .results-status.error {
     border-color: var(--color-border-error);
     background: var(--color-bg-error-soft);
     color: var(--color-text-error);

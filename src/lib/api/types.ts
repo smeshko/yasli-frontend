@@ -96,8 +96,41 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Institution */
+        /**
+         * Get Institution
+         * @description The detail by database serial.
+         *
+         *     `{institution_id}` matches exactly one path segment, so the three-segment
+         *     by-source path below can never be captured here regardless of registration
+         *     order. The reverse — `/api/institutions/by-source` with nothing after it —
+         *     does land here and returns 422, because `"by-source"` is not an integer.
+         */
         get: operations["get_institution_api_institutions__institution_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/institutions/by-source/{kind}/{external_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Institution By Source
+         * @description The same detail by the stable natural key `(kind, external_id)`.
+         *
+         *     `institutions.id` is a serial reassigned on every re-ingest; this pair is
+         *     not, so the frontend addresses a page by it. `external_id` carries no
+         *     length constraint: a value longer than the column is "no such
+         *     institution", not a malformed request.
+         */
+        get: operations["get_institution_by_source_api_institutions_by_source__kind___external_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -122,6 +155,14 @@ export interface components {
             number_suffix: string | null;
             /** Entrance */
             entrance: string | null;
+        };
+        /** Branch */
+        Branch: {
+            /** Label */
+            label: string | null;
+            /** Address */
+            address: string | null;
+            location: components["schemas"]["Location"] | null;
         };
         /** CoverageGroup */
         CoverageGroup: {
@@ -165,6 +206,23 @@ export interface components {
              * Format: date-time
              */
             last_seen_at: string;
+            /** Address */
+            address: string | null;
+            /** Phone */
+            phone: string | null;
+            /** Email */
+            email: string | null;
+            /** Director */
+            director: string | null;
+            /** Website */
+            website: string | null;
+            /** District Code */
+            district_code: ("01" | "02" | "03" | "04" | "05") | null;
+            /** Has Infant Group */
+            has_infant_group: boolean;
+            location: components["schemas"]["Location"] | null;
+            /** Branches */
+            branches: components["schemas"]["Branch"][];
             /** Coverage */
             coverage: components["schemas"]["CoverageGroup"][];
         };
@@ -188,6 +246,21 @@ export interface components {
              * Format: date-time
              */
             last_seen_at: string;
+            /** Has Infant Group */
+            has_infant_group: boolean;
+            location: components["schemas"]["Location"] | null;
+        };
+        /** Location */
+        Location: {
+            /** Lat */
+            lat: number;
+            /** Lon */
+            lon: number;
+            /**
+             * Precision
+             * @enum {string}
+             */
+            precision: "building" | "approximate";
         };
         /** MatchAddressContext */
         MatchAddressContext: {
@@ -454,6 +527,42 @@ export interface operations {
             path: {
                 /** @description institutions.id */
                 institution_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstitutionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_institution_by_source_api_institutions_by_source__kind___external_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-None-Match"?: string | null;
+            };
+            path: {
+                /** @description institutions.kind */
+                kind: "nursery" | "kindergarten" | "preschool";
+                /** @description institutions.external_id */
+                external_id: string;
             };
             cookie?: never;
         };

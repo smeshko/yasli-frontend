@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "api:types": "node ./scripts/generate-api-types.mjs",
+    "institutions:manifest": "node ./scripts/generate-institutions-manifest.mjs",
     "fixtures": "node scripts/fixture-server.mjs"
   },
   "dependencies": {
