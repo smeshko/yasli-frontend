@@ -70,6 +70,24 @@ describe("matchAddress", () => {
       },
     });
   });
+
+  /* The not-found fallback is opt-in per route: only `by-source` asks for it,
+     because only it can be missing wholesale. The match route keeps degrading
+     an unrecognised 404 to the generic error. */
+  it("degrades a 404 with an unrecognised body to http_error", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ detail: "Not Found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(matchAddress(404)).resolves.toEqual({
+      ok: false,
+      error: { code: "http_error", message: "Сървърът върна грешка.", status: 404 },
+    });
+  });
 });
 
 describe("buildInstitutionBySourcePath", () => {
@@ -159,14 +177,32 @@ describe("getInstitutionBySource", () => {
     });
   });
 
-  it("degrades a 404 with any other body to http_error", async () => {
+  /* A backend deployed before phase 1.3 has no `by-source` route and answers
+     FastAPI's own `{"detail":"Not Found"}`. That has to reach the page as the
+     not-found state, not as the error state, whose retry could never succeed. */
+  it("maps a route-level 404 body to institution_not_found", async () => {
     stubFetch(jsonResponse(JSON.stringify({ detail: "Not Found" }), 404));
 
-    const result = await getInstitutionBySource("kindergarten", "35");
-
-    expect(result).toEqual({
+    await expect(getInstitutionBySource("kindergarten", "35")).resolves.toEqual({
       ok: false,
-      error: { code: "http_error", message: "Сървърът върна грешка.", status: 404 },
+      error: {
+        code: "institution_not_found",
+        message: "Институцията не е намерена в заредените данни.",
+        status: 404,
+      },
+    });
+  });
+
+  it("maps a 404 with an unreadable body to institution_not_found", async () => {
+    stubFetch(jsonResponse("<!doctype html>", 404));
+
+    await expect(getInstitutionBySource("kindergarten", "35")).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "institution_not_found",
+        message: "Институцията не е намерена в заредените данни.",
+        status: 404,
+      },
     });
   });
 

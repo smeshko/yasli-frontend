@@ -71,10 +71,23 @@ export function getInstitutionBySource(
   kind: ReceptionKind,
   externalId: string,
 ): Promise<ApiResult<InstitutionProfile>> {
-  return requestJson<InstitutionProfile>(buildInstitutionBySourcePath(kind, externalId));
+  /* Any 404 here is "no profile at this slug", whatever the body says. The
+     backend's own miss is `{"error":"institution_not_found"}`, but a backend
+     deployed before phase 1.3 has no `by-source` route at all and answers
+     FastAPI's `{"detail":"Not Found"}`. Without the fallback that lands in the
+     error state, whose retry can never succeed; the not-found state at least
+     says what happened and offers a way back. */
+  return requestJson<InstitutionProfile>(buildInstitutionBySourcePath(kind, externalId), {
+    notFoundFallback: "institution_not_found",
+  });
 }
 
-async function requestJson<T>(path: string): Promise<ApiResult<T>> {
+interface RequestOptions {
+  /* Applied only when a 404 body carries no recognised `error` code. */
+  notFoundFallback?: NotFoundCode;
+}
+
+async function requestJson<T>(path: string, options: RequestOptions = {}): Promise<ApiResult<T>> {
   let response: Response;
 
   try {
@@ -94,7 +107,9 @@ async function requestJson<T>(path: string): Promise<ApiResult<T>> {
   }
 
   if (!response.ok) {
-    const notFoundCode = await readNotFoundCode(response);
+    const notFoundCode =
+      (await readNotFoundCode(response)) ??
+      (response.status === 404 ? (options.notFoundFallback ?? null) : null);
 
     if (notFoundCode) {
       return {
