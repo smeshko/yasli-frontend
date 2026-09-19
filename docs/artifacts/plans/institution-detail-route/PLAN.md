@@ -1,6 +1,6 @@
 # Plan: Institution detail route and page content
 
-Status: in-progress
+Status: done
 Branch: feature/yas-11-institution-detail-route
 Risk: medium
 Epic: 01 — Institution detail page with map ([epic](../../epics/01-institution-detail-page.md))
@@ -209,46 +209,51 @@ rest:
 
 ## Acceptance Criteria
 
-- [ ] `npm run build` succeeds with **no backend running** and
+- [x] `npm run build` succeeds with **no backend running** and
       `dist/institution/` contains exactly one directory per manifest row.
-- [ ] Against the deployed backend with phase 1.3, a direct visit to
-      `/institution/kindergarten-46/` renders ДГ№13 „Мир“ with its address,
-      contacts, catchment grouped by street and its 4 branch addresses as text.
-- [ ] A nursery page shows the район it serves and no catchment list; a
+- [ ] **DEPLOY-PENDING** — Against the deployed backend with phase 1.3, a
+      direct visit to `/institution/kindergarten-46/` renders ДГ№13 „Мир“ with
+      its address, contacts, catchment grouped by street and its 4 branch
+      addresses as text. Backend 1.3 is merged on the backend's `staging` but
+      Railway's `backend-api` deploys from `main`, so production still serves
+      the pre-1.3 contract and this cannot be shown. The same page is proven
+      against the fixture profile and against the real 1.3 *schema*; only the
+      real *data* is unverified. See `VALIDATION.md`.
+- [x] A nursery page shows the район it serves and no catchment list; a
       preschool page with no published catchment shows the §5 copy verbatim; a
       kindergarten page with no catchment shows its own line — none of them a
       generic "no results".
-- [ ] Arriving via a result card's "Детайли" link shows the searched address
+- [x] Arriving via a result card's "Детайли" link shows the searched address
       and whether the match was by address or by district; a direct visit
       with no matching stored search (a fresh session, or a tab whose last
       search did not include this institution) shows neither and no empty
       block. A direct visit in a tab whose last search *did* include this
       institution shows the context too — by design (DECISIONS.md, "Read the
       existing stored search state"): the institution does serve that address.
-- [ ] A slug outside the manifest returns HTTP 404 under `astro preview` and
+- [x] A slug outside the manifest returns HTTP 404 under `astro preview` and
       renders the site's 404 page; an institution missing from the API
       (`by-source` 404) renders the in-page not-found state with a link back.
-- [ ] A `by-source` server error renders the in-page error state whose retry
+- [x] A `by-source` server error renders the in-page error state whose retry
       re-issues the request; the loading state is visible before a response.
-- [ ] The stale banner appears when `last_seen_at` is more than 14 days old
+- [x] The stale banner appears when `last_seen_at` is more than 14 days old
       and not otherwise; the freshness line reads
       `Последна актуализация: dd.mm.yyyy`.
-- [ ] Every result card whose institution is in the manifest carries both
+- [x] Every result card whose institution is in the manifest carries both
       "Детайли" and "Източник"; the "Детайли" href is
       `/institution/<institution_kind>-<external_id>/`, including for
       infant-group rows shown under nurseries; a result absent from the
       manifest carries "Източник" only (unit test plus the S1 `999999` card).
-- [ ] Keyboard-only navigation reaches every link and button on the page with
+- [x] Keyboard-only navigation reaches every link and button on the page with
       a visible focus indicator in both themes.
-- [ ] Every string on the page is Bulgarian; every outbound link has
+- [x] Every string on the page is Bulgarian; every outbound link has
       `target="_blank" rel="noreferrer"`, the `↗` marker and an
       `http:`/`https:` href — a `website` value with any other scheme renders
       no link.
-- [ ] `npm run institutions:manifest` is idempotent (a second run produces no
+- [x] `npm run institutions:manifest` is idempotent (a second run produces no
       diff) and `.github/workflows/ci.yml` does not run it.
-- [ ] `npm run lint`, `npm run check` and `npm run test` pass; the only
+- [x] `npm run lint`, `npm run check` and `npm run test` pass; the only
       changed pre-existing assertion is the one named in TASK-008.
-- [ ] The page is legible at 390px and 1440px in light and dark for one
+- [x] The page is legible at 390px and 1440px in light and dark for one
       kindergarten with branches, one nursery and one preschool with no
       catchment (six screenshots).
 
@@ -265,4 +270,4 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 - [x] TASK-006: Build the InstitutionProfile island with every state and section (depends on TASK-002,TASK-005)
 - [x] TASK-007: Add the prerendered /institution/[slug] route (depends on TASK-001,TASK-003,TASK-006)
 - [x] TASK-008: Re-add the Детайли link on result cards (depends on TASK-007)
-- [ ] TASK-009: Final Validation
+- [x] TASK-009: Final Validation

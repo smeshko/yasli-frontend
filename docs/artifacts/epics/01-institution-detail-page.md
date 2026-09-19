@@ -47,7 +47,7 @@ pattern.
 
 ## Phase 1.1 — Detail route and page content
 
-**Plan**: [institution-detail-route](../plans/institution-detail-route/PLAN.md) · status: in-progress
+**Plan**: [institution-detail-route](../plans/institution-detail-route/PLAN.md) · status: done
 
 **Linear**: YAS-11 (https://linear.app/ivo-tsonev/issue/YAS-11)
 
@@ -65,12 +65,12 @@ pattern.
 
 ### Acceptance criteria
 
-- [ ] `npm run build` succeeds with **no backend running** and emits one page per institution in the manifest
-- [ ] A direct visit to `/institution/kindergarten-46/` renders ДГ№13 "Мир" with its address, contacts, catchment and its 4 branch addresses as text
-- [ ] A nursery page shows the district it serves and no empty catchment list; a preschool page with no published catchment shows the §5 copy, not a generic "no results"
-- [ ] Arriving from a search result shows which address the parent searched and whether the match was address- or district-based; arriving directly with no matching stored search shows neither and nothing looks broken (a same-tab direct visit after a search that included this institution keeps showing the context — by design, see the plan's `DECISIONS.md`)
-- [ ] An unknown slug renders the 404 page rather than an error state
-- [ ] Keyboard-only navigation reaches every link with a visible focus indicator; the page passes `npm run lint`, `npm run check` and `npm run test`
+- [x] `npm run build` succeeds with **no backend running** and emits one page per institution in the manifest
+- [ ] **Deploy-pending** — A direct visit to `/institution/kindergarten-46/` renders ДГ№13 "Мир" with its address, contacts, catchment and its 4 branch addresses as text. Proven against a fixture profile matching the real 1.3 schema; the production data path needs backend `staging` merged to `main` so Railway redeploys. See the plan's `VALIDATION.md`.
+- [x] A nursery page shows the district it serves and no empty catchment list; a preschool page with no published catchment shows the §5 copy, not a generic "no results"
+- [x] Arriving from a search result shows which address the parent searched and whether the match was address- or district-based; arriving directly with no matching stored search shows neither and nothing looks broken (a same-tab direct visit after a search that included this institution keeps showing the context — by design, see the plan's `DECISIONS.md`)
+- [x] An unknown slug renders the 404 page rather than an error state
+- [x] Keyboard-only navigation reaches every link with a visible focus indicator; the page passes `npm run lint`, `npm run check` and `npm run test`
 
 ### Validation
 
