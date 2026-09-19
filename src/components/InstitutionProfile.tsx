@@ -2,15 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   getInstitutionBySource,
-  type CoverageGroup,
   type InstitutionProfile as InstitutionProfileData,
 } from "@/lib/api/client";
 import { labelForDistrict } from "@/lib/domain/districts";
-import { formatAddressNumber } from "@/lib/domain/address";
 import { STALE_BANNER_TEXT, formatFreshnessDate, isSnapshotStale } from "@/lib/domain/freshness";
 import { type ReceptionKind } from "@/lib/domain/kinds";
 import { normalizeWebsiteUrl } from "@/lib/domain/website";
-import { formatStreetLabel } from "@/lib/search/addressSuggestions";
 import {
   findStoredMatchContext,
   loadStoredSearchState,
@@ -210,6 +207,19 @@ function ContactsSection({ profile }: { profile: InstitutionProfileData }) {
   );
 }
 
+/* The street-by-street address list is deliberately not rendered. A real
+   catchment runs to ~1900 addresses across ~93 streets (ДГ№13 „Мир“), which
+   on the page is a wall of numbers nobody reads and which buries everything
+   below it. The search screen already answers "does this institution serve
+   my address" precisely, so the list added length without adding an answer.
+   This diverges from PRD FR-12; recorded in the plan's VALIDATION.md.
+
+   What is left is the part that says something: nurseries are routed by
+   район, never by address, so they name the район they serve; and where a
+   kindergarten or preschool has no published catchment at all, that absence
+   is itself the answer and keeps its researched copy. Kindergartens never
+   print a district — theirs is derived by catchment majority and is not an
+   official fact. */
 function CoverageSection({
   kind,
   profile,
@@ -217,10 +227,6 @@ function CoverageSection({
   kind: ReceptionKind;
   profile: InstitutionProfileData;
 }) {
-  /* Nurseries are routed by район, never by address — so the page shows the
-     район and never a catchment list, even when the API returns rows.
-     Kindergartens are the mirror image: their district_code is derived by
-     catchment majority and is not an official fact, so it is never printed. */
   if (kind === "nursery") {
     return (
       <section aria-labelledby="profile-coverage">
@@ -231,35 +237,17 @@ function CoverageSection({
     );
   }
 
-  const hasCoverage = profile.coverage.length > 0;
+  if (profile.coverage.length > 0) {
+    return null;
+  }
 
   return (
     <section aria-labelledby="profile-coverage">
       <h2 id="profile-coverage">{COPY.coverageHeading}</h2>
-      {hasCoverage ? (
-        <CoverageList groups={profile.coverage} />
-      ) : (
-        <p className="profile-empty">
-          {kind === "preschool" ? COPY.preschoolNoCoverage : COPY.kindergartenNoCoverage}
-        </p>
-      )}
+      <p className="profile-empty">
+        {kind === "preschool" ? COPY.preschoolNoCoverage : COPY.kindergartenNoCoverage}
+      </p>
     </section>
-  );
-}
-
-/* API order is preserved: the backend already groups by street and sorts
-   numbers naturally, and that ordering is contractual and tested there.
-   Re-sorting here would duplicate the rule and drift from it. */
-function CoverageList({ groups }: { groups: CoverageGroup[] }) {
-  return (
-    <ul className="profile-coverage">
-      {groups.map((group) => (
-        <li key={group.street.id}>
-          <strong>{formatStreetLabel(group.street)}</strong>{" "}
-          <span>{group.addresses.map((address) => formatAddressNumber(address)).join(", ")}</span>
-        </li>
-      ))}
-    </ul>
   );
 }
 

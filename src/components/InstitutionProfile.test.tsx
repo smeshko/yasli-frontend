@@ -7,6 +7,7 @@ import type { StoredMatchContext } from "@/lib/search/storedSearch";
 import { InstitutionProfile, InstitutionProfileView } from "./InstitutionProfile";
 
 const NOW = new Date("2026-09-16T12:00:00Z");
+const COPY_NURSERY_NOTE_START = "Яслите не са по адрес";
 
 function street(id: number, part: string, marker: string | null = "УЛ.") {
   return {
@@ -141,17 +142,17 @@ describe("InstitutionProfileView kindergarten content", () => {
     expect(html).toContain("Последна актуализация:");
   });
 
-  it("keeps the catchment in API order with three-digit numbers", () => {
+  it("renders no catchment section when the institution has one", () => {
     const html = renderView({ profile: full });
 
-    const preslav = html.indexOf("ул. Преслав");
-    const slivnica = html.indexOf("бул. Сливница");
-    const kolev = html.indexOf("ул. Генерал Колев");
-
-    expect(preslav).toBeGreaterThan(-1);
-    expect(preslav).toBeLessThan(slivnica);
-    expect(slivnica).toBeLessThan(kolev);
-    expect(html).toContain("014, 014А, 015 вх.А");
+    // The street-by-street list is deliberately gone: a real catchment is
+    // ~1900 addresses. With coverage present there is nothing to say, so the
+    // section is absent rather than empty.
+    expect(html).not.toContain("Район на прием");
+    expect(html).not.toContain('class="profile-coverage"');
+    expect(html).not.toContain("ул. Преслав");
+    expect(html).not.toContain("бул. Сливница");
+    expect(html).not.toContain("014, 014А, 015 вх.А");
   });
 
   it("renders every branch as text, including a label-only one", () => {
@@ -164,18 +165,17 @@ describe("InstitutionProfileView kindergarten content", () => {
     expect(html).toContain("Филиал „Морско конче“");
   });
 
-  it("never prints a district name on a kindergarten page", () => {
-    const html = renderView({ profile: full });
+  it("never states a district on a kindergarten page", () => {
+    const html = renderView({
+      profile: profile({ district_code: "02", coverage: [] }),
+    });
 
-    for (const district of [
-      "Одесос",
-      "Приморски",
-      "Младост",
-      "Владислав Варненчик",
-      "Аспарухово",
-    ]) {
-      expect(html).not.toContain(district);
-    }
+    // Asserted on the sentence, not on the bare district name: a real
+    // catchment can contain a street like "бул. Осми Приморски Полк", so a
+    // substring check would fail for the wrong reason.
+    expect(html).not.toContain("обслужва район");
+    expect(html).not.toContain(COPY_NURSERY_NOTE_START);
+    expect(html).toContain("Няма публикуван район на прием за тази градина в източника.");
   });
 
   it("renders its own line when the catchment is empty and all contacts are null", () => {
@@ -191,6 +191,7 @@ describe("InstitutionProfileView kindergarten content", () => {
       }),
     });
 
+    expect(html).toContain("Район на прием");
     expect(html).toContain("Няма публикуван район на прием за тази градина в източника.");
     expect(html).toContain("Няма публикувани контакти.");
     expect(html).toContain("Адресът не е публикуван в източника.");
@@ -216,11 +217,10 @@ describe("InstitutionProfileView per-kind rules", () => {
 
     expect(html).toContain("Яслата обслужва район Приморски.");
     expect(html).toContain("Яслите не са по адрес");
-    // The heading carries id="profile-coverage", so assert on the list's
-    // class attribute rather than the bare string.
     expect(html).not.toContain('class="profile-coverage"');
     expect(html).not.toContain("<ul");
     expect(html).not.toContain("ул. Преслав");
+    expect(html).not.toContain("Район на прием");
   });
 
   it("says so plainly when a nursery's district is unconfirmed", () => {
