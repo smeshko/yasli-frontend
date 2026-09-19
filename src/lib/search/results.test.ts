@@ -199,6 +199,8 @@ describe("freshness helpers", () => {
         kind: "kindergarten",
         source_url: "https://example.test/1",
         last_seen_at: "2026-05-01T00:00:00Z",
+        has_infant_group: false,
+        location: null,
       },
       {
         id: 2,
@@ -207,6 +209,8 @@ describe("freshness helpers", () => {
         kind: "kindergarten",
         source_url: "https://example.test/2",
         last_seen_at: "2026-05-05T00:00:00Z",
+        has_infant_group: false,
+        location: null,
       },
     ] satisfies InstitutionListItem[];
 
