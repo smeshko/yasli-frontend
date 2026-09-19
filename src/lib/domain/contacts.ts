@@ -33,6 +33,11 @@ export function splitPhone(value: string): SplitPhone {
   return { dial: firstWholeNumber(display), display };
 }
 
+/* Written after +359, this is the national trunk prefix, which an
+   international number must not carry: +359 (0)52 613039 dials as
+   +35952613039. Dropping it is the only reading that is ever right. */
+const TRUNK_PREFIX_AFTER_COUNTRY_CODE = /^\s*\(0\)?\s*|^\s*\(\s*0\s*\)\s*/;
+
 function firstWholeNumber(text: string): string | null {
   const start = text.search(/\+359|0\d/);
 
@@ -42,13 +47,24 @@ function firstWholeNumber(text: string): string | null {
 
   const international = text.startsWith("+359", start);
   const { min, max } = international ? INTERNATIONAL : NATIONAL;
-  const rest = international ? text.slice(start + 4) : text.slice(start);
+  const rest = international
+    ? text.slice(start + 4).replace(TRUNK_PREFIX_AFTER_COUNTRY_CODE, "")
+    : text.slice(start);
   const groups = rest.match(/\d+/g) ?? [];
 
   let digits = international ? "359" : "";
 
   for (const group of groups) {
     if (digits.length + group.length > max) {
+      break;
+    }
+
+    /* A lone digit after a number we already have is not part of it — it is
+       an extension ("052 613039 вътр. 1") or an ordinal. Appending it fits
+       inside max and produces a valid-looking href for a different
+       subscriber, which is worse than linking nothing extra. Real groups
+       inside a Bulgarian number are never one digit. */
+    if (group.length === 1 && digits.length >= min) {
       break;
     }
 
@@ -64,7 +80,10 @@ function firstWholeNumber(text: string): string | null {
 
 /* `mailto:` takes one address. A field holding two would otherwise become a
    single comma-joined recipient no client can deliver to. */
-const EMAIL = /[^\s,;/]+@[^\s,;/]+\.[^\s,;/]+/;
+/* Bounded on both sides rather than "anything but a separator": a leading
+   label with no space ("имейл:dg@example.bg") and a trailing sentence dot
+   ("dg@example.bg.") both used to end up inside the mailto:. */
+const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/;
 
 export interface SplitEmail {
   address: string | null;

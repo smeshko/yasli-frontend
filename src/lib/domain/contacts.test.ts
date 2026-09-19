@@ -42,6 +42,32 @@ describe("splitPhone", () => {
   });
 });
 
+/* Round-3 hardening. None of these shapes appear in the dg.uslugi.io corpus
+   today — the scraped TEL values carry no "+", no parentheses and no "вътр."
+   — but each produced a wrong-but-plausible href, which is the exact failure
+   the multi-number fix existed to prevent. */
+describe("splitPhone edge shapes", () => {
+  it("drops the trunk prefix an international number must not carry", () => {
+    expect(splitPhone("+359 (0)52 613039").dial).toBe("+35952613039");
+    expect(splitPhone("+359 (0) 888 123 456").dial).toBe("+359888123456");
+  });
+
+  it("does not dial a different subscriber by absorbing an extension", () => {
+    expect(splitPhone("052 613039 вътр. 1").dial).toBe("052613039");
+    expect(splitPhone("052 613 039 / 1").dial).toBe("052613039");
+    expect(splitPhone("052 613039 вътр. 12").dial).toBe("052613039");
+  });
+
+  it("still links a plain international number", () => {
+    expect(splitPhone("+359 52 613039").dial).toBe("+35952613039");
+    expect(splitPhone("+359 885 123 456").dial).toBe("+359885123456");
+  });
+
+  it("still links a short national code", () => {
+    expect(splitPhone("0700 12 345").dial).toBe("070012345");
+  });
+});
+
 describe("splitEmail", () => {
   it("links a single address", () => {
     expect(splitEmail("dg13mir@example.bg")).toEqual({
@@ -60,6 +86,18 @@ describe("splitEmail", () => {
 
   it("keeps the whole published value as the text", () => {
     expect(splitEmail("a@b.bg, c@d.bg").display).toBe("a@b.bg, c@d.bg");
+  });
+
+  it("leaves a trailing sentence dot out of the mailto:", () => {
+    expect(splitEmail("dg@example.bg.").address).toBe("dg@example.bg");
+  });
+
+  it("does not swallow a label written with no space", () => {
+    expect(splitEmail("имейл:dg@example.bg").address).toBe("dg@example.bg");
+  });
+
+  it("keeps a multi-part domain", () => {
+    expect(splitEmail("a@b.co.uk").address).toBe("a@b.co.uk");
   });
 
   it("returns no address when nothing parses", () => {
