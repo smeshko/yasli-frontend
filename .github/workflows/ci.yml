@@ -25,7 +25,15 @@ jobs:
 
       - run: npm run test
 
-      # `npm run api:types` is intentionally skipped — it hits a live
-      # backend to regenerate src/lib/api/types.ts. The committed file
-      # is the source of truth in CI.
+      # `npm run api:types` and `npm run institutions:manifest` are
+      # intentionally skipped — both hit a live backend to regenerate a
+      # committed artifact. The committed files are the source of truth here.
+      #
+      # The build needs PUBLIC_YASLI_API_BASE_URL: resolveApiBaseUrl throws
+      # without it outside dev, and prerendering imports the API client. The
+      # value is only baked into an artifact CI throws away; Cloudflare Pages
+      # sets its own at deploy time. Override with a repository variable of
+      # the same name if the backend ever moves.
       - run: npm run build
+        env:
+          PUBLIC_YASLI_API_BASE_URL: ${{ vars.PUBLIC_YASLI_API_BASE_URL || 'https://yasli-backend-production.up.railway.app' }}
