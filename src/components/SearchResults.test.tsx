@@ -7,6 +7,17 @@ import { groupMatchResults } from "@/lib/search/results";
 import { type MatchState } from "./SearchExperience";
 import { SearchResults } from "./SearchResults";
 
+/* The (institution_kind, external_id) pairs the cases below render. A real
+   page exists only for slugs in the committed manifest, so SearchResults
+   takes the set as a prop and the tests pass an explicit one. */
+const PAGE_SLUGS = new Set([
+  "kindergarten-42",
+  "nursery-43",
+  "preschool-44",
+  "kindergarten-3",
+  "preschool-7",
+]);
+
 function matchResult(overrides: Partial<MatchResult> = {}): MatchResult {
   const id = overrides.id ?? 1;
 
@@ -74,6 +85,7 @@ describe("SearchResults", () => {
       <SearchResults
         filter="all"
         matchState={matchState}
+        pageSlugs={PAGE_SLUGS}
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
@@ -92,7 +104,8 @@ describe("SearchResults", () => {
     expect(html).toContain("Я Тест");
     expect(html).toContain("ПГ Тест");
     expect(html).toContain('href="https://example.test/source"');
-    expect(html).not.toMatch(/href="\/institutions\//);
+    expect(html).toContain('href="/institution/kindergarten-42/"');
+    expect(html).toContain('href="/institution/nursery-43/"');
   });
 
   it("renders generic missing-district copy for a city address", () => {
@@ -121,6 +134,7 @@ describe("SearchResults", () => {
       <SearchResults
         filter="all"
         matchState={matchState}
+        pageSlugs={PAGE_SLUGS}
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
@@ -153,6 +167,7 @@ describe("SearchResults", () => {
       <SearchResults
         filter="all"
         matchState={matchState}
+        pageSlugs={PAGE_SLUGS}
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
@@ -193,6 +208,7 @@ describe("SearchResults", () => {
       <SearchResults
         filter="all"
         matchState={matchState}
+        pageSlugs={PAGE_SLUGS}
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
@@ -201,6 +217,9 @@ describe("SearchResults", () => {
 
     expect(html).toContain("ДГ Тест (яслена група)");
     expect(html).toContain("<h3>ДГ Тест</h3>");
+    // The href uses institution_kind, so the infant-group row listed under
+    // nurseries points at the kindergarten's own page, not a nursery slug.
+    expect(html.match(/href="\/institution\/kindergarten-42\/"/g)).toHaveLength(2);
   });
 
   it("renders preschool district fallback from match basis", () => {
@@ -228,6 +247,7 @@ describe("SearchResults", () => {
       <SearchResults
         filter="preschool"
         matchState={matchState}
+        pageSlugs={PAGE_SLUGS}
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
@@ -251,6 +271,7 @@ describe("SearchResults", () => {
       <SearchResults
         filter="all"
         matchState={matchState}
+        pageSlugs={PAGE_SLUGS}
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
@@ -273,6 +294,7 @@ describe("SearchResults", () => {
       <SearchResults
         filter="all"
         matchState={matchState}
+        pageSlugs={PAGE_SLUGS}
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
@@ -281,5 +303,69 @@ describe("SearchResults", () => {
 
     expect(html).toContain("Презареди адресите");
     expect(html).toContain("Данните за избрания адрес са обновени");
+  });
+});
+
+describe("SearchResults detail links", () => {
+  const matchState = (): MatchState => ({
+    status: "success",
+    address: { id: 10, district_code: "01", settlement: null },
+    selectedAddress: null,
+    grouped: groupMatchResults([
+      matchResult({ id: 42 }),
+      matchResult({ id: 99, name: "ДГ Нова", external_id: "999999" }),
+    ]),
+  });
+
+  function render(pageSlugs: ReadonlySet<string>) {
+    return renderToStaticMarkup(
+      <SearchResults
+        filter="all"
+        matchState={matchState()}
+        pageSlugs={pageSlugs}
+        staleResults={false}
+        onFilterChange={vi.fn()}
+        onRetryStale={vi.fn()}
+      />,
+    );
+  }
+
+  it("links only the institution the manifest knows", () => {
+    const html = render(new Set(["kindergarten-42"]));
+
+    expect(html).toContain('href="/institution/kindergarten-42/"');
+    expect(html).not.toContain("/institution/kindergarten-999999/");
+  });
+
+  it("gives a card outside the manifest its source link and nothing else", () => {
+    const html = render(new Set(["kindergarten-42"]));
+    const cards = html.split('class="result-card"');
+    const unknownCard = cards.find((card) => card.includes("ДГ Нова"));
+
+    expect(unknownCard).toBeDefined();
+    expect(unknownCard).toContain("Източник");
+    expect(unknownCard).not.toContain("Детайли");
+    expect(unknownCard).not.toContain("/institution/");
+  });
+
+  it("renders Детайли before Източник on a linked card", () => {
+    const html = render(new Set(["kindergarten-42"]));
+    // Scoped to the linked card: the unlinked card sorts first by name, so a
+    // whole-document indexOf would compare its Източник against this card's
+    // Детайли.
+    const linkedCard = html
+      .split('class="result-card"')
+      .find((card) => card.includes("ДГ Тест"));
+
+    expect(linkedCard).toBeDefined();
+    expect(linkedCard!.indexOf("Детайли")).toBeLessThan(linkedCard!.indexOf("Източник"));
+  });
+
+  it("renders no detail link at all for an empty manifest", () => {
+    const html = render(new Set());
+
+    expect(html).not.toContain("Детайли");
+    expect(html).not.toContain("/institution/");
+    expect(html).toContain("Източник");
   });
 });

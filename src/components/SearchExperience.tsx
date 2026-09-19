@@ -5,7 +5,9 @@ import {
   matchAddress,
   type MatchAddressContext,
 } from "@/lib/api/client";
+import institutionsManifest from "@/data/institutions-manifest.json";
 import { formatFreshnessDate } from "@/lib/domain/freshness";
+import { buildSlugSet, type ManifestEntry } from "@/lib/institutions/manifest";
 import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
@@ -22,6 +24,11 @@ import { loadStoredSearchState, saveStoredSearchState } from "@/lib/search/store
 
 import { ArrowRightIcon, MapPinIcon, SearchIcon } from "./icons";
 import { SearchResults } from "./SearchResults";
+
+/* Built once at module scope: the manifest is a committed build input, not
+   runtime data, so there is nothing to recompute per render. It is the guard
+   that keeps a result card from linking to a page the build never emitted. */
+const INSTITUTION_PAGE_SLUGS = buildSlugSet(institutionsManifest as ManifestEntry[]);
 
 type ReferenceStatus = "idle" | "loading" | "ready" | "error";
 type MatchStatus = "idle" | "loading" | "success" | "error" | "stale";
@@ -390,6 +397,7 @@ export function SearchExperience() {
       <SearchResults
         filter={filter}
         matchState={matchState}
+        pageSlugs={INSTITUTION_PAGE_SLUGS}
         staleResults={staleResults}
         onFilterChange={setFilter}
         onRetryStale={() => void retryReferences()}

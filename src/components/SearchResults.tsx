@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { MatchAddressContext } from "@/lib/api/client";
 import { STALE_BANNER_TEXT } from "@/lib/domain/freshness";
 import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
+import { buildInstitutionSlug, institutionPath } from "@/lib/institutions/manifest";
 import {
   deriveResultGroupState,
   visibleResultKinds,
@@ -31,6 +32,11 @@ const MISSING_DISTRICT_NOTE =
 interface SearchResultsProps {
   filter: ResultFilter;
   matchState: MatchState;
+  /* Slugs that actually have a prerendered page, from the committed manifest.
+     Results are live API data, so an institution added to the backend since
+     the last `npm run institutions:manifest` has no page — its card gets no
+     "Детайли" link rather than a link to a static 404. */
+  pageSlugs: ReadonlySet<string>;
   staleResults: boolean;
   onFilterChange: (filter: ResultFilter) => void;
   onRetryStale: () => void;
@@ -39,6 +45,7 @@ interface SearchResultsProps {
 export function SearchResults({
   filter,
   matchState,
+  pageSlugs,
   staleResults,
   onFilterChange,
   onRetryStale,
@@ -87,6 +94,7 @@ export function SearchResults({
                 kind={kind}
                 institutions={matchState.grouped?.[kind] ?? []}
                 address={matchState.address}
+                pageSlugs={pageSlugs}
               />
             ))}
           </div>
@@ -131,10 +139,12 @@ function ResultGroup({
   kind,
   institutions,
   address,
+  pageSlugs,
 }: {
   kind: ReceptionKind;
   institutions: GroupedInstitution[];
   address: MatchAddressContext | null;
+  pageSlugs: ReadonlySet<string>;
 }) {
   const groupState = address ? deriveResultGroupState(address, institutions) : null;
   const showDistrictFallbackNotice =
@@ -183,6 +193,21 @@ function ResultGroup({
                   <h3>{displayName}</h3>
                 </div>
                 <div className="card-actions">
+                  {/* institution_kind, not reception_kind: an infant-group row
+                      listed under nurseries belongs to a kindergarten, and its
+                      page is the kindergarten's. */}
+                  {pageSlugs.has(
+                    buildInstitutionSlug(institution.institution_kind, institution.external_id),
+                  ) ? (
+                    <a
+                      href={institutionPath(
+                        institution.institution_kind,
+                        institution.external_id,
+                      )}
+                    >
+                      Детайли
+                    </a>
+                  ) : null}
                   <a href={institution.source_url} target="_blank" rel="noreferrer">
                     Източник <span aria-hidden="true">↗</span>
                   </a>
