@@ -5,7 +5,12 @@ import {
   type InstitutionProfile as InstitutionProfileData,
 } from "@/lib/api/client";
 import { labelForDistrict } from "@/lib/domain/districts";
-import { STALE_BANNER_TEXT, formatFreshnessDate, isSnapshotStale } from "@/lib/domain/freshness";
+import {
+  STALE_BANNER_TEXT,
+  formatFreshnessDate,
+  isSnapshotStale,
+  parseFreshnessDate,
+} from "@/lib/domain/freshness";
 import { type ReceptionKind } from "@/lib/domain/kinds";
 import { normalizeWebsiteUrl } from "@/lib/domain/website";
 import {
@@ -113,7 +118,10 @@ export function InstitutionProfileView({
   }
 
   const comparisonDate = now ?? new Date();
-  const isStale = isSnapshotStale(profile.last_seen_at, comparisonDate);
+  /* Unparsable is not an error state: the rest of the profile is still worth
+     showing. The banner and the line are simply the parts we cannot claim. */
+  const freshnessDate = parseFreshnessDate(profile.last_seen_at);
+  const isStale = freshnessDate ? isSnapshotStale(freshnessDate, comparisonDate) : false;
 
   return (
     <>
@@ -130,9 +138,11 @@ export function InstitutionProfileView({
       <CoverageSection kind={kind} profile={profile} />
       <BranchesSection branches={profile.branches} />
 
-      <p className="profile-meta">
-        {COPY.freshnessPrefix} {formatFreshnessDate(new Date(profile.last_seen_at))}
-      </p>
+      {freshnessDate ? (
+        <p className="profile-meta">
+          {COPY.freshnessPrefix} {formatFreshnessDate(freshnessDate)}
+        </p>
+      ) : null}
       <p className="profile-source">
         <a href={profile.source_url} target="_blank" rel="noreferrer">
           {COPY.sourceLink} <span aria-hidden="true">↗</span>

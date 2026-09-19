@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { formatAddressNumber } from "./address";
 import { DISTRICT_NAMES, labelForDistrict } from "./districts";
-import { STALE_BANNER_TEXT, formatFreshnessDate, isSnapshotStale } from "./freshness";
+import {
+  STALE_BANNER_TEXT,
+  formatFreshnessDate,
+  isSnapshotStale,
+  parseFreshnessDate,
+} from "./freshness";
 import { parseInstitutionNumber } from "./institutionName";
 import { labelForReceptionKind, receptionKindLabels, receptionKindOrder } from "./kinds";
 import { normalizeWebsiteUrl } from "./website";
@@ -35,6 +40,24 @@ describe("isSnapshotStale", () => {
   it("marks data stale only after fourteen days", () => {
     expect(isSnapshotStale("2026-04-30", "2026-05-15")).toBe(true);
     expect(isSnapshotStale("2026-05-01", "2026-05-15")).toBe(false);
+  });
+});
+
+describe("parseFreshnessDate", () => {
+  it("parses a valid timestamp", () => {
+    expect(parseFreshnessDate("2026-08-20T09:00:00Z")?.toISOString()).toBe(
+      "2026-08-20T09:00:00.000Z",
+    );
+  });
+
+  /* `last_seen_at` is typed as a bare string. Every unparsable shape has to
+     come back as null rather than throwing, because the caller is on the
+     render path of an island with no error boundary above it. */
+  it("returns null for anything unparsable", () => {
+    expect(parseFreshnessDate("not-a-date")).toBeNull();
+    expect(parseFreshnessDate("")).toBeNull();
+    expect(parseFreshnessDate(null)).toBeNull();
+    expect(parseFreshnessDate(undefined)).toBeNull();
   });
 });
 

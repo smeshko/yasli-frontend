@@ -271,6 +271,21 @@ describe("InstitutionProfileView freshness", () => {
 
     expect(html).toMatch(/Последна актуализация:\s*14\.09\.2026/);
   });
+
+  /* An unparsable `last_seen_at` used to throw out of the render path, which
+     in the browser tears the island down and leaves the page with its static
+     header and nothing under it — the one failure the state machine has no
+     state for. The rest of the profile must still render. */
+  it("drops the freshness line rather than throwing on an unparsable date", () => {
+    const html = renderView({
+      profile: profile({ last_seen_at: "not-a-date", address: "гр. Варна, ул. Тест 1" }),
+    });
+
+    expect(html).toContain("гр. Варна, ул. Тест 1");
+    expect(html).toContain("Официален източник");
+    expect(html).not.toContain("Последна актуализация:");
+    expect(html).not.toContain("Данните са по-стари от");
+  });
 });
 
 describe("InstitutionProfileView search context", () => {
