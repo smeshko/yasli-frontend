@@ -363,6 +363,39 @@ describe("SearchResults detail links", () => {
     expect(unknownCard).not.toContain("data-linked");
   });
 
+  /* The criterion is that a card with no page is never a dead end. When the
+     source value is not a usable http(s) URL there is no link to give it, so
+     the card names its source as text rather than losing the row entirely. */
+  it("names the source as text when the url is not linkable", () => {
+    const html = renderToStaticMarkup(
+      <SearchResults
+        filter="all"
+        matchState={{
+          status: "success",
+          address: { id: 10, district_code: "01", settlement: null },
+          selectedAddress: null,
+          grouped: groupMatchResults([
+            matchResult({
+              id: 99,
+              name: "ДГ Нова",
+              external_id: "999999",
+              source_url: "/lv/documents/999999.html",
+            }),
+          ]),
+        }}
+        pageSlugs={new Set()}
+        staleResults={false}
+        onFilterChange={vi.fn()}
+        onRetryStale={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain("Източник:");
+    expect(html).toContain("/lv/documents/999999.html");
+    expect(html).not.toContain('href="/lv/documents/999999.html"');
+    expect(html).not.toContain("<a ");
+  });
+
   it("makes the name the card's only control on a linked card", () => {
     const html = render(new Set(["kindergarten-42"]));
     const linkedCard = html

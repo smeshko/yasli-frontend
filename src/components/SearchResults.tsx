@@ -228,11 +228,20 @@ function ResultGroup({
                 {/* institution_kind, not reception_kind: an infant-group row
                     listed under nurseries belongs to a kindergarten, and its
                     page is the kindergarten's. */}
-                {hasPage || !sourceUrl ? null : (
+                {/* A card with no page keeps its source as its only
+                    affordance, so no card is a dead end (PLAN.md). When the
+                    value is not a usable http(s) URL it is named rather than
+                    linked — still an answer to "where is this from", without
+                    an href the guard rejected. */}
+                {hasPage ? null : (
                   <div className="card-actions">
-                    <a href={sourceUrl} target="_blank" rel="noreferrer">
-                      Източник <span aria-hidden="true">↗</span>
-                    </a>
+                    {sourceUrl ? (
+                      <a href={sourceUrl} target="_blank" rel="noreferrer">
+                        Източник <span aria-hidden="true">↗</span>
+                      </a>
+                    ) : (
+                      <span className="card-source-text">Източник: {institution.source_url}</span>
+                    )}
                   </div>
                 )}
               </article>

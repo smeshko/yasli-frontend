@@ -649,6 +649,16 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     color: var(--tone);
   }
 
+  /* The fallback when a source value is not a usable http(s) URL: the card
+     still names where its data came from, reading as muted metadata rather
+     than as a link that does nothing. Wraps, since it prints a raw value. */
+  .card-source-text {
+    padding: 8px 0 2px;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
   .empty-group {
     max-width: none;
     border: 2px dashed var(--color-border-dashed);
