@@ -10,7 +10,7 @@ import {
 } from "./freshness";
 import { parseInstitutionNumber } from "./institutionName";
 import { labelForReceptionKind, receptionKindLabels, receptionKindOrder } from "./kinds";
-import { normalizeWebsiteUrl } from "./website";
+import { normalizeExternalUrl, normalizeWebsiteUrl } from "./website";
 
 describe("reception kind helpers", () => {
   it("keeps the canonical display order", () => {
@@ -120,6 +120,30 @@ describe("normalizeWebsiteUrl", () => {
   it("treats null as absent", () => {
     expect(normalizeWebsiteUrl(null)).toBeNull();
     expect(normalizeWebsiteUrl(undefined)).toBeNull();
+  });
+});
+
+describe("normalizeExternalUrl", () => {
+  it("keeps an absolute http(s) url", () => {
+    expect(normalizeExternalUrl("https://dg.uslugi.io/lv/46.html")).toBe(
+      "https://dg.uslugi.io/lv/46.html",
+    );
+    expect(normalizeExternalUrl("http://example.bg")).toBe("http://example.bg");
+  });
+
+  /* Stricter than normalizeWebsiteUrl on purpose: source_url is built by the
+     backend, so a value without a scheme is a data fault. Completing it into
+     some origin would turn a broken record into a confident outbound link. */
+  it("rejects anything that does not declare http(s) itself", () => {
+    expect(normalizeExternalUrl("dg.uslugi.io/46.html")).toBeNull();
+    expect(normalizeExternalUrl("/lv/documents/46.html")).toBeNull();
+    expect(normalizeExternalUrl("//dg.uslugi.io/46.html")).toBeNull();
+    expect(normalizeExternalUrl("javascript:alert(1)")).toBeNull();
+    expect(normalizeExternalUrl("data:text/html,<script>")).toBeNull();
+    expect(normalizeExternalUrl("ftp://example.bg")).toBeNull();
+    expect(normalizeExternalUrl("https://")).toBeNull();
+    expect(normalizeExternalUrl("")).toBeNull();
+    expect(normalizeExternalUrl(null)).toBeNull();
   });
 });
 

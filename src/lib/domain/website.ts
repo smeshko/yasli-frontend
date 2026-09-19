@@ -28,6 +28,22 @@ export function normalizeWebsiteUrl(value: string | null | undefined): string | 
     candidate = `https://${trimmed}`;
   }
 
+  return parseHttpUrl(candidate);
+}
+
+/**
+ * The strict form: the value must already declare `http:`/`https:` itself.
+ * Used for `source_url`, which the backend builds from its own scrape — a
+ * relative or scheme-less value there is a data fault, not a bare host to be
+ * helpfully completed into some unrelated origin.
+ */
+export function normalizeExternalUrl(value: string | null | undefined): string | null {
+  const trimmed = value?.trim() ?? "";
+
+  return HTTP_SCHEME.test(trimmed) ? parseHttpUrl(trimmed) : null;
+}
+
+function parseHttpUrl(candidate: string): string | null {
   let url: URL;
 
   try {

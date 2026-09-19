@@ -12,7 +12,7 @@ import {
   parseFreshnessDate,
 } from "@/lib/domain/freshness";
 import { type ReceptionKind } from "@/lib/domain/kinds";
-import { normalizeWebsiteUrl } from "@/lib/domain/website";
+import { normalizeExternalUrl, normalizeWebsiteUrl } from "@/lib/domain/website";
 import {
   findStoredMatchContext,
   loadStoredSearchState,
@@ -121,6 +121,10 @@ export function InstitutionProfileView({
   /* Unparsable is not an error state: the rest of the profile is still worth
      showing. The banner and the line are simply the parts we cannot claim. */
   const freshnessDate = parseFreshnessDate(profile.last_seen_at);
+  /* Same scraped pipeline as `website`, so the same rule: no value reaches an
+     href without an explicit http(s) scheme. A relative `source_url` would
+     otherwise become a same-origin link back into the site. */
+  const sourceUrl = normalizeExternalUrl(profile.source_url);
   const isStale = freshnessDate ? isSnapshotStale(freshnessDate, comparisonDate) : false;
 
   return (
@@ -143,11 +147,13 @@ export function InstitutionProfileView({
           {COPY.freshnessPrefix} {formatFreshnessDate(freshnessDate)}
         </p>
       ) : null}
-      <p className="profile-source">
-        <a href={profile.source_url} target="_blank" rel="noreferrer">
-          {COPY.sourceLink} <span aria-hidden="true">↗</span>
-        </a>
-      </p>
+      {sourceUrl ? (
+        <p className="profile-source">
+          <a href={sourceUrl} target="_blank" rel="noreferrer">
+            {COPY.sourceLink} <span aria-hidden="true">↗</span>
+          </a>
+        </p>
+      ) : null}
     </>
   );
 }

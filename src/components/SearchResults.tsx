@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { MatchAddressContext } from "@/lib/api/client";
 import { STALE_BANNER_TEXT } from "@/lib/domain/freshness";
 import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
+import { normalizeExternalUrl } from "@/lib/domain/website";
 import { buildInstitutionSlug, institutionPath } from "@/lib/institutions/manifest";
 import {
   deriveResultGroupState,
@@ -180,6 +181,10 @@ function ResultGroup({
               institution.external_id,
             );
             const hasPage = pageSlugs.has(slug);
+            /* `source_url` is scraped, so it goes through the same guard as
+               the profile page's: no value becomes an href without an explicit
+               http(s) scheme. */
+            const sourceUrl = normalizeExternalUrl(institution.source_url);
             return (
               <article
                 className="result-card"
@@ -223,9 +228,9 @@ function ResultGroup({
                 {/* institution_kind, not reception_kind: an infant-group row
                     listed under nurseries belongs to a kindergarten, and its
                     page is the kindergarten's. */}
-                {hasPage ? null : (
+                {hasPage || !sourceUrl ? null : (
                   <div className="card-actions">
-                    <a href={institution.source_url} target="_blank" rel="noreferrer">
+                    <a href={sourceUrl} target="_blank" rel="noreferrer">
                       Източник <span aria-hidden="true">↗</span>
                     </a>
                   </div>

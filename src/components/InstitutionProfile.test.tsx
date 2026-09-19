@@ -335,6 +335,24 @@ describe("InstitutionProfileView website safety", () => {
     expect(html).toContain("Няма публикувани контакти.");
   });
 
+  /* source_url is scraped from the same pipeline as website and reached an
+     href unchecked; the criterion says *every* outbound link is http(s). */
+  it("drops the source link when source_url is not an absolute http(s) url", () => {
+    const html = renderView({
+      profile: profile({ source_url: "/lv/documents/garden/varna/rajon/46.html" }),
+    });
+
+    expect(html).not.toContain("Официален източник");
+    expect(html).not.toContain("/lv/documents/garden/varna/rajon/46.html");
+  });
+
+  it("keeps the source link when source_url is absolute", () => {
+    const html = renderView({ profile: profile({ source_url: "https://dg.uslugi.io/46.html" }) });
+
+    expect(html).toContain('href="https://dg.uslugi.io/46.html"');
+    expect(html).toContain("Официален източник");
+  });
+
   it("upgrades a bare host to https", () => {
     const html = renderView({ profile: profile({ website: "dg13.bg" }) });
 
