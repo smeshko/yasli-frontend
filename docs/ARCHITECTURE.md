@@ -50,8 +50,11 @@ src/
 | `listAddresses()` | `GET /api/addresses` |
 | `listInstitutions()` | `GET /api/institutions` |
 | `matchAddress(addressId)` | `GET /api/match?address_id={id}` |
+| `getInstitutionBySource(kind, externalId)` | `GET /api/institutions/by-source/{kind}/{external_id}` |
 
-Error codes: `network_error`, `http_error`, `invalid_json`, `address_not_found`. Messages are Bulgarian — they're rendered directly in the UI.
+Error codes: `network_error`, `http_error`, `invalid_json`, `address_not_found`, `institution_not_found`. Messages are Bulgarian — they're rendered directly in the UI.
+
+Both not-found codes come from a byte-exact 404 body (`{"error":"address_not_found"}` from the match route, `{"error":"institution_not_found"}` from the institution routes). `readNotFoundCode` matches that body against a closed list, so a 404 with any other shape stays a generic `http_error` rather than becoming a state the UI treats as authoritative.
 
 ## Search flow
 

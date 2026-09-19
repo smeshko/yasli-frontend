@@ -1,5 +1,6 @@
 import { apiBaseUrl } from "@/lib/api/config";
 import type { components, operations } from "@/lib/api/types";
+import type { ReceptionKind } from "@/lib/domain/kinds";
 
 export type Street = components["schemas"]["StreetOut"];
 export type Address = components["schemas"]["AddressOut"];
@@ -8,6 +9,12 @@ export type MatchResult = components["schemas"]["MatchResult"];
 export type StructuredMatchResponse =
   operations["match_api_match_get"]["responses"][200]["content"]["application/json"];
 export type InstitutionListItem = components["schemas"]["InstitutionListItem"];
+/* The enriched detail payload backend phase 1.3 added, shared by
+   `GET /api/institutions/{institution_id}` and the by-source route. */
+export type InstitutionProfile = components["schemas"]["InstitutionDetail"];
+export type InstitutionBranch = components["schemas"]["Branch"];
+export type InstitutionLocation = components["schemas"]["Location"];
+export type CoverageGroup = components["schemas"]["CoverageGroup"];
 
 export type MatchData = StructuredMatchResponse;
 
@@ -15,7 +22,8 @@ export type ApiErrorCode =
   | "network_error"
   | "http_error"
   | "invalid_json"
-  | "address_not_found";
+  | "address_not_found"
+  | "institution_not_found";
 
 export interface ApiRequestError {
   code: ApiErrorCode;
@@ -39,6 +47,10 @@ export function buildMatchRequestPath(addressId: number): string {
   return `/api/match?${params.toString()}`;
 }
 
+export function buildInstitutionBySourcePath(kind: ReceptionKind, externalId: string): string {
+  return `/api/institutions/by-source/${kind}/${encodeURIComponent(externalId)}`;
+}
+
 export function listStreets(): Promise<ApiResult<Street[]>> {
   return requestJson<Street[]>("/api/streets");
 }
@@ -53,6 +65,13 @@ export function listInstitutions(): Promise<ApiResult<InstitutionListItem[]>> {
 
 export async function matchAddress(addressId: number): Promise<ApiResult<MatchData>> {
   return requestJson<MatchData>(buildMatchRequestPath(addressId));
+}
+
+export function getInstitutionBySource(
+  kind: ReceptionKind,
+  externalId: string,
+): Promise<ApiResult<InstitutionProfile>> {
+  return requestJson<InstitutionProfile>(buildInstitutionBySourcePath(kind, externalId));
 }
 
 async function requestJson<T>(path: string): Promise<ApiResult<T>> {
@@ -75,14 +94,14 @@ async function requestJson<T>(path: string): Promise<ApiResult<T>> {
   }
 
   if (!response.ok) {
-    const addressNotFound = await isAddressNotFoundResponse(response);
+    const notFoundCode = await readNotFoundCode(response);
 
-    if (addressNotFound) {
+    if (notFoundCode) {
       return {
         ok: false,
         error: {
-          code: "address_not_found",
-          message: "Адресът вече не е наличен в заредените данни.",
+          code: notFoundCode,
+          message: NOT_FOUND_MESSAGES[notFoundCode],
           status: response.status,
         },
       };
@@ -115,15 +134,31 @@ async function requestJson<T>(path: string): Promise<ApiResult<T>> {
   }
 }
 
-async function isAddressNotFoundResponse(response: Response): Promise<boolean> {
+/* A closed list, not any `error` string: both backend 404s are byte-exact
+   bodies (`routes/institutions.py:176` for the institution routes, the match
+   route for the address one), and trusting an arbitrary `error` value would
+   turn an unrelated 404 into a state the UI treats as authoritative. */
+type NotFoundCode = "address_not_found" | "institution_not_found";
+
+const NOT_FOUND_MESSAGES: Record<NotFoundCode, string> = {
+  address_not_found: "Адресът вече не е наличен в заредените данни.",
+  institution_not_found: "Институцията не е намерена в заредените данни.",
+};
+
+async function readNotFoundCode(response: Response): Promise<NotFoundCode | null> {
   if (response.status !== 404) {
-    return false;
+    return null;
   }
 
   try {
     const body = (await response.clone().json()) as { error?: string };
-    return body.error === "address_not_found";
+
+    if (body.error === "address_not_found" || body.error === "institution_not_found") {
+      return body.error;
+    }
+
+    return null;
   } catch {
-    return false;
+    return null;
   }
 }
