@@ -30,9 +30,11 @@ in the browser from the `by-source` route that backend phase 1.3 adds.
 - `src/components/InstitutionProfile.tsx` — a React island that fetches
   `GET /api/institutions/by-source/{kind}/{external_id}` and renders: the
   "serves your address" context, the >14-day stale banner, physical address,
-  contacts (`tel:`, `mailto:`, director, website), the catchment grouped by
-  street, the branch list as text, the freshness line and the outbound source
-  link — plus loading, error-with-retry and not-found states.
+  contacts (`tel:`, `mailto:`, director, website), the branch list as text,
+  the freshness line and the outbound source link — plus loading,
+  error-with-retry and not-found states. The catchment's street-by-street
+  address list is **not** rendered (see `VALIDATION.md`); only the per-kind
+  statements about routing survive.
 - Per-kind empty states: nurseries show the район they serve and never a
   catchment list; preschools with no published catchment show the copy from
   `PRESCHOOL_COVERAGE_RESEARCH.md` §5 verbatim; kindergartens with no
@@ -49,11 +51,12 @@ in the browser from the `by-source` route that backend phase 1.3 adds.
   absent, so a scraped `website` never reaches an `href` unchecked).
 - `src/lib/api/client.ts`: `getInstitutionBySource` and an
   `institution_not_found` error code.
-- `SearchResults.tsx`: the "Детайли" link on every result card whose
-  `(institution_kind, external_id)` is in the committed manifest, before the
-  existing "Източник" link; `SearchExperience.tsx` passes the manifest slug
-  set in as a prop. A result the manifest does not know gets no link rather
-  than a link to a static 404.
+- `SearchResults.tsx`: a card whose `(institution_kind, external_id)` is in
+  the committed manifest becomes a link to its page — the whole card
+  navigates and carries no separate link; `SearchExperience.tsx` passes the
+  manifest slug set in as a prop. A result the manifest does not know is not
+  a link and keeps "Източник", rather than linking to a static 404 or
+  becoming inert.
 - `scripts/fixture-server.mjs`: the `by-source` route with deterministic
   profiles keyed to real manifest slugs, so every page state can be
   screenshotted with no backend; documented in `SCENARIOS.md` in this dir.
@@ -211,10 +214,13 @@ rest:
 
 - [x] `npm run build` succeeds with **no backend running** and
       `dist/institution/` contains exactly one directory per manifest row.
-- [ ] **DEPLOY-PENDING** — Against the deployed backend with phase 1.3, a
-      direct visit to `/institution/kindergarten-46/` renders ДГ№13 „Мир“ with
-      its address, contacts, catchment grouped by street and its 4 branch
-      addresses as text. Backend 1.3 is merged on the backend's `staging` but
+- [x] Against a backend with phase 1.3, a direct visit to
+      `/institution/kindergarten-46/` renders ДГ№13 „Мир“ with its address,
+      contacts and its 4 branch addresses as text. **Verified against real
+      data on a local backend** (2026-09-19), not the deployed one: 1.3 is
+      merged on the backend's `staging` but Railway deploys `main`. The
+      catchment is no longer part of this criterion — see "Catchment list
+      removed" in `VALIDATION.md`. Backend 1.3 is merged on the backend's `staging` but
       Railway's `backend-api` deploys from `main`, so production still serves
       the pre-1.3 contract and this cannot be shown. The same page is proven
       against the fixture profile and against the real 1.3 *schema*; only the
@@ -238,11 +244,13 @@ rest:
 - [x] The stale banner appears when `last_seen_at` is more than 14 days old
       and not otherwise; the freshness line reads
       `Последна актуализация: dd.mm.yyyy`.
-- [x] Every result card whose institution is in the manifest carries both
-      "Детайли" and "Източник"; the "Детайли" href is
-      `/institution/<institution_kind>-<external_id>/`, including for
-      infant-group rows shown under nurseries; a result absent from the
-      manifest carries "Източник" only (unit test plus the S1 `999999` card).
+- [x] A result card whose institution is in the manifest is itself a link to
+      `/institution/<institution_kind>-<external_id>/` — the whole card
+      navigates, and it carries no separate "Детайли" or "Източник" link. The
+      href uses `institution_kind`, so an infant-group row shown under
+      nurseries points at the kindergarten's page. A result absent from the
+      manifest is not a link and keeps "Източник" as its only affordance, so
+      no card is a dead end (unit tests plus the S1 `999999` card).
 - [x] Keyboard-only navigation reaches every link and button on the page with
       a visible focus indicator in both themes.
 - [x] Every string on the page is Bulgarian; every outbound link has

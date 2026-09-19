@@ -57,16 +57,16 @@ pattern.
 
 - A `scripts/generate-institutions-manifest.mjs` + `npm run institutions:manifest` pair modelled on `scripts/generate-api-types.mjs`: hits a live backend, writes a committed JSON manifest of `(kind, external_id, name)`, and is **not** run in CI.
 - `src/pages/institution/[slug].astro` with `getStaticPaths` reading that manifest. Slug is `<kind>-<external_id>` (e.g. `kindergarten-46`); the page hydrates from `GET /api/institutions/by-source/{kind}/{external_id}`.
-- Page sections: header (name, kind badge, ДГ/ДЯ number parsed from the name — **not** `DZ_NUMBER`, which tracks the internal id), physical address, contacts (phone as `tel:`, e-mail as `mailto:`, director, website for schools), the catchment grouped by street with natural number ordering, the branch list as text, `last_seen_at` freshness plus the >14-day stale banner, and the outbound source link marked external.
+- Page sections: header (name, kind badge, ДГ/ДЯ number parsed from the name — **not** `DZ_NUMBER`, which tracks the internal id), physical address, contacts (phone as `tel:`, e-mail as `mailto:`, director, website for schools), the branch list as text, `last_seen_at` freshness plus the >14-day stale banner, and the outbound source link marked external. The catchment's street-by-street list was dropped after review — a real one runs to ~1900 addresses and buried the page; only the per-kind routing statements remain. Diverges from PRD FR-12; see the plan's `VALIDATION.md`.
 - Per-kind empty states: nurseries explain district routing instead of showing an empty catchment; preschools reuse the copy from `PRESCHOOL_COVERAGE_RESEARCH.md` §5.
 - "Serves your address" context when the parent arrives from a result — carry the matched address and `match_basis` (`address` vs `district`) across the navigation, reusing the existing sessionStorage restore mechanism in `SearchExperience.tsx`.
-- Re-add the "Детайли" link on result cards in `SearchResults.tsx` alongside the existing "Източник" link — only for institutions present in the committed manifest, so a result the manifest does not know gets no link rather than a link to a static 404.
+- Make each result card in `SearchResults.tsx` a link to its institution page — only for institutions present in the committed manifest. A result the manifest does not know is not a link and keeps "Източник", so it is neither a link to a static 404 nor a dead card.
 - Loading, not-found and API-error states, matching how the search screen already handles them.
 
 ### Acceptance criteria
 
 - [x] `npm run build` succeeds with **no backend running** and emits one page per institution in the manifest
-- [ ] **Deploy-pending** — A direct visit to `/institution/kindergarten-46/` renders ДГ№13 "Мир" with its address, contacts, catchment and its 4 branch addresses as text. Proven against a fixture profile matching the real 1.3 schema; the production data path needs backend `staging` merged to `main` so Railway redeploys. See the plan's `VALIDATION.md`.
+- [x] A direct visit to `/institution/kindergarten-46/` renders ДГ№13 "Мир" with its address, contacts and its 4 branch addresses as text. Verified against real data on a local backend (2026-09-19). The catchment left this criterion when its address list was dropped. Production still serves the pre-1.3 contract until backend `staging` reaches `main`.
 - [x] A nursery page shows the district it serves and no empty catchment list; a preschool page with no published catchment shows the §5 copy, not a generic "no results"
 - [x] Arriving from a search result shows which address the parent searched and whether the match was address- or district-based; arriving directly with no matching stored search shows neither and nothing looks broken (a same-tab direct visit after a search that included this institution keeps showing the context — by design, see the plan's `DECISIONS.md`)
 - [x] An unknown slug renders the 404 page rather than an error state

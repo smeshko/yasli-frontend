@@ -154,6 +154,77 @@ saw it. It was reported as clean at the time because the check output was
 truncated to the last three lines, which cut off the error count. Fixed in
 `2c18686` and the full output is read in the Gates table above.
 
+---
+
+# Post-review changes — 2026-09-19
+
+Three changes made after final validation, on the author's review of the
+running page. Both of the first two contradict something the plan or the PRD
+committed to, so they are recorded here rather than absorbed quietly.
+
+## Catchment list removed
+
+**What changed.** The street-by-street catchment list is no longer rendered.
+The section now appears only when it has something to *state*: a nursery names
+the район it serves, and a kindergarten or preschool with no published
+catchment keeps its researched empty-state copy. A kindergarten or preschool
+that *has* a catchment renders no section at all.
+
+**Why.** Real catchments are far larger than the plan assumed. ДГ№13 „Мир“
+covers 93 streets and 1888 addresses; the list rendered as a wall of numbers
+that pushed the branches and freshness line off the screen. The plan's
+mitigation for this risk was "per-street rows with inline numbers, no
+truncation", which measured against real data is not a mitigation. The search
+screen already answers "does this institution serve my address" exactly, so
+the list added length without adding an answer.
+
+**What it costs.** This diverges from **PRD FR-12**, which asks for the
+catchment grouped by street and naturally sorted. The data is still in the API
+response and the backend still guarantees its ordering, so restoring it behind
+a disclosure later costs nothing. Considered and not taken now: a collapsed
+"покажи адресите" toggle.
+
+**Criteria touched.** The ДГ№13 criterion in `PLAN.md` and in the epic no
+longer names the catchment. The per-kind empty-state criterion is unchanged
+and still passes, because that copy survives.
+
+## Result cards navigate as a whole
+
+**What changed.** A card whose institution is in the manifest is now itself a
+link: the whole card navigates, and the separate "Детайли" and "Източник"
+links are gone from it. A card the manifest does not know is not a link and
+keeps "Източник" as its only affordance.
+
+**Why.** Two links on a card competed with each other, and the card already
+looked clickable. Keeping "Източник" on unlinked cards was a deliberate
+choice over removing it everywhere: those are the 18 stale nursery rows in
+production plus anything added since the last manifest run, and with no link
+and no click they would have become dead cards.
+
+**How it is built.** The link wraps the card's text block and its `::after` is
+stretched over the card. The first attempt put the link inside the `<h3>`,
+which is `position: relative`, so the overlay covered only the name and
+clicking the rest of the card did nothing. Moving the link to be a direct
+child of the card fixed it. One focusable control per card, labelled with the
+institution's name, so keyboard and middle-click behave like any link and no
+interactive element is nested inside another.
+
+**Verified at runtime** (headless Chrome, local backend with real data):
+clicking the far corner of a card navigates; the card is reached in 5 tab
+stops and carries a 2px focus ring in light and dark; Enter navigates; a card
+outside the manifest has no link and keeps its source link.
+
+**Criteria touched.** The result-card criterion in `PLAN.md` and the epic's
+"Re-add the Детайли link" bullet now describe whole-card navigation.
+
+## Fragile test assertion fixed
+
+The kindergarten test asserted that no district *name* appears anywhere in the
+markup, by substring. Real Varna has a boulevard called "Осми Приморски Полк",
+which contains "Приморски", so that assertion would have failed for the wrong
+reason as soon as a realistic street reached the fixture. It now asserts on
+the rendered district sentence instead.
+
 ## Known pre-existing failure, not caused by this branch
 
 Frontend CI has been red on `staging` since 2026-09-14 and is red on this
