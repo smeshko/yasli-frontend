@@ -1,0 +1,215 @@
+---
+import { InstitutionProfile } from "@/components/InstitutionProfile";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import manifest from "@/data/institutions-manifest.json";
+import { labelForReceptionKind } from "@/lib/domain/kinds";
+import { parseInstitutionNumber } from "@/lib/domain/institutionName";
+import { manifestToStaticPaths, type ManifestEntry } from "@/lib/institutions/manifest";
+import type { InferGetStaticPropsType } from "astro";
+
+/* The committed manifest is the only institution data the build can rely on:
+   CI has no backend. A page therefore exists for exactly the manifest's rows,
+   and `astro dev` honours the same list.
+
+   A function declaration, not a const arrow: Astro hoists getStaticPaths out
+   of the component scope, and only the declaration form hoists — as a const
+   the frontmatter's Astro.props read below is evaluated during path
+   generation and the build fails with UnavailableAstroGlobal. */
+export function getStaticPaths() {
+  return manifestToStaticPaths(manifest as ManifestEntry[]);
+}
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { kind, external_id, name } = Astro.props as Props;
+
+const kindLabel = labelForReceptionKind(kind);
+/* The ДГ/ДЯ number is additive: the name itself is shown exactly as the
+   source delivers it, never restructured. */
+const number = parseInstitutionNumber(name);
+---
+
+<BaseLayout
+  title={`${name} — Ясли Варна`}
+  description={`${kindLabel}: адрес, контакти, район на прием и филиали.`}
+>
+  <article class="profile section-stack" data-kind={kind}>
+    <a class="profile-back" href="/">← Обратно към търсенето</a>
+    <p class="eyebrow">{kindLabel}{number ? ` №${number}` : ""}</p>
+    <h1>{name}</h1>
+    <InstitutionProfile client:load kind={kind} externalId={external_id} />
+  </article>
+</BaseLayout>
+
+<style is:global>
+  /* Each page resolves one hue from its kind, the way .result-group does, and
+     everything inside reads from it. */
+  .profile {
+    --tone: var(--color-section-nursery);
+  }
+
+  .profile[data-kind="kindergarten"] {
+    --tone: var(--color-section-kindergarten);
+  }
+
+  .profile[data-kind="preschool"] {
+    --tone: var(--color-section-preschool);
+  }
+
+  .profile-back {
+    justify-self: start;
+    color: var(--color-text-muted);
+    font-size: 0.94rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .profile-back:hover {
+    color: var(--color-accent);
+  }
+
+  .profile .eyebrow {
+    color: var(--tone);
+  }
+
+  .profile section {
+    border: 2px solid var(--color-border-card);
+    border-radius: var(--radius-surface);
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-hard);
+    padding: 20px 22px;
+  }
+
+  .profile section h2 {
+    margin: 0 0 12px;
+    color: var(--color-text-strong);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .profile section p {
+    margin: 0;
+  }
+
+  /* The same treatment as a group note on the search screen: an aside about
+     the parent's own search, not part of the institution's own data. */
+  .profile-context {
+    max-width: none;
+    border-left: 4px solid var(--tone);
+    border-radius: 0 12px 12px 0;
+    background: var(--color-bg-surface-muted);
+    color: var(--color-text-muted);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    padding: 13px 16px;
+  }
+
+  .profile-status {
+    border: 2px solid var(--color-border-card);
+    border-radius: var(--radius-surface);
+    background: var(--color-bg-surface);
+    color: var(--color-text-muted);
+    padding: 16px 18px;
+  }
+
+  .profile-status--error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-color: var(--color-border-error);
+    background: var(--color-bg-error-soft);
+    color: var(--color-text-error);
+    font-weight: 500;
+  }
+
+  .profile-status--error button {
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
+    background: var(--color-accent);
+    box-shadow: var(--shadow-hard-sm);
+    color: var(--color-text-on-accent);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 9px 16px;
+  }
+
+  .profile dl {
+    display: grid;
+    grid-template-columns: minmax(7rem, auto) 1fr;
+    gap: 8px 18px;
+    margin: 0;
+  }
+
+  .profile dt {
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .profile dd {
+    margin: 0;
+  }
+
+  .profile-branches {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .profile-branches li {
+    line-height: 1.55;
+  }
+
+  .profile-empty,
+  .profile-note,
+  .profile-meta {
+    color: var(--color-text-muted);
+    font-size: 0.94rem;
+    line-height: 1.55;
+  }
+
+  .profile-note {
+    margin-top: 12px !important;
+  }
+
+  .profile-meta,
+  .profile-source {
+    margin: 0;
+  }
+
+  .profile a {
+    color: var(--color-accent);
+  }
+
+  /* The disqualifying accessibility defect class is an invisible focus ring,
+     so every interactive thing on this page gets one explicitly. */
+  .profile a:focus-visible,
+  .profile button:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 720px) {
+    .profile dl {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .profile dd + dt {
+      margin-top: 10px;
+    }
+
+    .profile section {
+      padding: 18px 16px;
+    }
+  }
+</style>

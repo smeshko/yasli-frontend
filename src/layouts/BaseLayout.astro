@@ -812,6 +812,19 @@ const navItems = [
     outline-offset: 3px;
   }
 
+  /* Shared by the search screen and every institution page, so it lives here
+     rather than in one page's styles. The declarations are the merged result
+     of the two groups it used to share with .results-status in index.astro. */
+  .stale-banner {
+    border: 2px solid var(--color-border-error);
+    border-radius: var(--radius-surface);
+    margin-top: 18px;
+    background: var(--color-bg-error-soft);
+    color: var(--color-text-error);
+    font-weight: 500;
+    padding: 16px 18px;
+  }
+
   .status-badge {
     display: inline-flex;
     width: fit-content;

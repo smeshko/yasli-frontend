@@ -30,11 +30,13 @@ The frontend is the only browser-facing surface of yasli. It has no server runti
 ```
 src/
 ├── components/         React: SearchExperience, StatusBadge
+├── data/               institutions-manifest.json (generated, committed)
 ├── layouts/            BaseLayout.astro (shell, global CSS, nav)
-├── pages/              Astro routes: /, /about, 404
+├── pages/              Astro routes: /, /institution/[slug], /pravila, 404
 └── lib/
     ├── api/            client.ts (fetch wrappers), config.ts (base URL resolver), types.ts (generated)
     ├── domain/         kinds.ts (ReceptionKind enum), freshness.ts (14-day staleness)
+    ├── institutions/   manifest.ts (slug, page path and getStaticPaths helpers over the manifest)
     └── search/         addressSuggestions.ts, referenceData.ts, results.ts
 ```
 
@@ -48,8 +50,13 @@ src/
 | `listAddresses()` | `GET /api/addresses` |
 | `listInstitutions()` | `GET /api/institutions` |
 | `matchAddress(addressId)` | `GET /api/match?address_id={id}` |
+| `getInstitutionBySource(kind, externalId)` | `GET /api/institutions/by-source/{kind}/{external_id}` |
 
-Error codes: `network_error`, `http_error`, `invalid_json`, `address_not_found`. Messages are Bulgarian — they're rendered directly in the UI.
+Error codes: `network_error`, `http_error`, `invalid_json`, `address_not_found`, `institution_not_found`. Messages are Bulgarian — they're rendered directly in the UI.
+
+Both not-found codes come from a byte-exact 404 body (`{"error":"address_not_found"}` from the match route, `{"error":"institution_not_found"}` from the institution routes). `readNotFoundCode` matches that body against a closed list, so a 404 with any other shape stays a generic `http_error` rather than becoming a state the UI treats as authoritative.
+
+`getInstitutionBySource` is the one exception: it opts into `notFoundFallback: "institution_not_found"`, so **any** 404 on `by-source` maps to the not-found state. A backend deployed before phase 1.3 has no such route and answers FastAPI's `{"detail":"Not Found"}`; without the fallback that lands in `http_error`, whose retry button can never succeed. The closed list still governs every other route.
 
 ## Search flow
 
@@ -73,9 +80,21 @@ Free-text submission without selecting a suggestion is intentionally **not** sup
 
 The build does **not** call this script. Workflow: backend changes its OpenAPI → run `npm run api:types` locally → commit the regenerated `types.ts`.
 
+## Institution manifest
+
+`scripts/generate-institutions-manifest.mjs` follows the same committed-generated-artifact rule:
+
+- Reads `YASLI_INSTITUTIONS_URL` (defaults to `http://localhost:8000/api/institutions`) with the global `fetch`.
+- Keeps `kind`, `external_id` and `name` per row, sorted by kind order (`nursery`, `kindergarten`, `preschool`) then numeric `external_id`, and writes `src/data/institutions-manifest.json` (committed to the repo).
+- Exits non-zero on a non-200 status, invalid JSON, an empty or non-array payload, a row missing a field, an unknown `kind` or a duplicate `(kind, external_id)`.
+
+The build does **not** call this script, and CI never runs it. `src/lib/institutions/manifest.ts` turns the rows into slugs (`<kind>-<external_id>`), page paths (`/institution/<slug>/`) and `getStaticPaths` rows, so the institution pages exist exactly for the manifest's rows. Workflow: the institution list changes → run `npm run institutions:manifest` against the deployed backend → commit the regenerated file → redeploy.
+
 ## Build output
 
-`output: "static"` produces `dist/` with prerendered HTML for every route plus React islands for `SearchExperience`. The `PUBLIC_YASLI_API_BASE_URL` value is **baked in at build time** — changing it requires a redeploy, not just a restart.
+`output: "static"` produces `dist/` with prerendered HTML for every route plus React islands for `SearchExperience` and `InstitutionProfile`.
+
+`/institution/<kind>-<external_id>/` is a dynamic route whose `getStaticPaths` reads the committed manifest, so the build emits exactly one page per manifest row and needs no backend. Each page prerenders its header (kind label, ДГ/ДЯ number parsed from the name, the name as `<h1>`) from the manifest and hydrates the rest from `GET /api/institutions/by-source/{kind}/{external_id}`. A slug outside the manifest has no page and is served the site 404. The `PUBLIC_YASLI_API_BASE_URL` value is **baked in at build time** — changing it requires a redeploy, not just a restart.
 
 ## Deployment
 

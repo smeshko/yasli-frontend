@@ -1,0 +1,477 @@
+[
+  {
+    "kind": "nursery",
+    "external_id": "1",
+    "name": "ДЯ № 1 \"ЩАСТЛИВО ДЕТСТВО\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "2",
+    "name": "ДЯ № 2 \"МОРЯЧЕ\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "3",
+    "name": "ДЯ № 3 \"ЗАЙО БАЙО\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "4",
+    "name": "ДЯ № 4 \"Приказен свят\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "5",
+    "name": "ДЯ № 5 \"ЧУДЕН СВЯТ\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "6",
+    "name": "ДЯ № 6 \"МЕЧО ПУХ\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "7",
+    "name": "ДЯ № 7 \"РОЗА\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "8",
+    "name": "ДЯ № 8 \"ЩУРЧЕ\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "9",
+    "name": "ДЯ № 9 \"ДЕТЕЛИНА\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "10",
+    "name": "ДЯ № 11 \"ИГЛИКА\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "11",
+    "name": "ДЯ № 13 \"РУСАЛКА\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "12",
+    "name": "ДЯ № 14 \"ЗВЪНЧЕ\""
+  },
+  {
+    "kind": "nursery",
+    "external_id": "39",
+    "name": "ДГ№6 \"Палечко\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "47",
+    "name": "ДГ№14 \"Дружба\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "52",
+    "name": "ДГ№19 \"Славейче\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "56",
+    "name": "ДГ№23 \"Иглика\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "63",
+    "name": "ДГ№30 \"Синчец\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "66",
+    "name": "ДГ№33 \"Делфинче\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "67",
+    "name": "ДГ№34 \"Лястовичка\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "68",
+    "name": "ДГ№35 \"Детска радост\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "69",
+    "name": "ДГ№36 \"Морска звездица\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "71",
+    "name": "ДГ№38 \"Маргаритка\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "72",
+    "name": "ДГ№39 \"Приказка\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "73",
+    "name": "ДГ№40 \"Детски свят\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "74",
+    "name": "ДГ№41 \"Първи юни\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "75",
+    "name": "ДГ№42 \"Българче\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "80",
+    "name": "ДГ№47 \"Люляче\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "81",
+    "name": "ДГ№48 \"Ран Босилек\" / с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "82",
+    "name": "ДГ№49 \"Боров кът\"/ с яслена група/"
+  },
+  {
+    "kind": "nursery",
+    "external_id": "83",
+    "name": "ДГ№37 \"Пламъче\"/ с яслена група/"
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "34",
+    "name": "ДГ№1 \"Светулка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "35",
+    "name": "ДГ№2 \"Щастливо детство\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "36",
+    "name": "ДГ№3 \"Звездичка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "37",
+    "name": "ДГ№4 \"Теменужка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "38",
+    "name": "ДГ№5 \"Слънчо\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "39",
+    "name": "ДГ№6 \"Палечко\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "40",
+    "name": "ДГ№7 \"А.С.Пушкин\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "41",
+    "name": "ДГ№8 \"Христо Ботев\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "42",
+    "name": "ДГ№9 \"Ален мак\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "43",
+    "name": "ДГ№10 \"Карамфилче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "44",
+    "name": "ДГ№11 \"Незабравка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "45",
+    "name": "ДГ№12 \"Ян Бибиян\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "46",
+    "name": "ДГ№13 \"Мир\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "47",
+    "name": "ДГ№14 \"Дружба\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "48",
+    "name": "ДГ№15 \"Гълъбче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "49",
+    "name": "ДГ№16 \"Слънчева Дъга\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "50",
+    "name": "ДГ№17 \"Петър Берон\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "51",
+    "name": "ДГ№18 \"Чайка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "52",
+    "name": "ДГ№19 \"Славейче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "53",
+    "name": "ДГ№20 \"Бриз\"/със специални групи/"
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "54",
+    "name": "ДГ№21 \"Калина Малина\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "55",
+    "name": "ДГ№22 \"Мечо Пух\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "56",
+    "name": "ДГ№23 \"Иглика\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "57",
+    "name": "ДГ№24 \"Детско градче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "58",
+    "name": "ДГ№25 \"Златното зрънце\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "59",
+    "name": "ДГ№26 \"Изворче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "60",
+    "name": "ДГ№27 \"Успех\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "61",
+    "name": "ДГ№28 \"Пролет\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "62",
+    "name": "ДГ№29 \"Звънче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "63",
+    "name": "ДГ№30 \"Синчец\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "64",
+    "name": "ДГ№31 \"Крилатко\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "65",
+    "name": "ДГ№32 \"Моряче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "66",
+    "name": "ДГ№33 \"Делфинче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "67",
+    "name": "ДГ№34 \"Лястовичка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "68",
+    "name": "ДГ№35 \"Детска радост\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "69",
+    "name": "ДГ№36 \"Морска звездица\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "70",
+    "name": "ДГ№37 \"Пламъче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "71",
+    "name": "ДГ№38 \"Маргаритка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "72",
+    "name": "ДГ№39 \"Приказка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "73",
+    "name": "ДГ№40 \"Детски свят\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "74",
+    "name": "ДГ№41 \"Първи юни\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "75",
+    "name": "ДГ№42 \"Българче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "76",
+    "name": "ДГ№43 \"Пинокио\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "77",
+    "name": "ДГ№44 \"Валентина Терешкова\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "78",
+    "name": "ДГ№45 \"Морски свят\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "79",
+    "name": "ДГ№46 \"Горска приказка\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "80",
+    "name": "ДГ№47 \"Люляче\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "81",
+    "name": "ДГ№48 \"Ран Босилек\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "82",
+    "name": "ДГ№49 \"Боров кът\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "83",
+    "name": "ДГ№50 \"Зорница\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "84",
+    "name": "ДГ№51 \"Ран Босилек\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "102",
+    "name": "ДГ№52 \"Бялата лястовица\""
+  },
+  {
+    "kind": "kindergarten",
+    "external_id": "103",
+    "name": "ДГ№53 \"Слънчево зайче\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "7",
+    "name": "ОУ \"Свети Иван Рилски\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "9",
+    "name": "ОУ \"Константин Арабаджиев\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "10",
+    "name": "ОУ \"Капитан Петко войвода\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "11",
+    "name": "ОУ \"Отец Паисий\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "12",
+    "name": "ОУ \"Панайот Волов\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "22",
+    "name": "III ОУ \"Ангел Кънчев\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "23",
+    "name": "II ОУ \"Никола Йонков Вапцаров\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "28",
+    "name": "СУ \"Елин Пелин\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "29",
+    "name": "СУ \"Любен Каравелов\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "32",
+    "name": "СУ \"Димчо Дебелянов\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "33",
+    "name": "СУ \"Неофит Бозвели\""
+  },
+  {
+    "kind": "preschool",
+    "external_id": "35",
+    "name": "ОУ \"Добри Войников\" с. Каменар"
+  }
+]

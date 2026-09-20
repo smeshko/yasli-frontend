@@ -285,8 +285,42 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     padding: 0 0 56px;
   }
 
-  .results-status,
-  .stale-banner {
+  /* The whole card navigates. Rather than a click handler on the article,
+     the institution name is a real link whose ::after is stretched over the
+     card: one focusable control, keyboard and middle-click behave like any
+     link, and no interactive element is nested inside another. */
+  .result-card[data-linked] {
+    cursor: pointer;
+  }
+
+  .result-card .card-link {
+    /* Stretch so a long name uses the full card width, and so the link box
+       (not just its text) spans the card horizontally. */
+    align-self: stretch;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .result-card .card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .result-card .card-link:focus-visible {
+    outline: none;
+  }
+
+  /* The ring goes on the card, since the link covers all of it, and reads
+     from the group's own hue like the hover shadow does — a nursery-coloured
+     ring on a kindergarten card clashed with its own hover state. */
+  .result-card:has(.card-link:focus-visible) {
+    outline: 2px solid var(--tone);
+    outline-offset: 3px;
+  }
+
+  .results-status {
     border: 2px solid var(--color-border-card);
     border-radius: var(--radius-surface);
     margin-top: 18px;
@@ -295,8 +329,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     padding: 16px 18px;
   }
 
-  .results-status.error,
-  .stale-banner {
+  .results-status.error {
     border-color: var(--color-border-error);
     background: var(--color-bg-error-soft);
     color: var(--color-text-error);
@@ -614,6 +647,16 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
   .card-actions a:hover {
     color: var(--tone);
+  }
+
+  /* The fallback when a source value is not a usable http(s) URL: the card
+     still names where its data came from, reading as muted metadata rather
+     than as a link that does nothing. Wraps, since it prints a raw value. */
+  .card-source-text {
+    padding: 8px 0 2px;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
   }
 
   .empty-group {
