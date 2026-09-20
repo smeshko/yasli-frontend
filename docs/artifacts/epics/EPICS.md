@@ -19,8 +19,8 @@ small-to-medium pull request and maps to exactly one plan under
 
 | # | Epic | Phases | Dependencies | Status |
 |---|------|--------|--------------|--------|
-| 1 | [Institution detail page with map](./01-institution-detail-page.md) | 3 | backend epic 01, scraper epic 01 | Blocked |
-| 2 | [Institution directory and availability](./02-institution-directory-and-availability.md) | 2 | Epic 01, backend epic 02 | Blocked |
+| 1 | [Institution detail page with map](./01-institution-detail-page.md) | 3 | backend epic 01, scraper epic 01 | In progress |
+| 2 | [Institution directory and availability](./02-institution-directory-and-availability.md) | 1 | Epic 01 | Blocked |
 
 ## Other repos
 

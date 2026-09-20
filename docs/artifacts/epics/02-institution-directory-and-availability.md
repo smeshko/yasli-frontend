@@ -2,25 +2,28 @@
 
 Status: planned
 Created: 2026-08-17
-Depends on: Epic 01; backend epic 02 (for phase 2.2)
+Depends on: Epic 01
 Project: institution-profiles
 Linear: YAS-5 (https://linear.app/ivo-tsonev/issue/YAS-5)
 Milestone: 4a808348-f6ad-4507-b30b-e2cc6b276c55
 
+> **Phase 2.2 deferred 2026-09-19.** The backend read it renders
+> ([backend epic 02](../../../../backend/docs/artifacts/epics/02-free-places-api.md))
+> is deferred — the source table was measured 88 days stale and byte-identical
+> to a copy captured a month earlier. Phase 2.1 is unaffected and carries this
+> epic on its own. The 2.2 spec is left below to pick back up. Linear has no
+> deferred state, so YAS-15 is tracked there as `Canceled`.
+
 ## Overview
 
-Two things search alone cannot deliver. First, a browsable directory: address
-search can only surface institutions that publish a catchment, and at least one
-school — ОУ "Захари Стоянов" — accepts preschool children while publishing none,
-so it is currently invisible to every possible query. A nav-level directory fixes
-that and answers PRD job #3. Second, free places: the source portal publishes a
-live per-cohort availability table, served by
-[backend epic 02](../../../../backend/docs/artifacts/epics/02-free-places-api.md),
-which is the one genuinely new answer we can give a parent beyond "who is
-responsible for my address".
+A browsable directory: address search can only surface institutions that
+publish a catchment, and at least one school — ОУ "Захари Стоянов" — accepts
+preschool children while publishing none, so it is currently invisible to every
+possible query. A nav-level directory fixes that and answers PRD job #3.
 
-Free places refreshes independently of the weekly snapshot, so it gets its own
-visible date rather than borrowing the snapshot's freshness.
+This epic was originally scoped with a second half — free places, a dated
+per-cohort availability block on the detail page. That is deferred; see the
+note above and backend epic 02 for the measurements.
 
 ## Architecture references
 
@@ -31,8 +34,9 @@ visible date rather than borrowing the snapshot's freshness.
 
 ## Dependencies
 
-- **[Epic 01](./01-institution-detail-page.md)** — the directory links to detail pages, and free places renders inside the detail page built in phase 1.1.
-- **backend epic 02, phase 2.1** — phase 2.2 renders its endpoint.
+- **[Epic 01](./01-institution-detail-page.md)** — the directory links to detail pages.
+
+(The former dependency on backend epic 02 phase 2.1 went with phase 2.2.)
 
 ## Out of scope
 
@@ -73,11 +77,14 @@ Screenshots at mobile and desktop width in both themes, plus the nav in its open
 
 ---
 
-## Phase 2.2 — Free places on the detail page
+## Phase 2.2 — Free places on the detail page — DEFERRED 2026-09-19
 
-**Plan**: _not yet created_
+**Plan**: _not created — phase deferred, see the note at the top of this file_
 
-**Linear**: YAS-15 (https://linear.app/ivo-tsonev/issue/YAS-15)
+**Linear**: YAS-15 (https://linear.app/ivo-tsonev/issue/YAS-15) — Canceled
+
+Kept verbatim as the specification to pick back up if the backend read is
+revived, which would be inside the next admission cycle, around April.
 
 **Goal**: The detail page shows free places per age cohort, dated so a parent can see how current the number is.
 
@@ -107,7 +114,9 @@ Screenshots of an institution with non-zero places, one with all zeros, and one 
 
 ## Epic-level acceptance criteria
 
-- [ ] Every phase merged and its acceptance criteria met
+- [ ] Phase 2.1 merged and its acceptance criteria met (2.2 is deferred, not pending)
 - [ ] Every institution is reachable without knowing an address
-- [ ] Availability numbers are never shown without the date they were published
 - [ ] Status row in [EPICS.md](./EPICS.md) updated to `Done`
+
+~~Availability numbers are never shown without the date they were published~~ —
+went with phase 2.2.
