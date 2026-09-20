@@ -7,6 +7,16 @@ Project: institution-profiles
 Linear: YAS-4 (https://linear.app/ivo-tsonev/issue/YAS-4)
 Milestone: 6250a9a8-d9a6-4875-98f6-95751d8616b1
 
+> **Phase 1.3 removed from scope 2026-09-20.** District shading was judged not
+> to earn its weight: it would have applied to only two of the three kinds,
+> four settlements (Виница, Тополи, Константиново, Казашко) fall outside all
+> five polygons and would have shown nothing anyway, and phase 1.1 already
+> states the район a nursery serves in words — which is the fact a parent
+> needs. A shape on a map would have restated it less precisely, since a
+> district polygon is not a catchment. The 1.2 map still shows the institution
+> itself. The spec is left below to pick back up. Linear has no removed state,
+> so YAS-13 is tracked there as `Canceled`.
+
 ## Overview
 
 Give every institution a shareable page that answers PRD job #2 — "tell me more
@@ -34,7 +44,7 @@ pattern.
 
 ## Dependencies
 
-- **[backend epic 01](../../../../backend/docs/artifacts/epics/01-institution-data-foundation.md)** — every phase here reads fields it adds. 1.1 needs the `by-source` route and the contacts (backend 1.3); 1.2 needs the coordinates (backend 1.2); 1.3 needs `district_code` (backend 1.3).
+- **[backend epic 01](../../../../backend/docs/artifacts/epics/01-institution-data-foundation.md)** — every phase here reads fields it adds. 1.1 needs the `by-source` route and the contacts (backend 1.3); 1.2 needs the coordinates (backend 1.2). (The former `district_code` dependency went with phase 1.3.)
 - **[scraper epic 01](../../../../scraper/docs/artifacts/epics/01-contact-metadata.md)** — contacts are only non-null once the scraper emits them.
 
 ## Out of scope
@@ -42,7 +52,7 @@ pattern.
 - The browse-all directory and the nav item — [Epic 02](./02-institution-directory-and-availability.md), phase 2.1.
 - Free places — backend epic 02 and Epic 02, phase 2.2.
 - Any pin or distance line for the parent's **own** address. Ruled out on measured grounds (research §5.1): 0/18 real Varna addresses geocode to house precision, and the misses land in the wrong municipality. The directions link covers the same job by letting the phone do it.
-- District shading on kindergarten pages. Their `district_code` is derived by catchment-majority and is not their catchment; showing it would teach parents something false.
+- District shading on **any** page, since phase 1.3 was removed. It was never going to be drawn on kindergarten pages regardless: their `district_code` is derived by catchment-majority and is not their catchment, so showing it would teach parents something false. Nursery and preschool pages state their район in words instead (phase 1.1).
 - Street-level catchment geometry (research §5).
 
 ## Phase 1.1 — Detail route and page content
@@ -111,11 +121,16 @@ Screenshots in both themes at mobile and desktop width, plus a screenshot with J
 
 ---
 
-## Phase 1.3 — District overlay where the district is the routing basis
+## Phase 1.3 — District overlay where the district is the routing basis — REMOVED 2026-09-20
 
-**Plan**: _not yet created_
+**Plan**: _not created — phase removed from scope, see the note at the top of this file_
 
-**Linear**: YAS-13 (https://linear.app/ivo-tsonev/issue/YAS-13)
+**Linear**: YAS-13 (https://linear.app/ivo-tsonev/issue/YAS-13) — Canceled
+
+Kept verbatim as the specification to pick back up if district shading is ever
+revived. The measured coverage gaps and the OSM relation ids below are the
+research that made the call, so they are worth keeping even though the phase is
+not being built.
 
 **Goal**: Nursery pages and district-routed preschool pages shade the район they actually serve, and say nothing when the polygon does not cover the address.
 
@@ -145,7 +160,7 @@ Screenshots of one nursery per district, plus the Виница/Тополи no-s
 
 ## Epic-level acceptance criteria
 
-- [ ] Every phase merged and its acceptance criteria met
+- [ ] Phases 1.1 and 1.2 merged and their acceptance criteria met (1.3 is removed, not pending)
 - [ ] A parent can go from a search result to a detail page, see where the institution is, and get directions on their phone
-- [ ] Nothing on the page implies we know something we don't: no catchment polygons, no shading on kindergarten pages, no pin for the parent's own address
+- [ ] Nothing on the page implies we know something we don't: no catchment polygons, no district shading of any kind, no pin for the parent's own address
 - [ ] Status row in [EPICS.md](./EPICS.md) updated to `Done`
