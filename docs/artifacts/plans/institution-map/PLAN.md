@@ -267,7 +267,7 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 - [x] TASK-001: Carry the institution coordinate in the manifest
 - [x] TASK-002: Add the map link-out URL builders
 - [x] TASK-003: Render the link-outs statically on the detail page (depends on TASK-001,TASK-002)
-- [ ] TASK-004: Add the map style helpers: Bulgarian labels and the theme pair
+- [x] TASK-004: Add the map style helpers: Bulgarian labels and the theme pair
 - [ ] TASK-005: Build the lazily loaded InstitutionMap island (depends on TASK-004)
 - [ ] TASK-006: Mount the map on the profile and document the route (depends on TASK-001,TASK-005)
 - [ ] TASK-007: Final Validation
