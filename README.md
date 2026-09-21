@@ -36,6 +36,15 @@ Regenerate the manifest against the deployed backend, never bare while `npm run 
 YASLI_INSTITUTIONS_URL=https://yasli-backend-production.up.railway.app/api/institutions npm run institutions:manifest
 ```
 
+The manifest carries each row's `location` (`{lat, lon, precision}` or `null`), which the detail page's map link-outs and its main pin are built from. **The backend must serve it** — that is backend phase 1.2 onwards, and at the time of writing it is merged on the backend's `staging` but not on the `main` that Railway deploys. Until it is, regenerate against a locally seeded backend instead:
+
+```bash
+# in yasli-backend: just be-seed && just be-api
+YASLI_INSTITUTIONS_URL=http://localhost:8000/api/institutions npm run institutions:manifest
+```
+
+A run against a backend that serves no coordinate on any row exits non-zero without writing, so it cannot silently strip the field from the committed file.
+
 An institution added to the backend after the last run has no page until the manifest is regenerated and the site redeployed.
 
 ## Environment variables

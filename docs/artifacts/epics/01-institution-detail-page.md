@@ -90,7 +90,7 @@ Screenshot the page for one kindergarten with branches, one nursery and one pres
 
 ## Phase 1.2 — Map with pins and link-outs
 
-**Plan**: [institution-map](../plans/institution-map/PLAN.md) · status: planned
+**Plan**: [institution-map](../plans/institution-map/PLAN.md) · status: in-progress
 
 **Linear**: YAS-12 (https://linear.app/ivo-tsonev/issue/YAS-12)
 

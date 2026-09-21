@@ -85,8 +85,9 @@ The build does **not** call this script. Workflow: backend changes its OpenAPI �
 `scripts/generate-institutions-manifest.mjs` follows the same committed-generated-artifact rule:
 
 - Reads `YASLI_INSTITUTIONS_URL` (defaults to `http://localhost:8000/api/institutions`) with the global `fetch`.
-- Keeps `kind`, `external_id` and `name` per row, sorted by kind order (`nursery`, `kindergarten`, `preschool`) then numeric `external_id`, and writes `src/data/institutions-manifest.json` (committed to the repo).
-- Exits non-zero on a non-200 status, invalid JSON, an empty or non-array payload, a row missing a field, an unknown `kind` or a duplicate `(kind, external_id)`.
+- Keeps `kind`, `external_id`, `name` and `location` per row, sorted by kind order (`nursery`, `kindergarten`, `preschool`) then numeric `external_id`, and writes `src/data/institutions-manifest.json` (committed to the repo).
+- `location` is the API's `Location` (`{lat, lon, precision}`) or `null`. It is build-stable reference data — coordinates are curated by hand in the backend's `institution_locations.csv` — which is why it lives in the manifest while the scraped, weekly-changing fields (address, phone, …) stay on the API. 77 of the 95 rows carry one; the 18 that do not are the infant-group nursery rows, whose building is keyed only under their kindergarten twin.
+- Exits non-zero on a non-200 status, invalid JSON, an empty or non-array payload, a row missing a field, an unknown `kind`, a duplicate `(kind, external_id)`, a malformed `location`, or a payload in which **no** row carries a `location` (which would mean a backend predating backend phase 1.2).
 
 The build does **not** call this script, and CI never runs it. `src/lib/institutions/manifest.ts` turns the rows into slugs (`<kind>-<external_id>`), page paths (`/institution/<slug>/`) and `getStaticPaths` rows, so the institution pages exist exactly for the manifest's rows. Workflow: the institution list changes → run `npm run institutions:manifest` against the deployed backend → commit the regenerated file → redeploy.
 
