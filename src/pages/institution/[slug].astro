@@ -4,6 +4,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import manifest from "@/data/institutions-manifest.json";
 import { labelForReceptionKind } from "@/lib/domain/kinds";
 import { parseInstitutionNumber } from "@/lib/domain/institutionName";
+import { buildMapLinks } from "@/lib/domain/mapLinks";
 import { manifestToStaticPaths, type ManifestEntry } from "@/lib/institutions/manifest";
 import type { InferGetStaticPropsType } from "astro";
 
@@ -21,12 +22,21 @@ export function getStaticPaths() {
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { kind, external_id, name } = Astro.props as Props;
+const { kind, external_id, name, location } = Astro.props as Props;
 
 const kindLabel = labelForReceptionKind(kind);
 /* The ДГ/ДЯ number is additive: the name itself is shown exactly as the
    source delivers it, never restructured. */
 const number = parseInstitutionNumber(name);
+
+/* Built here rather than inside the island on purpose: these four anchors are
+   the one part of the page that must survive with JavaScript disabled, the API
+   down, or the map unable to load. Rows without a coordinate — the infant-group
+   nurseries — get no block at all, not an empty one and not an apology.
+
+   If a future change ever renders link-outs inside InstitutionProfile, this
+   block must be deleted in the same change, never duplicated. */
+const mapLinks = location ? buildMapLinks(location, name) : [];
 ---
 
 <BaseLayout
@@ -37,6 +47,26 @@ const number = parseInstitutionNumber(name);
     <a class="profile-back" href="/">← Обратно към търсенето</a>
     <p class="eyebrow">{kindLabel}{number ? ` №${number}` : ""}</p>
     <h1>{name}</h1>
+    {
+      mapLinks.length > 0 && (
+        <nav class="profile-maplinks" aria-label="Карти и упътване">
+          <ul>
+            {mapLinks.map((link) => (
+              <li>
+                <a
+                  class={link.id === "directions" ? "profile-maplink is-primary" : "profile-maplink"}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {link.label} <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
     <InstitutionProfile client:load kind={kind} externalId={external_id} />
   </article>
 </BaseLayout>
@@ -70,6 +100,70 @@ const number = parseInstitutionNumber(name);
 
   .profile .eyebrow {
     color: var(--tone);
+  }
+
+  /* A landmark rather than a section with an <h2>: this is a set of ways out
+     of the page, not another fact about the institution, so it stays out of
+     the heading outline that "Адрес" and "Контакти" own.
+
+     The layout's bare `nav` selector is written for the site header, and under
+     720px it collapses one into the burger dropdown (max-height: 0; opacity: 0).
+     A class beats an element selector, so every one of those declarations is
+     reset here rather than the header's rules being rescoped from under it. */
+  .profile-maplinks {
+    display: block;
+    max-height: none;
+    overflow: visible;
+    opacity: 1;
+    pointer-events: auto;
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  .profile-maplinks ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .profile a.profile-maplink {
+    display: inline-flex;
+    align-items: center;
+    /* The accessibility audit's M5 sizing note: 44px minimum on touch. */
+    min-height: 44px;
+    border: 2px solid var(--color-border-card);
+    border-radius: var(--radius-control);
+    background: var(--color-bg-surface);
+    color: var(--color-text-strong);
+    font-size: 0.94rem;
+    font-weight: 600;
+    padding: 9px 16px;
+    text-decoration: none;
+  }
+
+  /* "Как да стигна" is the single most useful affordance on the page, so it
+     is the only one that carries the kind hue and a shadow. */
+  .profile a.profile-maplink.is-primary {
+    background: var(--tone);
+    box-shadow: var(--shadow-hard-sm);
+    color: var(--color-text-on-accent);
+    font-weight: 700;
+  }
+
+  .profile a.profile-maplink:hover {
+    border-color: var(--color-ink);
+    color: var(--color-accent);
+  }
+
+  .profile a.profile-maplink.is-primary:hover {
+    color: var(--color-text-on-accent);
+    filter: brightness(1.08);
   }
 
   .profile section {
