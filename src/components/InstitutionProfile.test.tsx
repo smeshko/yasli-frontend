@@ -48,6 +48,7 @@ function renderView(props: Partial<Parameters<typeof InstitutionProfileView>[0]>
       profile={profile()}
       context={null}
       kind="kindergarten"
+      location={null}
       now={NOW}
       onRetry={vi.fn()}
       {...props}
@@ -58,11 +59,40 @@ function renderView(props: Partial<Parameters<typeof InstitutionProfileView>[0]>
 describe("InstitutionProfile island", () => {
   it("renders the loading state on the server, because effects do not run", () => {
     const html = renderToStaticMarkup(
-      <InstitutionProfile kind="kindergarten" externalId="46" />,
+      <InstitutionProfile kind="kindergarten" externalId="46" location={null} />,
     );
 
     expect(html).toContain('role="status"');
     expect(html).toContain("Зареждаме данните за институцията…");
+  });
+});
+
+describe("InstitutionProfileView map", () => {
+  const location = { lat: 43.209589, lon: 27.926883, precision: "building" } as const;
+
+  it("renders the map region in the success state when the manifest has a coordinate", () => {
+    const markup = renderView({ location });
+
+    expect(markup).toContain('aria-label="Карта на сградите"');
+  });
+
+  it("renders no map region when the manifest has no coordinate", () => {
+    expect(renderView({ location: null })).not.toContain("profile-map");
+  });
+
+  it("puts the map between the address and the contacts", () => {
+    const markup = renderView({ location });
+
+    expect(markup.indexOf('id="profile-address"')).toBeLessThan(markup.indexOf("profile-map"));
+    expect(markup.indexOf("profile-map")).toBeLessThan(markup.indexOf('id="profile-contacts"'));
+  });
+
+  it("never renders the map outside the success state", () => {
+    /* Nothing else is on the page yet and there are no branches to draw, so a
+       container here would be two layout shifts for no information. */
+    for (const status of ["loading", "error", "not_found"] as const) {
+      expect(renderView({ status, profile: null, location })).not.toContain("profile-map");
+    }
   });
 });
 

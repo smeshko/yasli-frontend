@@ -90,7 +90,7 @@ Screenshot the page for one kindergarten with branches, one nursery and one pres
 
 ## Phase 1.2 — Map with pins and link-outs
 
-**Plan**: _not yet created_
+**Plan**: [institution-map](../plans/institution-map/PLAN.md) · status: done
 
 **Linear**: YAS-12 (https://linear.app/ivo-tsonev/issue/YAS-12)
 
@@ -107,13 +107,13 @@ Screenshot the page for one kindergarten with branches, one nursery and one pres
 
 ### Acceptance criteria
 
-- [ ] The map renders the institution at building precision, with Bulgarian labels
-- [ ] ДГ№13 "Мир" shows 5 pins (main + 4 branches); an institution with no branches shows 1
-- [ ] An institution whose coordinate is missing renders the page without a map container and without an error
-- [ ] With JavaScript disabled the address and all four link-outs still work
-- [ ] The map does not appear in the search screen's JS payload
-- [ ] Attribution is present; the map region is keyboard-skippable and does not trap focus
-- [ ] Both themes render legibly; `npm run lint`, `npm run check`, `npm run test` pass
+- [x] The map renders the institution at building precision, with Bulgarian labels
+- [x] ДГ№13 "Мир" shows 5 pins (main + 4 branches); an institution with no branches shows 1
+- [x] An institution whose coordinate is missing renders the page without a map container and without an error
+- [x] With JavaScript disabled **all four link-outs** still work — narrowed from "the address and all four link-outs". Phase 1.1 put the address inside a `client:load` island, so with JS off the page renders only its header; baking the address into the manifest too would duplicate a weekly-scraped field behind a hand-refreshed artifact. The coordinate is build-stable reference data, so the link-outs move out of the island and the address does not. See the plan's `DECISIONS.md` 1.
+- [x] The map does not appear in the search screen's JS payload
+- [x] Attribution is present; the map region is keyboard-skippable and does not trap focus — the only focusable things inside it are MapLibre's three attribution links, which the attribution criterion itself requires; the canvas is not in the tab order
+- [x] Both themes render legibly; `npm run lint`, `npm run check`, `npm run test` pass
 
 ### Validation
 
@@ -160,7 +160,7 @@ Screenshots of one nursery per district, plus the Виница/Тополи no-s
 
 ## Epic-level acceptance criteria
 
-- [ ] Phases 1.1 and 1.2 merged and their acceptance criteria met (1.3 is removed, not pending)
-- [ ] A parent can go from a search result to a detail page, see where the institution is, and get directions on their phone
-- [ ] Nothing on the page implies we know something we don't: no catchment polygons, no district shading of any kind, no pin for the parent's own address
-- [ ] Status row in [EPICS.md](./EPICS.md) updated to `Done`
+- [ ] Phases 1.1 and 1.2 merged and their acceptance criteria met (1.3 is removed, not pending) — 1.1 merged; 1.2's criteria are all met and its branch is open for review, so this ticks on merge
+- [x] A parent can go from a search result to a detail page, see where the institution is, and get directions on their phone
+- [x] Nothing on the page implies we know something we don't: no catchment polygons, no district shading of any kind, no pin for the parent's own address — and the 18 infant-group rows with no coordinate draw no pin rather than borrowing their kindergarten twin's
+- [ ] Status row in [EPICS.md](./EPICS.md) updated to `Done` — promoted on merge, per that file's own rule ("`Done` when the last one does" merge); Epic 02 unblocks at the same moment

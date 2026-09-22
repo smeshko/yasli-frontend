@@ -4,6 +4,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import manifest from "@/data/institutions-manifest.json";
 import { labelForReceptionKind } from "@/lib/domain/kinds";
 import { parseInstitutionNumber } from "@/lib/domain/institutionName";
+import { buildDirectionsLink } from "@/lib/domain/directionsLink";
 import { manifestToStaticPaths, type ManifestEntry } from "@/lib/institutions/manifest";
 import type { InferGetStaticPropsType } from "astro";
 
@@ -21,12 +22,21 @@ export function getStaticPaths() {
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { kind, external_id, name } = Astro.props as Props;
+const { kind, external_id, name, location } = Astro.props as Props;
 
 const kindLabel = labelForReceptionKind(kind);
 /* The ДГ/ДЯ number is additive: the name itself is shown exactly as the
    source delivers it, never restructured. */
 const number = parseInstitutionNumber(name);
+
+/* Built here rather than inside the island on purpose: this anchor is the one
+   part of the page that must survive with JavaScript disabled, the API down,
+   or the map unable to load. Rows without a coordinate — the infant-group
+   nurseries — get no button at all, not a dead one and not an apology.
+
+   If a future change ever renders a link-out inside InstitutionProfile, this
+   one must be deleted in the same change, never duplicated. */
+const directions = location ? buildDirectionsLink(location) : null;
 ---
 
 <BaseLayout
@@ -37,7 +47,16 @@ const number = parseInstitutionNumber(name);
     <a class="profile-back" href="/">← Обратно към търсенето</a>
     <p class="eyebrow">{kindLabel}{number ? ` №${number}` : ""}</p>
     <h1>{name}</h1>
-    <InstitutionProfile client:load kind={kind} externalId={external_id} />
+    {
+      directions && (
+        <p class="profile-directions">
+          <a class="profile-maplink" href={directions.href} target="_blank" rel="noreferrer">
+            {directions.label} <span aria-hidden="true">↗</span>
+          </a>
+        </p>
+      )
+    }
+    <InstitutionProfile client:load kind={kind} externalId={external_id} location={location} />
   </article>
 </BaseLayout>
 
@@ -70,6 +89,93 @@ const number = parseInstitutionNumber(name);
 
   .profile .eyebrow {
     color: var(--tone);
+  }
+
+  /* A plain paragraph, deliberately not a <nav>: the layout's bare `nav`
+     selector is written for the site header — it paints a swipe under every
+     anchor on hover and collapses the whole element into the burger dropdown
+     under 720px — and none of that belongs on a button. */
+  .profile-directions {
+    margin: 0;
+  }
+
+  /* "Как да стигна" is the most useful affordance on the page, so it carries
+     the kind hue and a shadow. */
+  .profile a.profile-maplink {
+    display: inline-flex;
+    align-items: center;
+    /* The accessibility audit's M5 sizing note: 44px minimum on touch. */
+    min-height: 44px;
+    border: 2px solid var(--color-border-card);
+    border-radius: var(--radius-control);
+    background: var(--tone);
+    box-shadow: var(--shadow-hard-sm);
+    color: var(--color-text-on-accent);
+    font-size: 0.94rem;
+    font-weight: 700;
+    padding: 9px 16px;
+    text-decoration: none;
+  }
+
+  .profile a.profile-maplink:hover {
+    border-color: var(--color-ink);
+    filter: brightness(1.08);
+  }
+
+  /* The map is a picture, not a panel of facts: it keeps the page's card
+     frame but drops the padding, so the cartography runs to the edge. */
+  .profile section.profile-map {
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .profile-map-canvas {
+    width: 100%;
+    /* Tall enough that ДГ№13's five buildings read as a cluster rather than a
+       line of dots, short enough not to push the contacts off a phone. */
+    height: 300px;
+  }
+
+  /* DOM markers, so they read the page's tokens and follow --tone in both
+     themes without the map needing a second palette. */
+  .profile-map-pin {
+    display: block;
+    box-sizing: border-box;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--color-bg-surface);
+    border-radius: 50%;
+    background: var(--tone);
+    box-shadow: 0 0 0 1.5px var(--color-ink);
+  }
+
+  .profile-map-pin.is-main {
+    width: 22px;
+    height: 22px;
+    border-width: 3px;
+  }
+
+  .profile-map-pin:not(.is-main) {
+    background: var(--color-bg-surface);
+    box-shadow: 0 0 0 1.5px var(--tone);
+  }
+
+  /* MapLibre's attribution has its own palette; keep it on the page's, and
+     opaque — over a dark base map a translucent panel leaves the credit
+     barely readable. */
+  /* Matched against MapLibre's own `.maplibregl-ctrl.maplibregl-ctrl-attrib`,
+     which carries the same specificity and is injected later by the dynamic
+     import, so the class has to be named here too. */
+  .profile-map .maplibregl-ctrl.maplibregl-ctrl-attrib {
+    border-radius: 8px 0 0 0;
+    background-color: var(--color-bg-surface);
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    padding: 2px 8px;
+  }
+
+  .profile-map .maplibregl-ctrl-attrib a {
+    color: var(--color-text-muted);
   }
 
   .profile section {
@@ -210,6 +316,14 @@ const number = parseInstitutionNumber(name);
 
     .profile section {
       padding: 18px 16px;
+    }
+
+    .profile section.profile-map {
+      padding: 0;
+    }
+
+    .profile-map-canvas {
+      height: 240px;
     }
   }
 </style>

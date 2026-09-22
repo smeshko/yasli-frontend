@@ -2,476 +2,879 @@
   {
     "kind": "nursery",
     "external_id": "1",
-    "name": "ДЯ № 1 \"ЩАСТЛИВО ДЕТСТВО\""
+    "name": "ДЯ № 1 \"ЩАСТЛИВО ДЕТСТВО\"",
+    "location": {
+      "lat": 43.206794,
+      "lon": 27.924536,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "2",
-    "name": "ДЯ № 2 \"МОРЯЧЕ\""
+    "name": "ДЯ № 2 \"МОРЯЧЕ\"",
+    "location": {
+      "lat": 43.216425,
+      "lon": 27.94441,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "3",
-    "name": "ДЯ № 3 \"ЗАЙО БАЙО\""
+    "name": "ДЯ № 3 \"ЗАЙО БАЙО\"",
+    "location": {
+      "lat": 43.205328,
+      "lon": 27.904888,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "4",
-    "name": "ДЯ № 4 \"Приказен свят\""
+    "name": "ДЯ № 4 \"Приказен свят\"",
+    "location": {
+      "lat": 43.215866,
+      "lon": 27.918633,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "5",
-    "name": "ДЯ № 5 \"ЧУДЕН СВЯТ\""
+    "name": "ДЯ № 5 \"ЧУДЕН СВЯТ\"",
+    "location": {
+      "lat": 43.218666,
+      "lon": 27.887155,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "6",
-    "name": "ДЯ № 6 \"МЕЧО ПУХ\""
+    "name": "ДЯ № 6 \"МЕЧО ПУХ\"",
+    "location": {
+      "lat": 43.247071,
+      "lon": 27.853936,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "7",
-    "name": "ДЯ № 7 \"РОЗА\""
+    "name": "ДЯ № 7 \"РОЗА\"",
+    "location": {
+      "lat": 43.225861,
+      "lon": 27.914699,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "8",
-    "name": "ДЯ № 8 \"ЩУРЧЕ\""
+    "name": "ДЯ № 8 \"ЩУРЧЕ\"",
+    "location": {
+      "lat": 43.225199,
+      "lon": 27.921055,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "9",
-    "name": "ДЯ № 9 \"ДЕТЕЛИНА\""
+    "name": "ДЯ № 9 \"ДЕТЕЛИНА\"",
+    "location": {
+      "lat": 43.181781,
+      "lon": 27.894382,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "10",
-    "name": "ДЯ № 11 \"ИГЛИКА\""
+    "name": "ДЯ № 11 \"ИГЛИКА\"",
+    "location": {
+      "lat": 43.226089,
+      "lon": 27.884396,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "11",
-    "name": "ДЯ № 13 \"РУСАЛКА\""
+    "name": "ДЯ № 13 \"РУСАЛКА\"",
+    "location": {
+      "lat": 43.229968,
+      "lon": 27.887333,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "12",
-    "name": "ДЯ № 14 \"ЗВЪНЧЕ\""
+    "name": "ДЯ № 14 \"ЗВЪНЧЕ\"",
+    "location": {
+      "lat": 43.210858,
+      "lon": 27.912865,
+      "precision": "building"
+    }
   },
   {
     "kind": "nursery",
     "external_id": "39",
-    "name": "ДГ№6 \"Палечко\"/ с яслена група/"
+    "name": "ДГ№6 \"Палечко\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "47",
-    "name": "ДГ№14 \"Дружба\"/ с яслена група/"
+    "name": "ДГ№14 \"Дружба\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "52",
-    "name": "ДГ№19 \"Славейче\"/ с яслена група/"
+    "name": "ДГ№19 \"Славейче\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "56",
-    "name": "ДГ№23 \"Иглика\"/ с яслена група/"
+    "name": "ДГ№23 \"Иглика\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "63",
-    "name": "ДГ№30 \"Синчец\"/ с яслена група/"
+    "name": "ДГ№30 \"Синчец\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "66",
-    "name": "ДГ№33 \"Делфинче\"/ с яслена група/"
+    "name": "ДГ№33 \"Делфинче\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "67",
-    "name": "ДГ№34 \"Лястовичка\"/ с яслена група/"
+    "name": "ДГ№34 \"Лястовичка\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "68",
-    "name": "ДГ№35 \"Детска радост\"/ с яслена група/"
+    "name": "ДГ№35 \"Детска радост\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "69",
-    "name": "ДГ№36 \"Морска звездица\"/ с яслена група/"
+    "name": "ДГ№36 \"Морска звездица\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "71",
-    "name": "ДГ№38 \"Маргаритка\"/ с яслена група/"
+    "name": "ДГ№38 \"Маргаритка\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "72",
-    "name": "ДГ№39 \"Приказка\"/ с яслена група/"
+    "name": "ДГ№39 \"Приказка\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "73",
-    "name": "ДГ№40 \"Детски свят\"/ с яслена група/"
+    "name": "ДГ№40 \"Детски свят\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "74",
-    "name": "ДГ№41 \"Първи юни\"/ с яслена група/"
+    "name": "ДГ№41 \"Първи юни\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "75",
-    "name": "ДГ№42 \"Българче\"/ с яслена група/"
+    "name": "ДГ№42 \"Българче\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "80",
-    "name": "ДГ№47 \"Люляче\"/ с яслена група/"
+    "name": "ДГ№47 \"Люляче\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "81",
-    "name": "ДГ№48 \"Ран Босилек\" / с яслена група/"
+    "name": "ДГ№48 \"Ран Босилек\" / с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "82",
-    "name": "ДГ№49 \"Боров кът\"/ с яслена група/"
+    "name": "ДГ№49 \"Боров кът\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "nursery",
     "external_id": "83",
-    "name": "ДГ№37 \"Пламъче\"/ с яслена група/"
+    "name": "ДГ№37 \"Пламъче\"/ с яслена група/",
+    "location": null
   },
   {
     "kind": "kindergarten",
     "external_id": "34",
-    "name": "ДГ№1 \"Светулка\""
+    "name": "ДГ№1 \"Светулка\"",
+    "location": {
+      "lat": 43.205838,
+      "lon": 27.904386,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "35",
-    "name": "ДГ№2 \"Щастливо детство\""
+    "name": "ДГ№2 \"Щастливо детство\"",
+    "location": {
+      "lat": 43.204041,
+      "lon": 27.898212,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "36",
-    "name": "ДГ№3 \"Звездичка\""
+    "name": "ДГ№3 \"Звездичка\"",
+    "location": {
+      "lat": 43.210593,
+      "lon": 27.910475,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "37",
-    "name": "ДГ№4 \"Теменужка\""
+    "name": "ДГ№4 \"Теменужка\"",
+    "location": {
+      "lat": 43.204536,
+      "lon": 27.914213,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "38",
-    "name": "ДГ№5 \"Слънчо\""
+    "name": "ДГ№5 \"Слънчо\"",
+    "location": {
+      "lat": 43.213995,
+      "lon": 27.904122,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "39",
-    "name": "ДГ№6 \"Палечко\""
+    "name": "ДГ№6 \"Палечко\"",
+    "location": {
+      "lat": 43.20836,
+      "lon": 27.889353,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "40",
-    "name": "ДГ№7 \"А.С.Пушкин\""
+    "name": "ДГ№7 \"А.С.Пушкин\"",
+    "location": {
+      "lat": 43.205604,
+      "lon": 27.92199,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "41",
-    "name": "ДГ№8 \"Христо Ботев\""
+    "name": "ДГ№8 \"Христо Ботев\"",
+    "location": {
+      "lat": 43.208638,
+      "lon": 27.897022,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "42",
-    "name": "ДГ№9 \"Ален мак\""
+    "name": "ДГ№9 \"Ален мак\"",
+    "location": {
+      "lat": 43.216317,
+      "lon": 27.945517,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "43",
-    "name": "ДГ№10 \"Карамфилче\""
+    "name": "ДГ№10 \"Карамфилче\"",
+    "location": {
+      "lat": 43.222055,
+      "lon": 27.911227,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "44",
-    "name": "ДГ№11 \"Незабравка\""
+    "name": "ДГ№11 \"Незабравка\"",
+    "location": {
+      "lat": 43.225227,
+      "lon": 27.919895,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "45",
-    "name": "ДГ№12 \"Ян Бибиян\""
+    "name": "ДГ№12 \"Ян Бибиян\"",
+    "location": {
+      "lat": 43.215966,
+      "lon": 27.914604,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "46",
-    "name": "ДГ№13 \"Мир\""
+    "name": "ДГ№13 \"Мир\"",
+    "location": {
+      "lat": 43.209589,
+      "lon": 27.926883,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "47",
-    "name": "ДГ№14 \"Дружба\""
+    "name": "ДГ№14 \"Дружба\"",
+    "location": {
+      "lat": 43.22541,
+      "lon": 27.925778,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "48",
-    "name": "ДГ№15 \"Гълъбче\""
+    "name": "ДГ№15 \"Гълъбче\"",
+    "location": {
+      "lat": 43.222136,
+      "lon": 27.932451,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "49",
-    "name": "ДГ№16 \"Слънчева Дъга\""
+    "name": "ДГ№16 \"Слънчева Дъга\"",
+    "location": {
+      "lat": 43.218227,
+      "lon": 27.921423,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "50",
-    "name": "ДГ№17 \"Петър Берон\""
+    "name": "ДГ№17 \"Петър Берон\"",
+    "location": {
+      "lat": 43.216893,
+      "lon": 27.923951,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "51",
-    "name": "ДГ№18 \"Чайка\""
+    "name": "ДГ№18 \"Чайка\"",
+    "location": {
+      "lat": 43.217211,
+      "lon": 27.934498,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "52",
-    "name": "ДГ№19 \"Славейче\""
+    "name": "ДГ№19 \"Славейче\"",
+    "location": {
+      "lat": 43.222572,
+      "lon": 27.933465,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "53",
-    "name": "ДГ№20 \"Бриз\"/със специални групи/"
+    "name": "ДГ№20 \"Бриз\"/със специални групи/",
+    "location": {
+      "lat": 43.212865,
+      "lon": 27.947969,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "54",
-    "name": "ДГ№21 \"Калина Малина\""
+    "name": "ДГ№21 \"Калина Малина\"",
+    "location": {
+      "lat": 43.217602,
+      "lon": 27.938426,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "55",
-    "name": "ДГ№22 \"Мечо Пух\""
+    "name": "ДГ№22 \"Мечо Пух\"",
+    "location": {
+      "lat": 43.216424,
+      "lon": 27.940245,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "56",
-    "name": "ДГ№23 \"Иглика\""
+    "name": "ДГ№23 \"Иглика\"",
+    "location": {
+      "lat": 43.247704,
+      "lon": 27.985164,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "57",
-    "name": "ДГ№24 \"Детско градче\""
+    "name": "ДГ№24 \"Детско градче\"",
+    "location": {
+      "lat": 43.225878,
+      "lon": 27.873007,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "58",
-    "name": "ДГ№25 \"Златното зрънце\""
+    "name": "ДГ№25 \"Златното зрънце\"",
+    "location": {
+      "lat": 43.232039,
+      "lon": 27.882076,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "59",
-    "name": "ДГ№26 \"Изворче\""
+    "name": "ДГ№26 \"Изворче\"",
+    "location": {
+      "lat": 43.221932,
+      "lon": 27.883028,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "60",
-    "name": "ДГ№27 \"Успех\""
+    "name": "ДГ№27 \"Успех\"",
+    "location": {
+      "lat": 43.225628,
+      "lon": 27.898291,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "61",
-    "name": "ДГ№28 \"Пролет\""
+    "name": "ДГ№28 \"Пролет\"",
+    "location": {
+      "lat": 43.223675,
+      "lon": 27.883171,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "62",
-    "name": "ДГ№29 \"Звънче\""
+    "name": "ДГ№29 \"Звънче\"",
+    "location": {
+      "lat": 43.234822,
+      "lon": 27.891744,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "63",
-    "name": "ДГ№30 \"Синчец\""
+    "name": "ДГ№30 \"Синчец\"",
+    "location": {
+      "lat": 43.230531,
+      "lon": 27.875259,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "64",
-    "name": "ДГ№31 \"Крилатко\""
+    "name": "ДГ№31 \"Крилатко\"",
+    "location": {
+      "lat": 43.235846,
+      "lon": 27.886511,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "65",
-    "name": "ДГ№32 \"Моряче\""
+    "name": "ДГ№32 \"Моряче\"",
+    "location": {
+      "lat": 43.230068,
+      "lon": 27.886414,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "66",
-    "name": "ДГ№33 \"Делфинче\""
+    "name": "ДГ№33 \"Делфинче\"",
+    "location": {
+      "lat": 43.236861,
+      "lon": 27.880707,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "67",
-    "name": "ДГ№34 \"Лястовичка\""
+    "name": "ДГ№34 \"Лястовичка\"",
+    "location": {
+      "lat": 43.236441,
+      "lon": 27.873222,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "68",
-    "name": "ДГ№35 \"Детска радост\""
+    "name": "ДГ№35 \"Детска радост\"",
+    "location": {
+      "lat": 43.223917,
+      "lon": 27.902604,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "69",
-    "name": "ДГ№36 \"Морска звездица\""
+    "name": "ДГ№36 \"Морска звездица\"",
+    "location": {
+      "lat": 43.231797,
+      "lon": 27.873446,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "70",
-    "name": "ДГ№37 \"Пламъче\""
+    "name": "ДГ№37 \"Пламъче\"",
+    "location": {
+      "lat": 43.249425,
+      "lon": 27.844186,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "71",
-    "name": "ДГ№38 \"Маргаритка\""
+    "name": "ДГ№38 \"Маргаритка\"",
+    "location": {
+      "lat": 43.24779,
+      "lon": 27.850777,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "72",
-    "name": "ДГ№39 \"Приказка\""
+    "name": "ДГ№39 \"Приказка\"",
+    "location": {
+      "lat": 43.238574,
+      "lon": 27.860523,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "73",
-    "name": "ДГ№40 \"Детски свят\""
+    "name": "ДГ№40 \"Детски свят\"",
+    "location": {
+      "lat": 43.244976,
+      "lon": 27.854209,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "74",
-    "name": "ДГ№41 \"Първи юни\""
+    "name": "ДГ№41 \"Първи юни\"",
+    "location": {
+      "lat": 43.244828,
+      "lon": 27.845885,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "75",
-    "name": "ДГ№42 \"Българче\""
+    "name": "ДГ№42 \"Българче\"",
+    "location": {
+      "lat": 43.248479,
+      "lon": 27.850817,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "76",
-    "name": "ДГ№43 \"Пинокио\""
+    "name": "ДГ№43 \"Пинокио\"",
+    "location": {
+      "lat": 43.182956,
+      "lon": 27.896004,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "77",
-    "name": "ДГ№44 \"Валентина Терешкова\""
+    "name": "ДГ№44 \"Валентина Терешкова\"",
+    "location": {
+      "lat": 43.18159,
+      "lon": 27.90122,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "78",
-    "name": "ДГ№45 \"Морски свят\""
+    "name": "ДГ№45 \"Морски свят\"",
+    "location": {
+      "lat": 43.185344,
+      "lon": 27.889076,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "79",
-    "name": "ДГ№46 \"Горска приказка\""
+    "name": "ДГ№46 \"Горска приказка\"",
+    "location": {
+      "lat": 43.176719,
+      "lon": 27.902538,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "80",
-    "name": "ДГ№47 \"Люляче\""
+    "name": "ДГ№47 \"Люляче\"",
+    "location": {
+      "lat": 43.16532,
+      "lon": 27.935582,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "81",
-    "name": "ДГ№48 \"Ран Босилек\""
+    "name": "ДГ№48 \"Ран Босилек\"",
+    "location": {
+      "lat": 43.216979,
+      "lon": 27.824548,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "82",
-    "name": "ДГ№49 \"Боров кът\""
+    "name": "ДГ№49 \"Боров кът\"",
+    "location": {
+      "lat": 43.245654,
+      "lon": 27.90149,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "83",
-    "name": "ДГ№50 \"Зорница\""
+    "name": "ДГ№50 \"Зорница\"",
+    "location": {
+      "lat": 43.156246,
+      "lon": 27.83931,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "84",
-    "name": "ДГ№51 \"Ран Босилек\""
+    "name": "ДГ№51 \"Ран Босилек\"",
+    "location": {
+      "lat": 43.162001,
+      "lon": 27.781813,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "102",
-    "name": "ДГ№52 \"Бялата лястовица\""
+    "name": "ДГ№52 \"Бялата лястовица\"",
+    "location": {
+      "lat": 43.209708,
+      "lon": 27.890355,
+      "precision": "building"
+    }
   },
   {
     "kind": "kindergarten",
     "external_id": "103",
-    "name": "ДГ№53 \"Слънчево зайче\""
+    "name": "ДГ№53 \"Слънчево зайче\"",
+    "location": {
+      "lat": 43.215467,
+      "lon": 27.892919,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "7",
-    "name": "ОУ \"Свети Иван Рилски\""
+    "name": "ОУ \"Свети Иван Рилски\"",
+    "location": {
+      "lat": 43.218049,
+      "lon": 27.889302,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "9",
-    "name": "ОУ \"Константин Арабаджиев\""
+    "name": "ОУ \"Константин Арабаджиев\"",
+    "location": {
+      "lat": 43.208689,
+      "lon": 27.901201,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "10",
-    "name": "ОУ \"Капитан Петко войвода\""
+    "name": "ОУ \"Капитан Петко войвода\"",
+    "location": {
+      "lat": 43.162645,
+      "lon": 27.938025,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "11",
-    "name": "ОУ \"Отец Паисий\""
+    "name": "ОУ \"Отец Паисий\"",
+    "location": {
+      "lat": 43.213391,
+      "lon": 27.885634,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "12",
-    "name": "ОУ \"Панайот Волов\""
+    "name": "ОУ \"Панайот Волов\"",
+    "location": {
+      "lat": 43.246062,
+      "lon": 27.979951,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "22",
-    "name": "III ОУ \"Ангел Кънчев\""
+    "name": "III ОУ \"Ангел Кънчев\"",
+    "location": {
+      "lat": 43.224818,
+      "lon": 27.915018,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "23",
-    "name": "II ОУ \"Никола Йонков Вапцаров\""
+    "name": "II ОУ \"Никола Йонков Вапцаров\"",
+    "location": {
+      "lat": 43.236858,
+      "lon": 27.884607,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "28",
-    "name": "СУ \"Елин Пелин\""
+    "name": "СУ \"Елин Пелин\"",
+    "location": {
+      "lat": 43.207779,
+      "lon": 27.896276,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "29",
-    "name": "СУ \"Любен Каравелов\""
+    "name": "СУ \"Любен Каравелов\"",
+    "location": {
+      "lat": 43.18289,
+      "lon": 27.892579,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "32",
-    "name": "СУ \"Димчо Дебелянов\""
+    "name": "СУ \"Димчо Дебелянов\"",
+    "location": {
+      "lat": 43.204096,
+      "lon": 27.907796,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "33",
-    "name": "СУ \"Неофит Бозвели\""
+    "name": "СУ \"Неофит Бозвели\"",
+    "location": {
+      "lat": 43.230766,
+      "lon": 27.886835,
+      "precision": "building"
+    }
   },
   {
     "kind": "preschool",
     "external_id": "35",
-    "name": "ОУ \"Добри Войников\" с. Каменар"
+    "name": "ОУ \"Добри Войников\" с. Каменар",
+    "location": {
+      "lat": 43.247031,
+      "lon": 27.902736,
+      "precision": "building"
+    }
   }
 ]

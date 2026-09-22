@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   getInstitutionBySource,
+  type InstitutionLocation,
   type InstitutionProfile as InstitutionProfileData,
 } from "@/lib/api/client";
 import { splitEmail, splitPhone } from "@/lib/domain/contacts";
@@ -20,6 +21,8 @@ import {
   type StoredMatchContext,
 } from "@/lib/search/storedSearch";
 import { createProfileLoader } from "@/lib/institutions/profileLoader";
+
+import { InstitutionMap } from "./InstitutionMap";
 
 export type ProfileStatus = "loading" | "success" | "error" | "not_found";
 
@@ -78,6 +81,7 @@ export interface InstitutionProfileViewProps {
   profile: InstitutionProfileData | null;
   context: StoredMatchContext | null;
   kind: ReceptionKind;
+  location: InstitutionLocation | null;
   now?: Date;
   onRetry: () => void;
 }
@@ -87,6 +91,7 @@ export function InstitutionProfileView({
   profile,
   context,
   kind,
+  location,
   now,
   onRetry,
 }: InstitutionProfileViewProps) {
@@ -141,6 +146,11 @@ export function InstitutionProfileView({
       {isStale ? <div className="stale-banner">{STALE_BANNER_TEXT}</div> : null}
 
       <AddressSection address={profile.address} />
+      {/* The address names the place, the map shows it, then the page moves on
+          to how to reach the people. Only in the success state: a container
+          that appears, draws one pin and re-fits when branches arrive is two
+          layout shifts for no information. */}
+      <InstitutionMap location={location} branches={profile.branches} name={profile.name} />
       <ContactsSection profile={profile} />
       <CoverageSection kind={kind} profile={profile} />
       <BranchesSection branches={profile.branches} />
@@ -312,9 +322,14 @@ function BranchesSection({ branches }: { branches: InstitutionProfileData["branc
 export interface InstitutionProfileProps {
   kind: ReceptionKind;
   externalId: string;
+  /* From the committed manifest, not from the fetched profile. They are the
+     same value from the same table, and taking it from the manifest makes the
+     main pin and the static link-outs above agree by construction rather than
+     by coincidence. */
+  location: InstitutionLocation | null;
 }
 
-export function InstitutionProfile({ kind, externalId }: InstitutionProfileProps) {
+export function InstitutionProfile({ kind, externalId, location }: InstitutionProfileProps) {
   const [status, setStatus] = useState<ProfileStatus>("loading");
   const [profile, setProfile] = useState<InstitutionProfileData | null>(null);
   const [context, setContext] = useState<StoredMatchContext | null>(null);
@@ -356,6 +371,7 @@ export function InstitutionProfile({ kind, externalId }: InstitutionProfileProps
       profile={profile}
       context={context}
       kind={kind}
+      location={location}
       onRetry={() => void loader.load()}
     />
   );

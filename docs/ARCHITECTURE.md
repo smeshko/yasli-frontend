@@ -30,7 +30,7 @@ The frontend is the only browser-facing surface of yasli. It has no server runti
 ```
 src/
 ├── components/         React: SearchExperience, StatusBadge
-├── data/               institutions-manifest.json (generated, committed)
+├── data/               institutions-manifest.json + institution-slugs.json (generated together, committed)
 ├── layouts/            BaseLayout.astro (shell, global CSS, nav)
 ├── pages/              Astro routes: /, /institution/[slug], /pravila, 404
 └── lib/
@@ -85,8 +85,10 @@ The build does **not** call this script. Workflow: backend changes its OpenAPI �
 `scripts/generate-institutions-manifest.mjs` follows the same committed-generated-artifact rule:
 
 - Reads `YASLI_INSTITUTIONS_URL` (defaults to `http://localhost:8000/api/institutions`) with the global `fetch`.
-- Keeps `kind`, `external_id` and `name` per row, sorted by kind order (`nursery`, `kindergarten`, `preschool`) then numeric `external_id`, and writes `src/data/institutions-manifest.json` (committed to the repo).
-- Exits non-zero on a non-200 status, invalid JSON, an empty or non-array payload, a row missing a field, an unknown `kind` or a duplicate `(kind, external_id)`.
+- Keeps `kind`, `external_id`, `name` and `location` per row, sorted by kind order (`nursery`, `kindergarten`, `preschool`) then numeric `external_id`, and writes `src/data/institutions-manifest.json` (committed to the repo).
+- `location` is the API's `Location` (`{lat, lon, precision}`) or `null`. It is build-stable reference data — coordinates are curated by hand in the backend's `institution_locations.csv` — which is why it lives in the manifest while the scraped, weekly-changing fields (address, phone, …) stay on the API. 77 of the 95 rows carry one; the 18 that do not are the infant-group nursery rows, whose building is keyed only under their kindergarten twin.
+- Exits non-zero on a non-200 status, invalid JSON, an empty or non-array payload, a row missing a field, an unknown `kind`, a duplicate `(kind, external_id)`, a malformed `location`, or a payload in which **no** row carries a `location` (which would mean a backend predating backend phase 1.2).
+- Writes a **second** artifact in the same run: `src/data/institution-slugs.json`, a flat array of the 95 slugs. `SearchExperience` imports that instead of the manifest, because all it needs is the set of pages that exist — importing the manifest would ship every institution's coordinate to a screen that draws no map. `manifestToSlugs` in `src/lib/institutions/manifest.ts` is the shared definition, and a unit test asserts the two committed files agree, so regenerating one without the other fails the suite.
 
 The build does **not** call this script, and CI never runs it. `src/lib/institutions/manifest.ts` turns the rows into slugs (`<kind>-<external_id>`), page paths (`/institution/<slug>/`) and `getStaticPaths` rows, so the institution pages exist exactly for the manifest's rows. Workflow: the institution list changes → run `npm run institutions:manifest` against the deployed backend → commit the regenerated file → redeploy.
 
@@ -95,6 +97,17 @@ The build does **not** call this script, and CI never runs it. `src/lib/institut
 `output: "static"` produces `dist/` with prerendered HTML for every route plus React islands for `SearchExperience` and `InstitutionProfile`.
 
 `/institution/<kind>-<external_id>/` is a dynamic route whose `getStaticPaths` reads the committed manifest, so the build emits exactly one page per manifest row and needs no backend. Each page prerenders its header (kind label, ДГ/ДЯ number parsed from the name, the name as `<h1>`) from the manifest and hydrates the rest from `GET /api/institutions/by-source/{kind}/{external_id}`. A slug outside the manifest has no page and is served the site 404. The `PUBLIC_YASLI_API_BASE_URL` value is **baked in at build time** — changing it requires a redeploy, not just a restart.
+
+The route also prerenders the four **map link-outs** (directions, Google Maps, Apple Maps, OpenStreetMap) from the manifest's `location`, in the Astro frontmatter and outside the island, so they are the one part of the page that works with JavaScript disabled. A row with no coordinate renders no link-out block at all.
+
+## The map island
+
+`InstitutionMap` is a React child of `InstitutionProfile`, rendered between the address and the contacts. It draws the institution's building plus each branch that has a coordinate on an [OpenFreeMap](https://openfreemap.org) base map — `positron` under light, `dark` under dark, with `text-field` rewritten to prefer `name:bg` (`src/lib/map/style.ts`).
+
+- **`maplibre-gl` is reached only through a dynamic `import()` behind an `IntersectionObserver`**, so it lands in its own chunk that the detail route requests when the map scrolls into view and **no other route can reach**. The search screen's payload contains none of it.
+- **`tiles.openfreemap.org` is the page's one third-party origin**: style, TileJSON, sprite, glyphs and tiles, with no API key, no quota and no registration. Its own attribution ships in the TileJSON and MapLibre's default control renders it.
+- **MapLibre's worker needs `?worker&url`.** It spawns its tile-parsing worker from `new URL("./maplibre-gl-worker.mjs", import.meta.url)`, which after bundling points at a file Vite does not emit; the map then renders blank grey with no error. `src/components/InstitutionMap.tsx` imports the worker with `?worker&url` and passes it to `setWorkerUrl`, and `astro.config.mjs` sets `vite.worker.format = "es"` because MapLibre starts it as a module worker.
+- **No coordinate, no `IntersectionObserver`, no WebGL, a failed import or a style that will not load all mean no container** — designed absences, not error states. The address and the link-outs above are the fallback, and the page never says the map failed.
 
 ## Deployment
 

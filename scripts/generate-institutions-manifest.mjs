@@ -7,13 +7,24 @@
 // Always pass YASLI_INSTITUTIONS_URL explicitly when the fixture server may
 // be up: the default URL is the fixture server's port, and it answers
 // /api/institutions with a handful of synthetic rows.
+//
+// The backend must be one that serves `location` on /api/institutions (backend
+// phase 1.2 onwards). A payload in which no row carries one is rejected rather
+// than written, so a run against an older deploy cannot silently strip the
+// coordinate from every row.
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve } from "node:path";
 
 const source = process.env.YASLI_INSTITUTIONS_URL?.trim() || "http://localhost:8000/api/institutions";
 const outputPath = resolve("src/data/institutions-manifest.json");
+/* The search screen needs the slugs and nothing else. Writing them as their
+   own artifact keeps every row's coordinate out of its bundle — see
+   manifestToSlugs in src/lib/institutions/manifest.ts. Both files are written
+   here, together, so they can never be regenerated apart. */
+const slugsPath = resolve("src/data/institution-slugs.json");
 const KIND_ORDER = ["nursery", "kindergarten", "preschool"];
 const REQUIRED_FIELDS = ["kind", "external_id", "name"];
+const PRECISIONS = ["building", "approximate"];
 
 function fail(reason) {
   console.error(`error: ${reason}`);
@@ -68,15 +79,64 @@ const rows = payload.map((row, index) => {
   }
   seen.add(key);
 
-  return { kind: row.kind, external_id: row.external_id, name: row.name };
+  return {
+    kind: row.kind,
+    external_id: row.external_id,
+    name: row.name,
+    location: readLocation(row.location, index),
+  };
 });
+
+// Every institution the backend knows is pinned in institution_locations, so a
+// payload where none is means the backend predates backend phase 1.2 — writing
+// it would strip the coordinate from the committed manifest.
+const located = rows.filter((row) => row.location !== null);
+if (located.length === 0) {
+  fail(
+    `${source} served no locations on any of ${rows.length} rows — it predates backend phase 1.2; refusing to write`,
+  );
+}
 
 rows.sort(compareRows);
 
+/* The same rule as buildInstitutionSlug in src/lib/institutions/manifest.ts,
+   which this script cannot import. A unit test asserts the two committed
+   artifacts agree, so a change to either shape fails the suite rather than
+   shipping a search screen that links to pages the build never emitted. */
+const slugs = rows.map((row) => `${row.kind}-${row.external_id}`);
+
 await mkdir(dirname(outputPath), { recursive: true });
 await writeFile(outputPath, `${JSON.stringify(rows, null, 2)}\n`);
+await writeFile(slugsPath, `${JSON.stringify(slugs, null, 2)}\n`);
 
-console.log(`wrote ${rows.length} institutions from ${source} to ${relative(process.cwd(), outputPath)}`);
+console.log(
+  `wrote ${rows.length} institutions (${located.length} located, ${rows.length - located.length} without a coordinate) from ${source} to ${relative(process.cwd(), outputPath)}`,
+);
+console.log(`wrote ${slugs.length} slugs to ${relative(process.cwd(), slugsPath)}`);
+
+// `location` is optional on a row but never malformed: absent or null becomes
+// null, anything else must be a complete Location.
+function readLocation(location, index) {
+  if (location === undefined || location === null) {
+    return null;
+  }
+
+  if (typeof location !== "object" || Array.isArray(location)) {
+    fail(`row ${index} has a "location" that is not an object`);
+  }
+
+  for (const field of ["lat", "lon"]) {
+    if (typeof location[field] !== "number" || !Number.isFinite(location[field])) {
+      fail(`row ${index} has a "location.${field}" that is not a finite number`);
+    }
+  }
+
+  if (!PRECISIONS.includes(location.precision)) {
+    fail(`row ${index} has an unknown location precision "${location.precision}"`);
+  }
+
+  return { lat: location.lat, lon: location.lon, precision: location.precision };
+}
 
 // Our own key (kind order, then numeric external_id) rather than the API's
 // order, so the committed diff stays stable if the backend's ordering changes.

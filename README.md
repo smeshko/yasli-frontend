@@ -25,16 +25,27 @@ npm run check      # Astro type check
 npm run lint       # ESLint
 npm run test       # Vitest
 npm run api:types  # regenerate src/lib/api/types.ts from backend OpenAPI
-npm run institutions:manifest  # regenerate src/data/institutions-manifest.json from a live backend
+npm run institutions:manifest  # regenerate src/data/institutions-manifest.json + institution-slugs.json from a live backend
 ```
 
-`npm run build` consumes the committed `src/lib/api/types.ts` and `src/data/institutions-manifest.json`; it does **not** regenerate either and does **not** require the backend.
+`npm run build` consumes the committed `src/lib/api/types.ts`, `src/data/institutions-manifest.json` and `src/data/institution-slugs.json`; it does **not** regenerate any of them and does **not** require the backend.
+
+The two data files are written by the one command, together — the slug list is the manifest's slugs and nothing else, imported by the search screen so that screen never carries 95 institutions' coordinates. A unit test fails if they disagree, so never hand-edit one.
 
 Regenerate the manifest against the deployed backend, never bare while `npm run fixtures` is up (the default URL is the fixture server's port, and it answers `/api/institutions` with a handful of synthetic rows):
 
 ```bash
 YASLI_INSTITUTIONS_URL=https://yasli-backend-production.up.railway.app/api/institutions npm run institutions:manifest
 ```
+
+The manifest carries each row's `location` (`{lat, lon, precision}` or `null`), which the detail page's map link-outs and its main pin are built from. **The backend must serve it** — that is backend phase 1.2 onwards, and at the time of writing it is merged on the backend's `staging` but not on the `main` that Railway deploys. Until it is, regenerate against a locally seeded backend instead:
+
+```bash
+# in yasli-backend: just be-seed && just be-api
+YASLI_INSTITUTIONS_URL=http://localhost:8000/api/institutions npm run institutions:manifest
+```
+
+A run against a backend that serves no coordinate on any row exits non-zero without writing, so it cannot silently strip the field from the committed file.
 
 An institution added to the backend after the last run has no page until the manifest is regenerated and the site redeployed.
 

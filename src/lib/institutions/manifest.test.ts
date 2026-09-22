@@ -1,17 +1,31 @@
 import { describe, expect, it } from "vitest";
 
+import committedManifest from "@/data/institutions-manifest.json";
+import committedSlugs from "@/data/institution-slugs.json";
+
 import {
   buildInstitutionSlug,
   buildSlugSet,
   institutionPath,
+  manifestToSlugs,
   manifestToStaticPaths,
   type ManifestEntry,
 } from "./manifest";
 
 const entries: ManifestEntry[] = [
-  { kind: "nursery", external_id: "47", name: 'ДГ№14 "Дружба"/ с яслена група/' },
-  { kind: "kindergarten", external_id: "46", name: 'ДГ№13 "Мир"' },
-  { kind: "preschool", external_id: "12", name: "ОУ „Захари Стоянов“ — ПГ" },
+  { kind: "nursery", external_id: "47", name: 'ДГ№14 "Дружба"/ с яслена група/', location: null },
+  {
+    kind: "kindergarten",
+    external_id: "46",
+    name: 'ДГ№13 "Мир"',
+    location: { lat: 43.2141, lon: 27.9147, precision: "building" },
+  },
+  {
+    kind: "preschool",
+    external_id: "12",
+    name: "ОУ „Захари Стоянов“ — ПГ",
+    location: { lat: 43.2224, lon: 27.9086, precision: "building" },
+  },
 ];
 
 describe("buildInstitutionSlug", () => {
@@ -50,6 +64,17 @@ describe("manifestToStaticPaths", () => {
   it("returns an empty list for an empty manifest", () => {
     expect(manifestToStaticPaths([])).toEqual([]);
   });
+
+  it("carries the location through to props, coordinate and precision intact", () => {
+    const [nursery, kindergarten] = manifestToStaticPaths(entries);
+
+    expect(nursery.props.location).toBeNull();
+    expect(kindergarten.props.location).toEqual({
+      lat: 43.2141,
+      lon: 27.9147,
+      precision: "building",
+    });
+  });
 });
 
 describe("buildSlugSet", () => {
@@ -65,5 +90,35 @@ describe("buildSlugSet", () => {
   it("does not contain slugs outside the list", () => {
     expect(buildSlugSet(entries).has("kindergarten-999999")).toBe(false);
     expect(buildSlugSet([]).has("kindergarten-46")).toBe(false);
+  });
+
+  it("is unaffected by whether an entry carries a location", () => {
+    const withoutLocations = entries.map((entry) => ({ ...entry, location: null }));
+
+    expect(buildSlugSet(withoutLocations)).toEqual(buildSlugSet(entries));
+  });
+});
+
+describe("manifestToSlugs", () => {
+  it("returns one slug per entry, in the manifest's order", () => {
+    expect(manifestToSlugs(entries)).toEqual(["nursery-47", "kindergarten-46", "preschool-12"]);
+  });
+
+  it("has nothing to return for an empty manifest", () => {
+    expect(manifestToSlugs([])).toEqual([]);
+  });
+});
+
+describe("the two committed artifacts", () => {
+  /* institution-slugs.json exists so the search screen does not have to import
+     95 full rows — including their coordinates — to answer "does this
+     institution have a page". Both files come out of one generator run, and
+     this is what stops them drifting apart if one is ever regenerated alone. */
+  it("agree: the slug list is exactly the manifest's slugs", () => {
+    expect(committedSlugs).toEqual(manifestToSlugs(committedManifest as ManifestEntry[]));
+  });
+
+  it("carry no coordinate in the slug list", () => {
+    expect(committedSlugs.every((slug) => typeof slug === "string")).toBe(true);
   });
 });

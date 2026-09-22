@@ -5,9 +5,8 @@ import {
   matchAddress,
   type MatchAddressContext,
 } from "@/lib/api/client";
-import institutionsManifest from "@/data/institutions-manifest.json";
+import institutionSlugs from "@/data/institution-slugs.json";
 import { formatFreshnessDate } from "@/lib/domain/freshness";
-import { buildSlugSet, type ManifestEntry } from "@/lib/institutions/manifest";
 import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
@@ -25,10 +24,14 @@ import { loadStoredSearchState, saveStoredSearchState } from "@/lib/search/store
 import { ArrowRightIcon, MapPinIcon, SearchIcon } from "./icons";
 import { SearchResults } from "./SearchResults";
 
-/* Built once at module scope: the manifest is a committed build input, not
+/* Built once at module scope: the slug list is a committed build input, not
    runtime data, so there is nothing to recompute per render. It is the guard
-   that keeps a result card from linking to a page the build never emitted. */
-const INSTITUTION_PAGE_SLUGS = buildSlugSet(institutionsManifest as ManifestEntry[]);
+   that keeps a result card from linking to a page the build never emitted.
+
+   The slugs rather than the manifest itself: this screen needs no more than
+   the names of the pages that exist, and importing the full manifest would
+   ship every institution's coordinate to a screen that draws no map. */
+const INSTITUTION_PAGE_SLUGS = new Set<string>(institutionSlugs);
 
 type ReferenceStatus = "idle" | "loading" | "ready" | "error";
 type MatchStatus = "idle" | "loading" | "success" | "error" | "stale";
