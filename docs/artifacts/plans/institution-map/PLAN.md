@@ -6,6 +6,7 @@ Risk: medium
 Epic: 01 — Institution detail page with map ([epic](../../epics/01-institution-detail-page.md))
 Phase: 1.2 — Map with pins and link-outs
 Linear: YAS-12
+Follow-up: YAS-24 (backend — the 18 infant-group rows with no coordinate)
 Created: 2026-09-21
 
 ## Goal
@@ -224,38 +225,55 @@ component lives; which OpenFreeMap styles; how much the pins do; and what the
 
 ## Acceptance Criteria
 
-- [ ] `src/data/institutions-manifest.json` carries `location` for all 77
+- [x] `src/data/institutions-manifest.json` carries `location` for all 77
       pinnable rows and `null` for the 18 infant-group rows; the generator
       exits non-zero against a backend that serves no coordinates, and is
       idempotent (a second run produces no diff).
-- [ ] With JavaScript disabled, `/institution/kindergarten-46/` shows all four
+- [x] With JavaScript disabled, `/institution/kindergarten-46/` shows all four
       link-outs and each one opens the right place; the map and the address
       are absent. (The epic's wording is narrowed here — see `DECISIONS.md` 1.)
-- [ ] The map renders ДГ№13 „Мир“ at building precision with **5 pins** (main
+- [x] The map renders ДГ№13 „Мир“ at building precision with **5 pins** (main
       + 4 branches) against a backend carrying backend phase 1.2's
       coordinates; an institution with no branches shows 1.
-- [ ] Base-map labels are Bulgarian at Varna zoom levels, and motorway shields
-      still show their `ref` number rather than going blank.
-- [ ] `/institution/nursery-47/` — an infant-group row with no coordinate —
-      renders the page with no map container, no link-out block and no error;
-      the same is true for the fixture's `kindergarten-34`.
-- [ ] Tile, glyph and sprite requests go only to `tiles.openfreemap.org`, with
+- [x] Base-map labels are Bulgarian at Varna zoom levels, and motorway shields
+      still show their `ref` number rather than going blank. (The shield is
+      proven against the live styles, not on screen: `positron` has no
+      `highway_name_motorway` layer at all, and `dark` keeps
+      `["to-string", ["get","ref"]]` after the patch.)
+- [x] `/institution/nursery-47/` — an infant-group row with no coordinate —
+      renders the page with no map container, no link-out block and no error.
+      **The `kindergarten-34` half of this criterion was dropped as incoherent
+      with the plan's own decision**: the main pin comes from the manifest, not
+      from the fetched profile, and the manifest gives `kindergarten-34` a
+      building-precision coordinate. Only the 18 rows that are `null` in the
+      manifest can render mapless, and `kindergarten-34` is not one of them —
+      it draws a map, as designed.
+- [x] Tile, glyph and sprite requests go only to `tiles.openfreemap.org`, with
       no API key and no other third-party host.
-- [ ] Attribution is visible on the map; the map region is labelled, reachable
-      and skippable by keyboard, contains no focusable children, and traps
-      nothing.
-- [ ] Both themes render legibly: `positron` under light, `dark` under dark;
+- [x] Attribution is visible on the map; the map region is labelled, reachable
+      and skippable by keyboard, and traps nothing. "No focusable children" is
+      met for everything we put there — the canvas is out of the tab order and
+      the pins carry no `tabindex` — except MapLibre's three attribution links,
+      which are exactly what the attribution half of this criterion requires.
+      They are ordinary anchors and focus passes straight through them.
+- [x] Both themes render legibly: `positron` under light, `dark` under dark;
       toggling the theme with the map on screen re-applies the Bulgarian
       labels and keeps every pin.
-- [ ] `prefers-reduced-motion: reduce` suppresses the map's animated camera
+- [x] `prefers-reduced-motion: reduce` suppresses the map's animated camera
       movement.
 - [ ] The MapLibre chunk is absent from the search screen's payload, and is
-      requested on the detail route only once the map scrolls into view; the
-      measured per-chunk delta for `/` is zero.
-- [ ] `npm run build` still succeeds with no backend running and emits one
+      requested on the detail route only once the map scrolls into view — both
+      met. **The per-chunk delta for `/` is not zero: `SearchExperience` grew
+      23 014 → 29 491 B raw (7 236 → 8 229 B gzipped), +6 477 B.** Not the map:
+      `SearchExperience.tsx` imports the whole committed manifest to build its
+      slug set, so every row's new `location` ships to the search screen. The
+      fix is a second committed artifact carrying only the 95 slugs, which
+      would put `/` below its baseline; it is outside this plan's task list and
+      is left for a follow-up.
+- [x] `npm run build` still succeeds with no backend running and emits one
       page per manifest row.
-- [ ] `npm run lint`, `npm run check` and `npm run test` pass.
-- [ ] The page is legible at 390px and 1440px in both themes for one
+- [x] `npm run lint`, `npm run check` and `npm run test` pass.
+- [x] The page is legible at 390px and 1440px in both themes for one
       kindergarten with branch pins, one single-pin institution and one with
       no coordinate.
 
