@@ -288,4 +288,9 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 - [x] TASK-004: Add the map style helpers: Bulgarian labels and the theme pair
 - [x] TASK-005: Build the lazily loaded InstitutionMap island (depends on TASK-004)
 - [x] TASK-006: Mount the map on the profile and document the route (depends on TASK-001,TASK-005)
+- [x] TASK-008: Keep the manifest's coordinates off the search screen (depends on TASK-001)
 - [ ] TASK-007: Final Validation
+
+TASK-008 was added after the first pass of TASK-007 measured the search
+screen's payload and found it 6 477 B heavier than the baseline. It runs
+before final validation, which then re-measures.

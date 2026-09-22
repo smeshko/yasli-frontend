@@ -45,6 +45,19 @@ export function manifestToStaticPaths(entries: readonly ManifestEntry[]): Instit
   }));
 }
 
+/**
+ * The slugs alone, in manifest order — the contents of the committed
+ * `src/data/institution-slugs.json`.
+ *
+ * That second artifact exists so the search screen can answer "does this
+ * institution have a page" without importing 95 full rows, coordinates and
+ * all, into its bundle. Both files are written by one generator run, and both
+ * build their slugs here so they cannot disagree.
+ */
+export function manifestToSlugs(entries: readonly ManifestEntry[]): string[] {
+  return entries.map((entry) => buildInstitutionSlug(entry.kind, entry.external_id));
+}
+
 export function buildSlugSet(entries: readonly ManifestEntry[]): ReadonlySet<string> {
   return new Set(entries.map((entry) => buildInstitutionSlug(entry.kind, entry.external_id)));
 }

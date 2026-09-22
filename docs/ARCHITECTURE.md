@@ -30,7 +30,7 @@ The frontend is the only browser-facing surface of yasli. It has no server runti
 ```
 src/
 ├── components/         React: SearchExperience, StatusBadge
-├── data/               institutions-manifest.json (generated, committed)
+├── data/               institutions-manifest.json + institution-slugs.json (generated together, committed)
 ├── layouts/            BaseLayout.astro (shell, global CSS, nav)
 ├── pages/              Astro routes: /, /institution/[slug], /pravila, 404
 └── lib/
@@ -88,6 +88,7 @@ The build does **not** call this script. Workflow: backend changes its OpenAPI �
 - Keeps `kind`, `external_id`, `name` and `location` per row, sorted by kind order (`nursery`, `kindergarten`, `preschool`) then numeric `external_id`, and writes `src/data/institutions-manifest.json` (committed to the repo).
 - `location` is the API's `Location` (`{lat, lon, precision}`) or `null`. It is build-stable reference data — coordinates are curated by hand in the backend's `institution_locations.csv` — which is why it lives in the manifest while the scraped, weekly-changing fields (address, phone, …) stay on the API. 77 of the 95 rows carry one; the 18 that do not are the infant-group nursery rows, whose building is keyed only under their kindergarten twin.
 - Exits non-zero on a non-200 status, invalid JSON, an empty or non-array payload, a row missing a field, an unknown `kind`, a duplicate `(kind, external_id)`, a malformed `location`, or a payload in which **no** row carries a `location` (which would mean a backend predating backend phase 1.2).
+- Writes a **second** artifact in the same run: `src/data/institution-slugs.json`, a flat array of the 95 slugs. `SearchExperience` imports that instead of the manifest, because all it needs is the set of pages that exist — importing the manifest would ship every institution's coordinate to a screen that draws no map. `manifestToSlugs` in `src/lib/institutions/manifest.ts` is the shared definition, and a unit test asserts the two committed files agree, so regenerating one without the other fails the suite.
 
 The build does **not** call this script, and CI never runs it. `src/lib/institutions/manifest.ts` turns the rows into slugs (`<kind>-<external_id>`), page paths (`/institution/<slug>/`) and `getStaticPaths` rows, so the institution pages exist exactly for the manifest's rows. Workflow: the institution list changes → run `npm run institutions:manifest` against the deployed backend → commit the regenerated file → redeploy.
 

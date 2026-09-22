@@ -17,6 +17,11 @@ import { dirname, relative, resolve } from "node:path";
 
 const source = process.env.YASLI_INSTITUTIONS_URL?.trim() || "http://localhost:8000/api/institutions";
 const outputPath = resolve("src/data/institutions-manifest.json");
+/* The search screen needs the slugs and nothing else. Writing them as their
+   own artifact keeps every row's coordinate out of its bundle — see
+   manifestToSlugs in src/lib/institutions/manifest.ts. Both files are written
+   here, together, so they can never be regenerated apart. */
+const slugsPath = resolve("src/data/institution-slugs.json");
 const KIND_ORDER = ["nursery", "kindergarten", "preschool"];
 const REQUIRED_FIELDS = ["kind", "external_id", "name"];
 const PRECISIONS = ["building", "approximate"];
@@ -94,12 +99,20 @@ if (located.length === 0) {
 
 rows.sort(compareRows);
 
+/* The same rule as buildInstitutionSlug in src/lib/institutions/manifest.ts,
+   which this script cannot import. A unit test asserts the two committed
+   artifacts agree, so a change to either shape fails the suite rather than
+   shipping a search screen that links to pages the build never emitted. */
+const slugs = rows.map((row) => `${row.kind}-${row.external_id}`);
+
 await mkdir(dirname(outputPath), { recursive: true });
 await writeFile(outputPath, `${JSON.stringify(rows, null, 2)}\n`);
+await writeFile(slugsPath, `${JSON.stringify(slugs, null, 2)}\n`);
 
 console.log(
   `wrote ${rows.length} institutions (${located.length} located, ${rows.length - located.length} without a coordinate) from ${source} to ${relative(process.cwd(), outputPath)}`,
 );
+console.log(`wrote ${slugs.length} slugs to ${relative(process.cwd(), slugsPath)}`);
 
 // `location` is optional on a row but never malformed: absent or null becomes
 // null, anything else must be a complete Location.

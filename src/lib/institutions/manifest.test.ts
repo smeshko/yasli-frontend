@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import committedManifest from "@/data/institutions-manifest.json";
+import committedSlugs from "@/data/institution-slugs.json";
+
 import {
   buildInstitutionSlug,
   buildSlugSet,
   institutionPath,
+  manifestToSlugs,
   manifestToStaticPaths,
   type ManifestEntry,
 } from "./manifest";
@@ -92,5 +96,29 @@ describe("buildSlugSet", () => {
     const withoutLocations = entries.map((entry) => ({ ...entry, location: null }));
 
     expect(buildSlugSet(withoutLocations)).toEqual(buildSlugSet(entries));
+  });
+});
+
+describe("manifestToSlugs", () => {
+  it("returns one slug per entry, in the manifest's order", () => {
+    expect(manifestToSlugs(entries)).toEqual(["nursery-47", "kindergarten-46", "preschool-12"]);
+  });
+
+  it("has nothing to return for an empty manifest", () => {
+    expect(manifestToSlugs([])).toEqual([]);
+  });
+});
+
+describe("the two committed artifacts", () => {
+  /* institution-slugs.json exists so the search screen does not have to import
+     95 full rows — including their coordinates — to answer "does this
+     institution have a page". Both files come out of one generator run, and
+     this is what stops them drifting apart if one is ever regenerated alone. */
+  it("agree: the slug list is exactly the manifest's slugs", () => {
+    expect(committedSlugs).toEqual(manifestToSlugs(committedManifest as ManifestEntry[]));
+  });
+
+  it("carry no coordinate in the slug list", () => {
+    expect(committedSlugs.every((slug) => typeof slug === "string")).toBe(true);
   });
 });
