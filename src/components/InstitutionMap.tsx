@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import mapStylesheetUrl from "maplibre-gl/dist/maplibre-gl.css?url";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 
 import type { InstitutionBranch, InstitutionLocation } from "@/lib/api/client";
@@ -137,7 +138,7 @@ async function drawMap(
      is what keeps the bundle out of the initial payload and off every other
      route. Its stylesheet rides along in the same chunk. */
   const maplibre = await import("maplibre-gl");
-  await import("maplibre-gl/dist/maplibre-gl.css");
+  await loadMapStylesheet();
 
   /* MapLibre resolves its tile-parsing worker as a sibling of its own module
      URL — `new URL("./maplibre-gl-worker.mjs", import.meta.url)` — which after
@@ -266,6 +267,28 @@ async function drawMap(
     }
     map.remove();
   };
+}
+
+/* MapLibre's stylesheet is 83 KB and is linked into the page head if it is
+   imported as a module — eager weight on a route whose map may never be
+   scrolled to. Fetched as an ordinary stylesheet here instead, once, at the
+   moment the map is drawn. */
+function loadMapStylesheet(): Promise<void> {
+  const existing = document.head.querySelector(`link[href="${mapStylesheetUrl}"]`);
+  if (existing) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = mapStylesheetUrl;
+    /* Resolve either way: without its stylesheet the map still draws, just
+       with MapLibre's controls unstyled, which beats no map at all. */
+    link.addEventListener("load", () => resolve());
+    link.addEventListener("error", () => resolve());
+    document.head.append(link);
+  });
 }
 
 /* DOM markers rather than a GeoJSON symbol layer: they read the page's CSS
