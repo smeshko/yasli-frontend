@@ -1,6 +1,6 @@
 # Plan: Map with pins and link-outs
 
-Status: in-progress
+Status: done
 Branch: feature/yas-12-institution-map
 Risk: medium
 Epic: 01 — Institution detail page with map ([epic](../../epics/01-institution-detail-page.md))
@@ -261,15 +261,15 @@ component lives; which OpenFreeMap styles; how much the pins do; and what the
       labels and keeps every pin.
 - [x] `prefers-reduced-motion: reduce` suppresses the map's animated camera
       movement.
-- [ ] The MapLibre chunk is absent from the search screen's payload, and is
-      requested on the detail route only once the map scrolls into view — both
-      met. **The per-chunk delta for `/` is not zero: `SearchExperience` grew
-      23 014 → 29 491 B raw (7 236 → 8 229 B gzipped), +6 477 B.** Not the map:
-      `SearchExperience.tsx` imports the whole committed manifest to build its
-      slug set, so every row's new `location` ships to the search screen. The
-      fix is a second committed artifact carrying only the 95 slugs, which
-      would put `/` below its baseline; it is outside this plan's task list and
-      is left for a follow-up.
+- [x] The MapLibre chunk is absent from the search screen's payload, and is
+      requested on the detail route only once the map scrolls into view; the
+      measured per-chunk delta for `/` is zero. The first pass of TASK-007
+      measured `SearchExperience` at 29 491 B against a 23 014 B baseline —
+      `SearchExperience.tsx` imported the whole manifest to build its slug set,
+      so every row's new `location` reached the search screen. TASK-008 gave it
+      a slug-only artifact instead: **16 705 B raw / 6 019 B gzipped, 6 309 B
+      *below* the baseline**, with no `lat`, `lon` or `precision` anywhere in
+      the chunk.
 - [x] `npm run build` still succeeds with no backend running and emits one
       page per manifest row.
 - [x] `npm run lint`, `npm run check` and `npm run test` pass.
@@ -289,7 +289,7 @@ Task state lives here. Tasks are appended by `scripts/add_task.py` and
 - [x] TASK-005: Build the lazily loaded InstitutionMap island (depends on TASK-004)
 - [x] TASK-006: Mount the map on the profile and document the route (depends on TASK-001,TASK-005)
 - [x] TASK-008: Keep the manifest's coordinates off the search screen (depends on TASK-001)
-- [ ] TASK-007: Final Validation
+- [x] TASK-007: Final Validation
 
 TASK-008 was added after the first pass of TASK-007 measured the search
 screen's payload and found it 6 477 B heavier than the baseline. It runs
