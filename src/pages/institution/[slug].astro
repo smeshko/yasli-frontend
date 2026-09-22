@@ -67,7 +67,7 @@ const mapLinks = location ? buildMapLinks(location, name) : [];
         </nav>
       )
     }
-    <InstitutionProfile client:load kind={kind} externalId={external_id} />
+    <InstitutionProfile client:load kind={kind} externalId={external_id} location={location} />
   </article>
 </BaseLayout>
 
@@ -164,6 +164,62 @@ const mapLinks = location ? buildMapLinks(location, name) : [];
   .profile a.profile-maplink.is-primary:hover {
     color: var(--color-text-on-accent);
     filter: brightness(1.08);
+  }
+
+  /* The map is a picture, not a panel of facts: it keeps the page's card
+     frame but drops the padding, so the cartography runs to the edge. */
+  .profile section.profile-map {
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .profile-map-canvas {
+    width: 100%;
+    /* Tall enough that ДГ№13's five buildings read as a cluster rather than a
+       line of dots, short enough not to push the contacts off a phone. */
+    height: 300px;
+  }
+
+  /* DOM markers, so they read the page's tokens and follow --tone in both
+     themes without the map needing a second palette. */
+  .profile-map-pin {
+    display: block;
+    box-sizing: border-box;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--color-bg-surface);
+    border-radius: 50%;
+    background: var(--tone);
+    box-shadow: 0 0 0 1.5px var(--color-ink);
+  }
+
+  .profile-map-pin.is-main {
+    width: 22px;
+    height: 22px;
+    border-width: 3px;
+  }
+
+  .profile-map-pin:not(.is-main) {
+    background: var(--color-bg-surface);
+    box-shadow: 0 0 0 1.5px var(--tone);
+  }
+
+  /* MapLibre's attribution has its own palette; keep it on the page's, and
+     opaque — over a dark base map a translucent panel leaves the credit
+     barely readable. */
+  /* Matched against MapLibre's own `.maplibregl-ctrl.maplibregl-ctrl-attrib`,
+     which carries the same specificity and is injected later by the dynamic
+     import, so the class has to be named here too. */
+  .profile-map .maplibregl-ctrl.maplibregl-ctrl-attrib {
+    border-radius: 8px 0 0 0;
+    background-color: var(--color-bg-surface);
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    padding: 2px 8px;
+  }
+
+  .profile-map .maplibregl-ctrl-attrib a {
+    color: var(--color-text-muted);
   }
 
   .profile section {
@@ -304,6 +360,14 @@ const mapLinks = location ? buildMapLinks(location, name) : [];
 
     .profile section {
       padding: 18px 16px;
+    }
+
+    .profile section.profile-map {
+      padding: 0;
+    }
+
+    .profile-map-canvas {
+      height: 240px;
     }
   }
 </style>

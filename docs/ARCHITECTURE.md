@@ -97,6 +97,17 @@ The build does **not** call this script, and CI never runs it. `src/lib/institut
 
 `/institution/<kind>-<external_id>/` is a dynamic route whose `getStaticPaths` reads the committed manifest, so the build emits exactly one page per manifest row and needs no backend. Each page prerenders its header (kind label, ДГ/ДЯ number parsed from the name, the name as `<h1>`) from the manifest and hydrates the rest from `GET /api/institutions/by-source/{kind}/{external_id}`. A slug outside the manifest has no page and is served the site 404. The `PUBLIC_YASLI_API_BASE_URL` value is **baked in at build time** — changing it requires a redeploy, not just a restart.
 
+The route also prerenders the four **map link-outs** (directions, Google Maps, Apple Maps, OpenStreetMap) from the manifest's `location`, in the Astro frontmatter and outside the island, so they are the one part of the page that works with JavaScript disabled. A row with no coordinate renders no link-out block at all.
+
+## The map island
+
+`InstitutionMap` is a React child of `InstitutionProfile`, rendered between the address and the contacts. It draws the institution's building plus each branch that has a coordinate on an [OpenFreeMap](https://openfreemap.org) base map — `positron` under light, `dark` under dark, with `text-field` rewritten to prefer `name:bg` (`src/lib/map/style.ts`).
+
+- **`maplibre-gl` is reached only through a dynamic `import()` behind an `IntersectionObserver`**, so it lands in its own chunk that the detail route requests when the map scrolls into view and **no other route can reach**. The search screen's payload contains none of it.
+- **`tiles.openfreemap.org` is the page's one third-party origin**: style, TileJSON, sprite, glyphs and tiles, with no API key, no quota and no registration. Its own attribution ships in the TileJSON and MapLibre's default control renders it.
+- **MapLibre's worker needs `?worker&url`.** It spawns its tile-parsing worker from `new URL("./maplibre-gl-worker.mjs", import.meta.url)`, which after bundling points at a file Vite does not emit; the map then renders blank grey with no error. `src/components/InstitutionMap.tsx` imports the worker with `?worker&url` and passes it to `setWorkerUrl`, and `astro.config.mjs` sets `vite.worker.format = "es"` because MapLibre starts it as a module worker.
+- **No coordinate, no `IntersectionObserver`, no WebGL, a failed import or a style that will not load all mean no container** — designed absences, not error states. The address and the link-outs above are the fallback, and the page never says the map failed.
+
 ## Deployment
 
 Cloudflare Pages, Git-connected to the repo's `main` branch. See README for build config.

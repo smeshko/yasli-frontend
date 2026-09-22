@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+
 import type { InstitutionBranch, InstitutionLocation } from "@/lib/api/client";
 import { fitBoundsFor, toPins, type MapPin, type MapView } from "@/lib/map/pins";
 import { bulgarianLabelStyle, styleUrlForTheme, type MapStyle } from "@/lib/map/style";
@@ -16,6 +18,8 @@ const FIT_MAX_ZOOM = 17;
 /* Start fetching a little before the container is actually on screen, so the
    map is drawn by the time it arrives rather than after. */
 const PREFETCH_MARGIN = "200px";
+/* A style host that neither answers nor errors still means no map. */
+const STYLE_TIMEOUT_MS = 12_000;
 
 export interface InstitutionMapProps {
   location: InstitutionLocation | null;
@@ -77,7 +81,7 @@ export function InstitutionMap({ location, branches, name }: InstitutionMapProps
         }
 
         observer.disconnect();
-        drawMap(container, pins, view, name)
+        drawMap(container, pins, view, name, giveUp)
           .then((dispose) => {
             if (disposed) {
               dispose?.();
@@ -127,12 +131,22 @@ async function drawMap(
   pins: readonly MapPin[],
   view: MapView,
   name: string,
+  onFail: () => void,
 ): Promise<(() => void) | null> {
   /* The one reference to maplibre-gl in the codebase, and it is dynamic: this
      is what keeps the bundle out of the initial payload and off every other
      route. Its stylesheet rides along in the same chunk. */
   const maplibre = await import("maplibre-gl");
   await import("maplibre-gl/dist/maplibre-gl.css");
+
+  /* MapLibre resolves its tile-parsing worker as a sibling of its own module
+     URL — `new URL("./maplibre-gl-worker.mjs", import.meta.url)` — which after
+     bundling points at a path next to the chunk that Vite never emits. The
+     request fails, no worker starts, and the map renders as blank grey with
+     the pins still on it and not one error anywhere. `?worker&url` has Vite
+     bundle the worker with its own dependencies and hand back the address it
+     actually lands at, which is then what MapLibre spawns. */
+  maplibre.setWorkerUrl(workerUrl);
 
   const reducedMotion = prefersReducedMotion();
   let markers: InstanceType<typeof maplibre.Marker>[] = [];
@@ -168,35 +182,32 @@ async function drawMap(
     return null;
   }
 
-  let failed = false;
-  const markFailed = () => {
-    failed = true;
-  };
-  map.on("error", markFailed);
+  /* Setting a style resets the map's sources, so the label patch and the pins
+     are one function, run as soon as a style is ready and again after every
+     swap.
 
-  await new Promise<void>((resolve) => {
-    map.once("load", () => resolve());
-    map.once("error", () => resolve());
-  });
-
-  if (failed) {
-    map.remove();
-    return null;
-  }
-
-  /* Setting a style resets the map's sources and removes its markers, so the
-     label patch and the pins are one function, run on load and after every
-     swap. */
+     Deliberately not gated on the `load` event: `load` waits for every tile of
+     the opening view as well as the style, and at building zoom over Varna it
+     can simply never arrive — measured 2026-09-21, where `styledata` fired
+     three times and `load` not at all. A ready style is all this needs. */
   const applyStyleAndPins = () => {
     const style = map.getStyle() as unknown as MapStyle | undefined;
-    if (style) {
-      const { style: patched, rewritten } = bulgarianLabelStyle(style);
-      /* Converges: a patched style mentions no `name:latin`, so the next
-         styledata finds nothing to rewrite and the loop stops. */
-      if (rewritten > 0) {
-        map.setStyle(patched as never, { diff: true });
-      }
+    if (!style) {
+      return;
     }
+
+    /* Applied layer by layer with setLayoutProperty rather than by handing the
+       patched object back to setStyle: re-setting a whole style replaces its
+       sources too, and the round trip through getStyle leaves the map with
+       sources it never fetches tiles for — measured 2026-09-21, a blank grey
+       map with the pins still on it. */
+    const { style: patched } = bulgarianLabelStyle(style);
+    patched.layers.forEach((layer, index) => {
+      const next = layer.layout?.["text-field"];
+      if (next != null && next !== style.layers[index].layout?.["text-field"]) {
+        map.setLayoutProperty(layer.id, "text-field", next as never);
+      }
+    });
 
     for (const marker of markers) {
       marker.remove();
@@ -206,20 +217,49 @@ async function drawMap(
         .setLngLat([pin.lon, pin.lat])
         .addTo(map),
     );
+
+    /* Belt and braces against a focus trap: MapLibre puts the canvas in the
+       tab order even with `keyboard: false`, and there is nothing inside it to
+       operate. Re-done after each style swap, which rebuilds the canvas. */
+    map.getCanvas().removeAttribute("tabindex");
   };
 
-  applyStyleAndPins();
-  map.on("styledata", applyStyleAndPins);
+  let styleReady = false;
+  const onStyleData = () => {
+    styleReady = true;
+    applyStyleAndPins();
+  };
 
-  /* Belt and braces against a focus trap: MapLibre puts the canvas in the tab
-     order in some configurations, and there is nothing inside to operate. */
-  map.getCanvas().removeAttribute("tabindex");
+  map.on("styledata", onStyleData);
+  if (map.isStyleLoaded()) {
+    onStyleData();
+  }
+
+  map.on("error", () => {
+    /* An error before any style has arrived means there is no map to show —
+       the same designed absence as no WebGL. Afterwards MapLibre reports
+       ordinary things like a tile that would not load, which is not a reason
+       to take the map away. */
+    if (!styleReady) {
+      onFail();
+    }
+  });
+
+  /* A style that neither loads nor errors — a blocked or hanging host — is
+     still an absent map, not a spinner. */
+  const styleTimer = window.setTimeout(() => {
+    if (!styleReady) {
+      onFail();
+    }
+  }, STYLE_TIMEOUT_MS);
 
   const unobserveTheme = observeMapTheme((theme) => {
+    styleReady = false;
     map.setStyle(styleUrlForTheme(theme));
   });
 
   return () => {
+    window.clearTimeout(styleTimer);
     unobserveTheme();
     for (const marker of markers) {
       marker.remove();
