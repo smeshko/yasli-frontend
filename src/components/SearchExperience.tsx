@@ -11,7 +11,7 @@ import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
 } from "@/lib/search/addressSuggestions";
-import { isSuggestionListShown, type ReferenceStatus } from "@/lib/search/autocomplete";
+import { isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "@/lib/search/autocomplete";
 import { clearReferenceDataCache, loadReferenceData } from "@/lib/search/referenceData";
 import {
   groupMatchResults,
@@ -250,31 +250,30 @@ export function SearchExperience() {
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (preventsNativeKeyDefault(event.key, isAutocompleteOpen)) {
+      event.preventDefault();
+    }
+
     if (!isAutocompleteOpen && event.key !== "Enter") {
       return;
     }
 
     if (event.key === "ArrowDown") {
-      event.preventDefault();
       setActiveIndex((current) => Math.min(current + 1, Math.max(visibleSuggestions.length - 1, 0)));
       return;
     }
 
     if (event.key === "ArrowUp") {
-      event.preventDefault();
       setActiveIndex((current) => Math.max(current - 1, 0));
       return;
     }
 
     if (event.key === "Escape") {
-      // type="search" otherwise clears the field natively on Escape.
-      event.preventDefault();
       setIsAutocompleteOpen(false);
       return;
     }
 
     if (event.key === "Enter") {
-      event.preventDefault();
       const activeSuggestion = visibleSuggestions[activeIndex];
 
       if (activeSuggestion) {
