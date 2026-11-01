@@ -8,3 +8,6 @@ coverage/
 .wrangler/
 .mf/
 npm-debug.log*
+.sail-runs/
+.sail/sail.d.ts
+.sail/sail-intakes.d.ts
