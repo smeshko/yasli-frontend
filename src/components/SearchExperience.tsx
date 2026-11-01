@@ -11,6 +11,7 @@ import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
 } from "@/lib/search/addressSuggestions";
+import { isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "@/lib/search/autocomplete";
 import { clearReferenceDataCache, loadReferenceData } from "@/lib/search/referenceData";
 import {
   groupMatchResults,
@@ -33,7 +34,6 @@ import { SearchResults } from "./SearchResults";
    ship every institution's coordinate to a screen that draws no map. */
 const INSTITUTION_PAGE_SLUGS = new Set<string>(institutionSlugs);
 
-type ReferenceStatus = "idle" | "loading" | "ready" | "error";
 type MatchStatus = "idle" | "loading" | "success" | "error" | "stale";
 
 export interface MatchState {
@@ -74,6 +74,11 @@ export function SearchExperience() {
     [query, suggestions],
   );
   const hasQuery = query.trim().length > 0;
+  const showSuggestions = isSuggestionListShown({
+    referenceStatus,
+    isOpen: isAutocompleteOpen,
+    suggestionCount: visibleSuggestions.length,
+  });
   const showNoMatches =
     referenceStatus === "ready" && hasQuery && isAutocompleteOpen && visibleSuggestions.length === 0;
   const staleResults = shouldShowStaleBanner(freshnessDate);
@@ -245,18 +250,20 @@ export function SearchExperience() {
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (preventsNativeKeyDefault(event.key, isAutocompleteOpen)) {
+      event.preventDefault();
+    }
+
     if (!isAutocompleteOpen && event.key !== "Enter") {
       return;
     }
 
     if (event.key === "ArrowDown") {
-      event.preventDefault();
       setActiveIndex((current) => Math.min(current + 1, Math.max(visibleSuggestions.length - 1, 0)));
       return;
     }
 
     if (event.key === "ArrowUp") {
-      event.preventDefault();
       setActiveIndex((current) => Math.max(current - 1, 0));
       return;
     }
@@ -267,7 +274,6 @@ export function SearchExperience() {
     }
 
     if (event.key === "Enter") {
-      event.preventDefault();
       const activeSuggestion = visibleSuggestions[activeIndex];
 
       if (activeSuggestion) {
@@ -331,7 +337,7 @@ export function SearchExperience() {
                 placeholder="ул. Преслав 12"
                 aria-autocomplete="list"
                 aria-controls="address-suggestions"
-                aria-expanded={isAutocompleteOpen}
+                aria-expanded={showSuggestions}
                 aria-describedby={inputDescriptionId}
                 onChange={(event) => handleQueryChange(event.currentTarget.value)}
                 onFocus={() => setIsAutocompleteOpen(true)}
@@ -339,7 +345,7 @@ export function SearchExperience() {
               />
             </div>
 
-            {referenceStatus === "ready" && isAutocompleteOpen && visibleSuggestions.length > 0 ? (
+            {showSuggestions ? (
               <ul className="suggestion-panel" id="address-suggestions" role="listbox">
                 {visibleSuggestions.map((suggestion, index) => (
                   <li
