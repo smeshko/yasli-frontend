@@ -11,3 +11,5 @@ export const receptionKindLabels: Record<ReceptionKind, string> = {
 export function labelForReceptionKind(kind: ReceptionKind): string {
   return receptionKindLabels[kind];
 }
+
+export const INFANT_GROUP_LABEL = "яслена група";
