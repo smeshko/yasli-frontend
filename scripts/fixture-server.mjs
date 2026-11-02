@@ -13,9 +13,9 @@
  *
  *   FIXTURE_SCENARIO=S1 node scripts/fixture-server.mjs
  *
- * Search scenarios (S1–S10) are documented in
+ * Search scenarios (S1–S9) are documented in
  * docs/artifacts/plans/archive/2026-08-02-dvorat-design/SCENARIOS.md;
- * S10 adds two streets that start with "Преслав" (ranking demo);
+ * S10, documented only here, adds two streets that start with "Преслав" (ranking demo);
  * institution-page scenarios (D1–D3, the by-source profiles) in
  * docs/artifacts/plans/institution-detail-route/SCENARIOS.md
  */
