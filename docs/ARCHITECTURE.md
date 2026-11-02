@@ -29,10 +29,10 @@ The frontend is the only browser-facing surface of yasli. It has no server runti
 
 ```
 src/
-├── components/         React: SearchExperience, StatusBadge
+├── components/         React: SearchExperience, InstitutionDirectory, StatusBadge
 ├── data/               institutions-manifest.json + institution-slugs.json (generated together, committed)
 ├── layouts/            BaseLayout.astro (shell, global CSS, nav)
-├── pages/              Astro routes: /, /institution/[slug], /pravila, 404
+├── pages/              Astro routes: /, /institutions/, /institution/[slug], /pravila, 404
 └── lib/
     ├── api/            client.ts (fetch wrappers), config.ts (base URL resolver), types.ts (generated)
     ├── domain/         kinds.ts (ReceptionKind enum), freshness.ts (14-day staleness)
@@ -94,11 +94,15 @@ The build does **not** call this script, and CI never runs it. `src/lib/institut
 
 ## Build output
 
-`output: "static"` produces `dist/` with prerendered HTML for every route plus React islands for `SearchExperience` and `InstitutionProfile`.
+`output: "static"` produces `dist/` with prerendered HTML for every route plus React islands for `SearchExperience`, `InstitutionDirectory` and `InstitutionProfile`.
 
 `/institution/<kind>-<external_id>/` is a dynamic route whose `getStaticPaths` reads the committed manifest, so the build emits exactly one page per manifest row and needs no backend. Each page prerenders its header (kind label, ДГ/ДЯ number parsed from the name, the name as `<h1>`) from the manifest and hydrates the rest from `GET /api/institutions/by-source/{kind}/{external_id}`. A slug outside the manifest has no page and is served the site 404. The `PUBLIC_YASLI_API_BASE_URL` value is **baked in at build time** — changing it requires a redeploy, not just a restart.
 
 The route also prerenders the four **map link-outs** (directions, Google Maps, Apple Maps, OpenStreetMap) from the manifest's `location`, in the Astro frontmatter and outside the island, so they are the one part of the page that works with JavaScript disabled. A row with no coordinate renders no link-out block at all.
+
+## Directory
+
+`/institutions/` is a client island (`InstitutionDirectory`) over `listInstitutions()` (`GET /api/institutions`), loaded through `createProfileLoader` so only the newest request reaches state. `buildDirectoryGroups` (`src/lib/institutions/directory.ts`) groups rows by `kind` in `receptionKindOrder`, sorts each group with `institutionNameCollator`, and links a row only when `<kind>-<external_id>` is in `institution-slugs.json`; other rows render as plain text. A kindergarten with an infant group stays under "Детска градина" with an `INFANT_GROUP_LABEL` tag. The nav items ("Търсене", "Всички институции") live in `src/lib/navigation.ts` and `BaseLayout.astro` marks the current one with `aria-current`. The fixture backend adds scenarios `B1` (list fails once) and `B2` (list answers after 4 s) for this page.
 
 ## The map island
 

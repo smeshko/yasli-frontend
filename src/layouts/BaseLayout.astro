@@ -1,6 +1,7 @@
 ---
 import SiteFooter from "@/components/SiteFooter.astro";
 import ThemeToggle from "@/components/ThemeToggle.astro";
+import { buildNavItems } from "@/lib/navigation";
 
 interface Props {
   title: string;
@@ -12,23 +13,9 @@ const {
   description = "Ясли и детски градини във Варна.",
 } = Astro.props;
 
-const normalizePath = (path: string) => {
-  const normalizedPath = path.replace(/\/+$/, "");
-  return normalizedPath === "" ? "/" : normalizedPath;
-};
+const showNav = true;
 
-const pathname = normalizePath(Astro.url.pathname);
-
-// Temporarily hidden while the /pravila copy is being reworked.
-const showNav = false;
-
-const navItems = [
-  { href: "/", label: "Търсене" },
-  { href: "/pravila", label: "Правила за прием" },
-].map((item) => ({
-  ...item,
-  active: pathname === normalizePath(item.href),
-}));
+const navItems = buildNavItems(Astro.url.pathname);
 ---
 
 <!doctype html>
