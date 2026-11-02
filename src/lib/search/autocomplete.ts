@@ -17,3 +17,8 @@ export function preventsNativeKeyDefault(key: string, isOpen: boolean): boolean 
 
   return isOpen && (key === "ArrowUp" || key === "ArrowDown");
 }
+
+// Focus moving to null or outside the container leaves; within it (e.g. into the listbox) stays.
+export function isFocusLeaving(container: { contains(other: Node | null): boolean } | null, next: Node | null): boolean {
+  return next === null || container === null || !container.contains(next);
+}
