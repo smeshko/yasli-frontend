@@ -189,12 +189,8 @@ export function SearchExperience() {
     }
   }
 
+  // Both retry buttons land here: a stale match can be behind the reference-data error too.
   async function retryReferences() {
-    clearReferenceDataCache();
-    await loadReferences();
-  }
-
-  async function reloadStaleAddresses() {
     clearReferenceDataCache();
     const reloaded = await loadReferences();
     const current = matchStateRef.current;
@@ -449,7 +445,7 @@ export function SearchExperience() {
         pageSlugs={INSTITUTION_PAGE_SLUGS}
         staleResults={staleResults}
         onFilterChange={setFilter}
-        onRetryStale={() => void reloadStaleAddresses()}
+        onRetryStale={() => void retryReferences()}
         onRetryMatch={() => {
           if (matchState.selectedAddress) {
             void selectSuggestion(matchState.selectedAddress);
