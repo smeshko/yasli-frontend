@@ -89,6 +89,7 @@ describe("SearchResults", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
 
@@ -141,6 +142,7 @@ describe("SearchResults", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
 
@@ -174,6 +176,7 @@ describe("SearchResults", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
 
@@ -215,6 +218,7 @@ describe("SearchResults", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
 
@@ -256,6 +260,7 @@ describe("SearchResults", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
 
@@ -263,7 +268,40 @@ describe("SearchResults", () => {
     expect(html).toContain("ПГ Район");
   });
 
-  it("renders API failure state", () => {
+  it("renders API failure state with a retry button", () => {
+    const matchState: MatchState = {
+      status: "error",
+      address: null,
+      selectedAddress: {
+        id: "10",
+        addressId: 10,
+        streetId: 1,
+        label: "бул. Генерал Колев 085",
+        context: "гр. Варна",
+        numberLabel: "085",
+        searchText: "БУЛ ГЕНЕРАЛ КОЛЕВ 085",
+      },
+      grouped: null,
+      message: "Не успяхме да заредим резултатите. Опитайте отново.",
+    };
+
+    const html = renderToStaticMarkup(
+      <SearchResults
+        filter="all"
+        matchState={matchState}
+        pageSlugs={PAGE_SLUGS}
+        staleResults={false}
+        onFilterChange={vi.fn()}
+        onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain("Не успяхме да заредим резултатите");
+    expect(html).toContain("Опитайте отново</button>");
+  });
+
+  it("renders API failure state without a button when no address is selected", () => {
     const matchState: MatchState = {
       status: "error",
       address: null,
@@ -280,10 +318,12 @@ describe("SearchResults", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
 
     expect(html).toContain("Не успяхме да заредим резултатите");
+    expect(html).not.toContain("<button");
   });
 
   it("renders stale address retry state", () => {
@@ -303,6 +343,7 @@ describe("SearchResults", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
 
@@ -331,6 +372,7 @@ describe("SearchResults detail links", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
   }
@@ -387,6 +429,7 @@ describe("SearchResults detail links", () => {
         staleResults={false}
         onFilterChange={vi.fn()}
         onRetryStale={vi.fn()}
+        onRetryMatch={vi.fn()}
       />,
     );
 
