@@ -5,6 +5,10 @@
    or splits the name. */
 const INSTITUTION_NUMBER = /№\s*(\d+)/u;
 
+/* Names carry their № number inline, so a plain string compare puts №9 after
+   №22. This collator orders the numbers inside names as numbers. */
+export const institutionNameCollator = new Intl.Collator("bg", { numeric: true });
+
 export function parseInstitutionNumber(name: string): string | null {
   const match = INSTITUTION_NUMBER.exec(name);
 

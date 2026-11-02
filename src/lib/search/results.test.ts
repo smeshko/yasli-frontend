@@ -54,6 +54,27 @@ describe("groupMatchResults", () => {
     expect(grouped.kindergarten.map((institution) => institution.name)).toEqual(["ДГ А", "ДГ Я"]);
   });
 
+  it("sorts institution numbers numerically within each group", () => {
+    const nursery = { institution_kind: "nursery", reception_kind: "nursery" } as const;
+    const grouped = groupMatchResults([
+      matchResult({ id: 1, name: "ДГ№22" }),
+      matchResult({ id: 2, name: 'ДГ№9 "Ален мак"' }),
+      matchResult({ id: 3, name: 'ДГ№18 "Чайка"' }),
+      matchResult({ id: 4, name: "ДГ№21" }),
+      matchResult({ id: 5, name: "ДЯ № 14", ...nursery }),
+      matchResult({ id: 6, name: "ДЯ № 7", ...nursery }),
+      matchResult({ id: 7, name: "ДЯ № 2", ...nursery }),
+    ]);
+
+    expect(grouped.kindergarten.map((institution) => institution.name)).toEqual([
+      'ДГ№9 "Ален мак"',
+      'ДГ№18 "Чайка"',
+      "ДГ№21",
+      "ДГ№22",
+    ]);
+    expect(grouped.nursery.map((institution) => institution.name)).toEqual(["ДЯ № 2", "ДЯ № 7", "ДЯ № 14"]);
+  });
+
   it("groups infant-group kindergarten rows by explicit reception kind", () => {
     const institutions: MatchResult[] = [
       matchResult({
