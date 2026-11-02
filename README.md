@@ -30,7 +30,7 @@ npm run institutions:manifest  # regenerate src/data/institutions-manifest.json 
 
 `npm run build` consumes the committed `src/lib/api/types.ts`, `src/data/institutions-manifest.json` and `src/data/institution-slugs.json`; it does **not** regenerate any of them and does **not** require the backend.
 
-The two data files are written by the one command, together — the slug list is the manifest's slugs and nothing else, imported by the search screen so that screen never carries 95 institutions' coordinates. A unit test fails if they disagree, so never hand-edit one.
+The two data files are written by the one command, together — the slug list is the manifest's slugs and nothing else, imported by the search screen so that screen never carries every institution's coordinates. A unit test fails if they disagree, so never hand-edit one.
 
 Regenerate the manifest against the deployed backend, never bare while `npm run fixtures` is up (the default URL is the fixture server's port, and it answers `/api/institutions` with a handful of synthetic rows):
 
