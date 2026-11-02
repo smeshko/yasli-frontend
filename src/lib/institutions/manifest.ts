@@ -49,7 +49,7 @@ export function manifestToStaticPaths(entries: readonly ManifestEntry[]): Instit
  * `src/data/institution-slugs.json`.
  *
  * That second artifact exists so the search screen can answer "does this
- * institution have a page" without importing 95 full rows, coordinates and
+ * institution have a page" without importing every full row, coordinates and
  * all, into its bundle. Both files are written by one generator run, and both
  * build their slugs here so they cannot disagree.
  */

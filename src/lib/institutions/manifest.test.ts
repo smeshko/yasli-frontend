@@ -111,7 +111,7 @@ describe("manifestToSlugs", () => {
 
 describe("the two committed artifacts", () => {
   /* institution-slugs.json exists so the search screen does not have to import
-     95 full rows — including their coordinates — to answer "does this
+     every full row — including its coordinates — to answer "does this
      institution have a page". Both files come out of one generator run, and
      this is what stops them drifting apart if one is ever regenerated alone. */
   it("agree: the slug list is exactly the manifest's slugs", () => {
