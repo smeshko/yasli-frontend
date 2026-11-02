@@ -107,16 +107,22 @@ export function buildExactAddressSuggestions(
     .filter((suggestion): suggestion is ExactAddressSuggestion => suggestion !== null);
 }
 
+// The no-match panel in SearchExperience shares this rule.
+export function isSearchableQuery(query: string): boolean {
+  const normalizedQuery = normalizeSearchText(transliterateLatin(query));
+  return CYRILLIC_OR_DIGIT_QUERY.test(normalizedQuery) && normalizedQuery.length >= 2;
+}
+
 export function searchExactAddressSuggestions(
   suggestions: ExactAddressSuggestion[],
   query: string,
   limit = 8,
 ): ExactAddressSuggestion[] {
-  const normalizedQuery = normalizeSearchText(transliterateLatin(query));
-
-  if (!CYRILLIC_OR_DIGIT_QUERY.test(normalizedQuery) || normalizedQuery.length < 2) {
+  if (!isSearchableQuery(query)) {
     return [];
   }
+
+  const normalizedQuery = normalizeSearchText(transliterateLatin(query));
 
   const terms = normalizedQuery.split(" ").filter(Boolean);
 

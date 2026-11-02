@@ -8,6 +8,7 @@ import {
 import institutionSlugs from "@/data/institution-slugs.json";
 import { formatFreshnessDate } from "@/lib/domain/freshness";
 import {
+  isSearchableQuery,
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
 } from "@/lib/search/addressSuggestions";
@@ -76,14 +77,16 @@ export function SearchExperience() {
     () => searchExactAddressSuggestions(suggestions, query),
     [query, suggestions],
   );
-  const hasQuery = query.trim().length > 0;
   const showSuggestions = isSuggestionListShown({
     referenceStatus,
     isOpen: isAutocompleteOpen,
     suggestionCount: visibleSuggestions.length,
   });
   const showNoMatches =
-    referenceStatus === "ready" && hasQuery && isAutocompleteOpen && visibleSuggestions.length === 0;
+    referenceStatus === "ready" &&
+    isSearchableQuery(query) &&
+    isAutocompleteOpen &&
+    visibleSuggestions.length === 0;
   const staleResults = shouldShowStaleBanner(freshnessDate);
 
   useEffect(() => {
