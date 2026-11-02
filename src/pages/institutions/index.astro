@@ -1,0 +1,147 @@
+---
+import { InstitutionDirectory } from "@/components/InstitutionDirectory";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Всички институции — Ясли Варна"
+  description="Всички ясли, детски градини и подготвителни групи във Варна."
+>
+  <section class="directory section-stack">
+    <h1>Всички институции</h1>
+    <InstitutionDirectory client:load />
+  </section>
+</BaseLayout>
+
+<style is:global>
+  .directory-groups {
+    display: grid;
+    gap: 28px;
+  }
+
+  .directory-group {
+    display: grid;
+    gap: 8px;
+    --tone: var(--color-section-nursery);
+  }
+
+  .directory-group[data-kind="kindergarten"] {
+    --tone: var(--color-section-kindergarten);
+  }
+
+  .directory-group[data-kind="preschool"] {
+    --tone: var(--color-section-preschool);
+  }
+
+  .directory-group h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0;
+    color: var(--color-text-strong);
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .directory-group .group-count {
+    background: var(--tone);
+    border-radius: 999px;
+    color: var(--color-text-on-accent);
+    font-family: var(--font-ui);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    transform: translateY(-4px);
+  }
+
+  .directory-list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 2px solid var(--tone);
+  }
+
+  .directory-list li {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    min-height: 44px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--color-border-card);
+    color: var(--color-text-strong);
+  }
+
+  .directory-link {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .directory-link:hover {
+    text-decoration: underline;
+  }
+
+  /* The link stretches over the whole row so the tap target is the row. */
+  .directory-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .directory-link:focus-visible {
+    outline: 2px solid var(--tone);
+    outline-offset: 3px;
+  }
+
+  .directory-tag {
+    border: 1px solid var(--tone);
+    border-radius: 999px;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 2px 10px;
+  }
+
+  .directory-status {
+    border: 2px solid var(--color-border-card);
+    border-radius: var(--radius-surface);
+    background: var(--color-bg-surface);
+    color: var(--color-text-muted);
+    padding: 16px 18px;
+  }
+
+  .directory-status--error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-color: var(--color-border-error);
+    background: var(--color-bg-error-soft);
+    color: var(--color-text-error);
+    font-weight: 500;
+  }
+
+  .directory-status--error button {
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-control);
+    background: var(--color-accent);
+    box-shadow: var(--shadow-hard-sm);
+    color: var(--color-text-on-accent);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 9px 16px;
+  }
+
+  .directory-status--error button:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+</style>

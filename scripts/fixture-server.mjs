@@ -13,6 +13,9 @@
  *
  *   FIXTURE_SCENARIO=S1 node scripts/fixture-server.mjs
  *
+ * Directory scenarios (/institutions/): B1 fails the first GET /api/institutions
+ * then recovers; B2 answers it after 4 s. Use them on /institutions/ only.
+ *
  * Search scenarios (S1–S9) are documented in
  * docs/artifacts/plans/archive/2026-08-02-dvorat-design/SCENARIOS.md;
  * institution-page scenarios (D1–D3, the by-source profiles) in
@@ -136,13 +139,24 @@ const RESULTS = {
   },
 };
 
+// Real manifest (kind, external_id, name) pairs so directory links resolve in
+// astro dev, in the API's plain-string name order so the page's re-sort is
+// visible. kindergarten/999999 is outside the manifest: the unlinked row.
 const INSTITUTIONS = [
-  { id: 101, external_id: "101", name: "ДЯ №4 „Пчелица“", kind: "nursery" },
-  { id: 201, external_id: "201", name: "ДГ №14 „Дружба“", kind: "kindergarten" },
-  { id: 301, external_id: "301", name: "ОУ „Захари Стоянов“ — ПГ", kind: "preschool" },
-].map((item) => ({
+  { external_id: "4", name: 'ДЯ № 4 "Приказен свят"', kind: "nursery", has_infant_group: false },
+  { external_id: "11", name: 'ДЯ № 13 "РУСАЛКА"', kind: "nursery", has_infant_group: false },
+  { external_id: "46", name: 'ДГ№13 "Мир"', kind: "kindergarten", has_infant_group: false },
+  { external_id: "55", name: 'ДГ№22 "Мечо Пух"', kind: "kindergarten", has_infant_group: false },
+  { external_id: "38", name: 'ДГ№5 "Слънчо"', kind: "kindergarten", has_infant_group: true },
+  { external_id: "42", name: 'ДГ№9 "Ален мак"', kind: "kindergarten", has_infant_group: false },
+  { external_id: "999999", name: 'ДГ№60 "Нова градина"', kind: "kindergarten", has_infant_group: false },
+  { external_id: "12", name: 'ОУ "Панайот Волов"', kind: "preschool", has_infant_group: false },
+  { external_id: "11", name: 'ОУ "Отец Паисий"', kind: "preschool", has_infant_group: false },
+].map((item, index) => ({
+  id: 1000 + index,
   ...item,
-  source_url: `https://dg.uslugi.io/institution/${item.id}`,
+  location: null,
+  source_url: `https://dg.uslugi.io/institution/${item.kind}/${item.external_id}`,
   last_seen_at: lastSeenAt(SCENARIO === "S6" ? STALE_DAYS : FRESH_DAYS),
 }));
 
@@ -280,6 +294,16 @@ function shouldFailMatch() {
   return matchCallCount === 1;
 }
 
+let institutionsCallCount = 0;
+
+function shouldFailInstitutions() {
+  // B1 fails the first list request only, so the directory's retry has
+  // something to recover to.
+  if (SCENARIO !== "B1") return false;
+  institutionsCallCount += 1;
+  return institutionsCallCount === 1;
+}
+
 // --- server -----------------------------------------------------------------
 
 const CORS = {
@@ -318,6 +342,14 @@ const server = createServer((req, res) => {
   }
 
   if (url.pathname === "/api/institutions") {
+    if (shouldFailInstitutions()) {
+      send(res, 500, { error: "internal_error" });
+      return;
+    }
+    if (SCENARIO === "B2") {
+      setTimeout(() => send(res, 200, INSTITUTIONS), 4000);
+      return;
+    }
     send(res, 200, INSTITUTIONS);
     return;
   }
@@ -406,6 +438,8 @@ server.listen(PORT, () => {
   if (SCENARIO === "S7") console.log("  -> /api/match fails once, then recovers: retry control shown");
   if (SCENARIO === "S8") console.log("  -> /api/match returns address_not_found: retry button shown");
   if (SCENARIO === "S9") console.log("  -> /api/streets fails once, then recovers");
+  if (SCENARIO === "B1") console.log("  -> /api/institutions fails once, then recovers: directory retry shown");
+  if (SCENARIO === "B2") console.log("  -> /api/institutions answers after 4 s: directory loading state");
   if (SCENARIO === "D2") console.log(`  -> by-source profiles are ${STALE_DAYS} days old: stale banner expected on institution pages`);
   if (SCENARIO === "D3") console.log("  -> /api/institutions/by-source returns 500: error state with retry");
 });
