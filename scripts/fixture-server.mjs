@@ -13,8 +13,9 @@
  *
  *   FIXTURE_SCENARIO=S1 node scripts/fixture-server.mjs
  *
- * Search scenarios (S1–S9) are documented in
+ * Search scenarios (S1–S10) are documented in
  * docs/artifacts/plans/archive/2026-08-02-dvorat-design/SCENARIOS.md;
+ * S10 adds two streets that start with "Преслав" (ranking demo);
  * institution-page scenarios (D1–D3, the by-source profiles) in
  * docs/artifacts/plans/institution-detail-route/SCENARIOS.md
  */
@@ -56,6 +57,17 @@ const ADDRESSES = [
   { id: 5501, street_id: 4, number_int: 118, number_suffix: null, entrance: null },
   { id: 3302, street_id: 5, number_int: 12, number_suffix: null, entrance: "А" },
   { id: 8802, street_id: 6, number_int: 12, number_suffix: null, entrance: null },
+];
+
+// S10 only: longer streets that start with "Преслав", to show the exact match ranks first.
+const PRESLAV_PREFIX_STREETS = [
+  { id: 7, city: "ГР.ВАРНА", raw_name: "ГР.ВАРНА УЛ.КОНСТАНТИН ПРЕСЛАВСКИ", street_part: "КОНСТАНТИН ПРЕСЛАВСКИ", type_marker: "УЛ." },
+  { id: 8, city: "ГР.ВАРНА", raw_name: "ГР.ВАРНА УЛ.НАУМ ПРЕСЛАВСКИ", street_part: "НАУМ ПРЕСЛАВСКИ", type_marker: "УЛ." },
+];
+
+const PRESLAV_PREFIX_ADDRESSES = [
+  { id: 9001, street_id: 7, number_int: 12, number_suffix: null, entrance: null },
+  { id: 9002, street_id: 8, number_int: 12, number_suffix: null, entrance: null },
 ];
 
 const KINDS = ["nursery", "kindergarten", "preschool"];
@@ -308,12 +320,12 @@ const server = createServer((req, res) => {
       send(res, 500, { error: "internal_error" });
       return;
     }
-    send(res, 200, STREETS);
+    send(res, 200, SCENARIO === "S10" ? [...STREETS, ...PRESLAV_PREFIX_STREETS] : STREETS);
     return;
   }
 
   if (url.pathname === "/api/addresses") {
-    send(res, 200, ADDRESSES);
+    send(res, 200, SCENARIO === "S10" ? [...ADDRESSES, ...PRESLAV_PREFIX_ADDRESSES] : ADDRESSES);
     return;
   }
 
@@ -406,6 +418,7 @@ server.listen(PORT, () => {
   if (SCENARIO === "S7") console.log("  -> /api/match fails once, then recovers: retry control shown");
   if (SCENARIO === "S8") console.log("  -> /api/match returns address_not_found: retry button shown");
   if (SCENARIO === "S9") console.log("  -> /api/streets fails once, then recovers");
+  if (SCENARIO === "S10") console.log("  -> two extra streets start with Преслав: the exact match ranks first");
   if (SCENARIO === "D2") console.log(`  -> by-source profiles are ${STALE_DAYS} days old: stale banner expected on institution pages`);
   if (SCENARIO === "D3") console.log("  -> /api/institutions/by-source returns 500: error state with retry");
 });
