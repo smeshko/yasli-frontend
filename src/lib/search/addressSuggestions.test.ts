@@ -172,9 +172,10 @@ describe("searchExactAddressSuggestions", () => {
 });
 
 describe("normalizeSearchText", () => {
-  it("splits letters from digits in both directions", () => {
+  it("splits a street name from its number but keeps a number's suffix", () => {
     expect(normalizeSearchText("преслав12")).toBe("ПРЕСЛАВ 12");
-    expect(normalizeSearchText("002А")).toBe("002 А");
+    expect(normalizeSearchText("преслав2а")).toBe("ПРЕСЛАВ 2А");
+    expect(normalizeSearchText("002А")).toBe("002А");
   });
 });
 
@@ -205,5 +206,20 @@ describe("letter/digit joins in search", () => {
 
     expect(searchExactAddressSuggestions(suffixed, "2а").map((s) => s.addressId)).toContain(801);
     expect(searchExactAddressSuggestions(suffixed, "002А").map((s) => s.addressId)).toContain(801);
+  });
+
+  it("ranks a suffixed number first among unsuffixed neighbours", () => {
+    const neighbours = buildExactAddressSuggestions(streets, [
+      { id: 901, street_id: 15, number_int: 2, number_suffix: null, entrance: null },
+      { id: 902, street_id: 15, number_int: 2, number_suffix: "А", entrance: null },
+      { id: 903, street_id: 15, number_int: 2, number_suffix: "В", entrance: null },
+      { id: 904, street_id: 10, number_int: 2, number_suffix: null, entrance: null },
+      { id: 905, street_id: 12, number_int: 20, number_suffix: null, entrance: null },
+      { id: 906, street_id: 13, number_int: 200, number_suffix: null, entrance: null },
+    ]);
+
+    expect(searchExactAddressSuggestions(neighbours, "2в").map((s) => s.addressId)).toEqual([903]);
+    expect(searchExactAddressSuggestions(neighbours, "002В")[0]?.addressId).toBe(903);
+    expect(searchExactAddressSuggestions(neighbours, "преслав 2в")[0]?.addressId).toBe(903);
   });
 });
