@@ -1,4 +1,5 @@
 import type { InstitutionListItem, MatchAddressContext, MatchResult } from "@/lib/api/client";
+import { institutionNameCollator } from "@/lib/domain/institutionName";
 import type { ReceptionKind } from "@/lib/domain/kinds";
 import { receptionKindOrder } from "@/lib/domain/kinds";
 import { isSnapshotStale } from "@/lib/domain/freshness";
@@ -26,7 +27,7 @@ export function groupMatchResults(results: MatchResult[]): GroupedResults {
   }
 
   for (const kind of receptionKindOrder) {
-    grouped[kind].sort((first, second) => first.name.localeCompare(second.name, "bg"));
+    grouped[kind].sort((first, second) => institutionNameCollator.compare(first.name, second.name));
   }
 
   return grouped;
