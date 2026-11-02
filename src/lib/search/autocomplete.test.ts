@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "./autocomplete";
+import { isFocusLeaving, isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "./autocomplete";
 
 describe("isSuggestionListShown", () => {
   it("is true when reference data is ready, the list is open and there are suggestions", () => {
@@ -35,5 +35,27 @@ describe("preventsNativeKeyDefault", () => {
 
   it("lets other keys through", () => {
     expect(preventsNativeKeyDefault("a", true)).toBe(false);
+  });
+});
+
+describe("isFocusLeaving", () => {
+  const node = {} as Node;
+  const containing = { contains: () => true };
+  const notContaining = { contains: () => false };
+
+  it("leaves when focus goes to nothing", () => {
+    expect(isFocusLeaving(containing, null)).toBe(true);
+  });
+
+  it("leaves when there is no container", () => {
+    expect(isFocusLeaving(null, node)).toBe(true);
+  });
+
+  it("leaves when the container does not hold the next node", () => {
+    expect(isFocusLeaving(notContaining, node)).toBe(true);
+  });
+
+  it("stays when the container holds the next node", () => {
+    expect(isFocusLeaving(containing, node)).toBe(false);
   });
 });

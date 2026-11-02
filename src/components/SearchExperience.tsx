@@ -11,7 +11,7 @@ import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
 } from "@/lib/search/addressSuggestions";
-import { isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "@/lib/search/autocomplete";
+import { isFocusLeaving, isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "@/lib/search/autocomplete";
 import { clearReferenceDataCache, loadReferenceData } from "@/lib/search/referenceData";
 import {
   groupMatchResults,
@@ -147,7 +147,8 @@ export function SearchExperience() {
   /* Tapping anywhere off the field dismisses the list; focusing the input
      brings it back (onFocus). pointerdown rather than click so the list goes
      away on press, and capture so it still fires when a handler deeper in the
-     page stops propagation. */
+     page stops propagation. The onBlur on the anchor closes it for keyboard
+     focus moves. */
   useEffect(() => {
     if (!isAutocompleteOpen) {
       return;
@@ -326,7 +327,15 @@ export function SearchExperience() {
           <label className="sr-only" htmlFor="address-search">
             Адрес във Варна
           </label>
-          <div className="search-field-anchor" ref={anchorRef}>
+          <div
+            className="search-field-anchor"
+            ref={anchorRef}
+            onBlur={(event) => {
+              if (isFocusLeaving(anchorRef.current, event.relatedTarget)) {
+                setIsAutocompleteOpen(false);
+              }
+            }}
+          >
             <div className="search-field">
               <SearchIcon />
               <input
@@ -346,7 +355,12 @@ export function SearchExperience() {
             </div>
 
             {showSuggestions ? (
-              <ul className="suggestion-panel" id="address-suggestions" role="listbox">
+              <ul
+                className="suggestion-panel"
+                id="address-suggestions"
+                role="listbox"
+                onMouseDown={(event) => event.preventDefault()}
+              >
                 {visibleSuggestions.map((suggestion, index) => (
                   <li
                     key={suggestion.id}
@@ -372,7 +386,9 @@ export function SearchExperience() {
             ) : null}
 
             {showNoMatches ? (
-              <div className="suggestion-panel status-panel">Няма точен адрес за това търсене.</div>
+              <div className="suggestion-panel status-panel" onMouseDown={(event) => event.preventDefault()}>
+                Няма точен адрес за това търсене.
+              </div>
             ) : null}
           </div>
 
