@@ -4,6 +4,7 @@ import type { Address, Street } from "@/lib/api/client";
 
 import {
   buildExactAddressSuggestions,
+  normalizeSearchText,
   searchExactAddressSuggestions,
 } from "./addressSuggestions";
 
@@ -34,6 +35,13 @@ const streets: Street[] = [
     city: "ГР.ВАРНА",
     raw_name: "ГР.ВАРНА УЛ.Н.Й.ВАПЦАРОВ",
     street_part: "Н.Й.ВАПЦАРОВ",
+    type_marker: "УЛ.",
+  },
+  {
+    id: 15,
+    city: "ГР.ВАРНА",
+    raw_name: "ГР.ВАРНА УЛ.ПРЕСЛАВ",
+    street_part: "ПРЕСЛАВ",
     type_marker: "УЛ.",
   },
   {
@@ -160,5 +168,42 @@ describe("searchExactAddressSuggestions", () => {
 
     expect(searchExactAddressSuggestions(suggestions, "никола вапцаров")[0]?.addressId).toBe(601);
     expect(searchExactAddressSuggestions(suggestions, "васил коларов")[0]?.addressId).toBe(602);
+  });
+});
+
+describe("normalizeSearchText", () => {
+  it("splits letters from digits in both directions", () => {
+    expect(normalizeSearchText("преслав12")).toBe("ПРЕСЛАВ 12");
+    expect(normalizeSearchText("002А")).toBe("002 А");
+  });
+});
+
+describe("letter/digit joins in search", () => {
+  const preslav = buildExactAddressSuggestions(streets, [
+    { id: 701, street_id: 15, number_int: 12, number_suffix: null, entrance: null },
+  ]);
+
+  it("matches a street name joined to its number", () => {
+    expect(searchExactAddressSuggestions(preslav, "преслав12").map((s) => s.addressId)).toContain(
+      701,
+    );
+  });
+
+  it("matches a pasted two-line address once the line break is stripped", () => {
+    const stripped = "преслав\n12".replace(/[\r\n]/g, "");
+
+    expect(searchExactAddressSuggestions(preslav, stripped).map((s) => s.addressId)).toContain(701);
+    expect(searchExactAddressSuggestions(preslav, "преслав\n12").map((s) => s.addressId)).toContain(
+      701,
+    );
+  });
+
+  it("matches suffixed numbers with and without padding", () => {
+    const suffixed = buildExactAddressSuggestions(streets, [
+      { id: 801, street_id: 10, number_int: 2, number_suffix: "А", entrance: null },
+    ]);
+
+    expect(searchExactAddressSuggestions(suffixed, "2а").map((s) => s.addressId)).toContain(801);
+    expect(searchExactAddressSuggestions(suffixed, "002А").map((s) => s.addressId)).toContain(801);
   });
 });
