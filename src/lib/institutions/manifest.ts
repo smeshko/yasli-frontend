@@ -13,9 +13,8 @@ export type ManifestLocation = InstitutionLocation;
  * institution pages: `getStaticPaths` reads it, so a page exists exactly for
  * the rows in that file.
  *
- * `location` is `null` for the infant-group nursery rows, whose building is
- * keyed only under their kindergarten twin — those pages render no map and no
- * link-outs.
+ * `location` is `null` for a row the backend has no coordinates for — such a
+ * page renders no map and no link-outs.
  */
 export interface ManifestEntry {
   kind: ReceptionKind;
