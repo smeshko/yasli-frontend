@@ -17,9 +17,10 @@ Milestone: 4a808348-f6ad-4507-b30b-e2cc6b276c55
 ## Overview
 
 A browsable directory: address search can only surface institutions that
-publish a catchment, and at least one school — ОУ "Захари Стоянов" — accepts
-preschool children while publishing none, so it is currently invisible to every
-possible query. A nav-level directory fixes that and answers PRD job #3.
+publish a catchment, so an institution that publishes none is invisible to every
+possible query. A nav-level directory lists every institution the API returns
+and answers PRD job #3. ОУ "Захари Стоянов" publishes no catchment and is not
+in the API yet; it is tracked in YAS-41, not here.
 
 This epic was originally scoped with a second half — free places, a dated
 per-cohort availability block on the detail page. That is deferred; see the
@@ -52,13 +53,13 @@ note above and backend epic 02 for the measurements.
 
 **Linear**: YAS-14 (https://linear.app/ivo-tsonev/issue/YAS-14)
 
-**Goal**: Parents can reach every institution without searching an address, including the ones with no published catchment.
+**Goal**: Parents can reach every institution the API lists without searching an address, including the ones with no published catchment (ОУ "Захари Стоянов" follows with YAS-41).
 
 ### What to build
 
-- `src/pages/institutions/index.astro`: every institution grouped by kind in reception order (nursery → kindergarten → preschool), alphabetical within a group, each row linking to its detail page and showing the infant-group marker where it applies.
-- Restore the "Всички институции" item to `navItems` in `BaseLayout.astro` (s12 removed it), keeping the existing active-state and mobile-toggle behaviour.
-- Data comes from `GET /api/institutions`, which already returns a deterministic reception-then-name ordering — reuse it rather than re-sorting client-side.
+- `src/pages/institutions/index.astro`: every institution grouped by kind in reception order (nursery → kindergarten → preschool), sorted within a group, each row linking to its detail page and showing the infant-group marker where it applies.
+- Restore the "Всички институции" item to the nav (items live in `src/lib/navigation.ts`), keeping the existing active-state and mobile-toggle behaviour. The nav is unhidden; "Правила за прием" is dropped from it until its copy is ready (`/pravila` stays, unlinked).
+- Data comes from `GET /api/institutions`, as a client-side island; each group is sorted with `institutionNameCollator` (YAS-36), since the API's name sort puts ДГ№22 before ДГ№9.
 - The page must work as an entry point: no dependency on prior search state.
 - Reuse the existing kind labels and badges from `lib/domain/kinds.ts` rather than restating Bulgarian copy.
 
@@ -115,7 +116,7 @@ Screenshots of an institution with non-zero places, one with all zeros, and one 
 ## Epic-level acceptance criteria
 
 - [ ] Phase 2.1 merged and its acceptance criteria met (2.2 is deferred, not pending)
-- [ ] Every institution is reachable without knowing an address
+- [ ] Every institution the API lists is reachable without knowing an address
 - [ ] Status row in [EPICS.md](./EPICS.md) updated to `Done`
 
 ~~Availability numbers are never shown without the date they were published~~ —
