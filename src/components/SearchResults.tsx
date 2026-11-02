@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import type { MatchAddressContext } from "@/lib/api/client";
 import { STALE_BANNER_TEXT } from "@/lib/domain/freshness";
-import { labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
+import { INFANT_GROUP_LABEL, labelForReceptionKind, receptionKindOrder, type ReceptionKind } from "@/lib/domain/kinds";
 import { normalizeExternalUrl } from "@/lib/domain/website";
 import { buildInstitutionSlug, institutionPath } from "@/lib/institutions/manifest";
 import {
@@ -183,7 +183,7 @@ function ResultGroup({
         <div className="cards">
           {institutions.map((institution, index) => {
             const displayName = institution.offering === "infant_group"
-              ? `${institution.name} (яслена група)`
+              ? `${institution.name} (${INFANT_GROUP_LABEL})`
               : institution.name;
             const slug = buildInstitutionSlug(
               institution.institution_kind,
