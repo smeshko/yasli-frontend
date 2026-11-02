@@ -257,14 +257,14 @@ describe("whole-word ranking", () => {
     },
   );
 
-  it("ranks a whole-number match above a longer number", () => {
+  it("ranks a whole-number match above a longer number that sorts earlier", () => {
     const numbers = buildExactAddressSuggestions(streets, [
-      { id: 1101, street_id: 15, number_int: 120, number_suffix: null, entrance: null },
-      { id: 1102, street_id: 15, number_int: 12, number_suffix: null, entrance: null },
+      { id: 1201, street_id: 10, number_int: 120, number_suffix: null, entrance: null },
+      { id: 1202, street_id: 15, number_int: 12, number_suffix: null, entrance: null },
     ]);
 
-    expect(searchExactAddressSuggestions(numbers, "преслав 12").map((s) => s.addressId)).toEqual([
-      1102, 1101,
+    expect(searchExactAddressSuggestions(numbers, "12").map((s) => s.addressId)).toEqual([
+      1202, 1201,
     ]);
   });
 });
