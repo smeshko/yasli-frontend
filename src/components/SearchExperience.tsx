@@ -410,6 +410,11 @@ export function SearchExperience() {
         staleResults={staleResults}
         onFilterChange={setFilter}
         onRetryStale={() => void retryReferences()}
+        onRetryMatch={() => {
+          if (matchState.selectedAddress) {
+            void selectSuggestion(matchState.selectedAddress);
+          }
+        }}
       />
     </div>
   );

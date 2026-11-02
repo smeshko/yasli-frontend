@@ -270,6 +270,16 @@ function shouldFailStreets() {
   return streetsCallCount === 1;
 }
 
+let matchCallCount = 0;
+
+function shouldFailMatch() {
+  // S7 fails the first match only, so the "Опитайте отново" retry has
+  // something to recover to.
+  if (SCENARIO !== "S7") return false;
+  matchCallCount += 1;
+  return matchCallCount === 1;
+}
+
 // --- server -----------------------------------------------------------------
 
 const CORS = {
@@ -353,7 +363,7 @@ const server = createServer((req, res) => {
   }
 
   if (url.pathname === "/api/match") {
-    if (SCENARIO === "S7") {
+    if (shouldFailMatch()) {
       send(res, 500, { error: "internal_error" });
       return;
     }
@@ -393,7 +403,7 @@ server.listen(PORT, () => {
   console.log(`  scenario:     ${SCENARIO}`);
   console.log(`  last_seen_at: ${lastSeenAt(freshness)} (${freshness} days ago)`);
   if (SCENARIO === "S6") console.log("  -> stale banner expected (threshold is 14 days)");
-  if (SCENARIO === "S7") console.log("  -> /api/match returns 500: error message, no retry control");
+  if (SCENARIO === "S7") console.log("  -> /api/match fails once, then recovers: retry control shown");
   if (SCENARIO === "S8") console.log("  -> /api/match returns address_not_found: retry button shown");
   if (SCENARIO === "S9") console.log("  -> /api/streets fails once, then recovers");
   if (SCENARIO === "D2") console.log(`  -> by-source profiles are ${STALE_DAYS} days old: stale banner expected on institution pages`);

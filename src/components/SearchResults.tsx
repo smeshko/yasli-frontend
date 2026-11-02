@@ -41,6 +41,7 @@ interface SearchResultsProps {
   staleResults: boolean;
   onFilterChange: (filter: ResultFilter) => void;
   onRetryStale: () => void;
+  onRetryMatch: () => void;
 }
 
 export function SearchResults({
@@ -50,6 +51,7 @@ export function SearchResults({
   staleResults,
   onFilterChange,
   onRetryStale,
+  onRetryMatch,
 }: SearchResultsProps) {
   if (matchState.status === "idle") {
     return null;
@@ -63,7 +65,14 @@ export function SearchResults({
       {matchState.status === "loading" ? <div className="results-status">Търсим институции...</div> : null}
 
       {matchState.status === "error" ? (
-        <div className="results-status error">{matchState.message}</div>
+        <div className="results-status error">
+          <span>{matchState.message}</span>
+          {matchState.selectedAddress ? (
+            <button type="button" onClick={onRetryMatch}>
+              Опитайте отново
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {matchState.status === "stale" ? (
