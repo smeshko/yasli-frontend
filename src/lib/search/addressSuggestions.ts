@@ -196,18 +196,19 @@ function scoreSuggestion(
   normalizedQuery: string,
   terms: string[],
 ): number {
+  const words = suggestion.searchText.split(" ");
+  const wholeWordTerms = terms.filter((term) => words.includes(term)).length;
+
   if (suggestion.searchText.startsWith(normalizedQuery)) {
-    return 100 + normalizedQuery.length;
+    return 100 + normalizedQuery.length + wholeWordTerms;
   }
 
-  const words = suggestion.searchText.split(" ");
-
   if (terms.every((term) => words.some((word) => word.startsWith(term)))) {
-    return 75 + terms.join("").length;
+    return 75 + terms.join("").length + wholeWordTerms;
   }
 
   if (terms.every((term) => suggestion.searchText.includes(term))) {
-    return 50 + terms.join("").length;
+    return 50 + terms.join("").length + wholeWordTerms;
   }
 
   return 0;

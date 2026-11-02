@@ -246,3 +246,48 @@ describe("isSearchableQuery", () => {
     expect(isSearchableQuery(query)).toBe(true);
   });
 });
+
+describe("whole-word ranking", () => {
+  const withPrefixStreets: Street[] = [
+    ...streets,
+    {
+      id: 16,
+      city: "ГР.ВАРНА",
+      raw_name: "ГР.ВАРНА УЛ.КОНСТАНТИН ПРЕСЛАВСКИ",
+      street_part: "КОНСТАНТИН ПРЕСЛАВСКИ",
+      type_marker: "УЛ.",
+    },
+    {
+      id: 17,
+      city: "ГР.ВАРНА",
+      raw_name: "ГР.ВАРНА УЛ.НАУМ ПРЕСЛАВСКИ",
+      street_part: "НАУМ ПРЕСЛАВСКИ",
+      type_marker: "УЛ.",
+    },
+  ];
+  const suggestions = buildExactAddressSuggestions(withPrefixStreets, [
+    { id: 1001, street_id: 15, number_int: 12, number_suffix: null, entrance: null },
+    { id: 1002, street_id: 16, number_int: 12, number_suffix: null, entrance: null },
+    { id: 1003, street_id: 17, number_int: 12, number_suffix: null, entrance: null },
+  ]);
+
+  it.each(["преслав 12", "ПРЕСЛАВ 12", "preslav 12", "преслав 012", "ул.   преслав,12"])(
+    "ranks an exact street name above longer streets it prefixes: %s",
+    (query) => {
+      expect(searchExactAddressSuggestions(suggestions, query).map((s) => s.addressId)).toEqual([
+        1001, 1002, 1003,
+      ]);
+    },
+  );
+
+  it("ranks a whole-number match above a longer number that sorts earlier", () => {
+    const numbers = buildExactAddressSuggestions(streets, [
+      { id: 1201, street_id: 10, number_int: 120, number_suffix: null, entrance: null },
+      { id: 1202, street_id: 15, number_int: 12, number_suffix: null, entrance: null },
+    ]);
+
+    expect(searchExactAddressSuggestions(numbers, "12").map((s) => s.addressId)).toEqual([
+      1202, 1201,
+    ]);
+  });
+});
