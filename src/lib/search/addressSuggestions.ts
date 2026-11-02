@@ -161,6 +161,7 @@ export function normalizeSearchText(value: string): string {
     .normalize("NFC")
     .toLocaleUpperCase("bg-BG")
     .replace(/[^\p{Script=Cyrillic}\d]+/gu, " ")
+    .replace(/(?<=\p{Script=Cyrillic})(?=\d)/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
