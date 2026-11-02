@@ -22,3 +22,8 @@ export function preventsNativeKeyDefault(key: string, isOpen: boolean): boolean 
 export function isFocusLeaving(container: { contains(other: Node | null): boolean } | null, next: Node | null): boolean {
   return next === null || container === null || !container.contains(next);
 }
+
+// Only a still-stale match resets, and only once the reload worked; an edit or a failed reload leaves it be.
+export function matchStateAfterStaleReload<T extends { status: string }>(current: T, reloaded: boolean, idle: T): T {
+  return reloaded && current.status === "stale" ? idle : current;
+}

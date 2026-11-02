@@ -12,7 +12,7 @@ import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
 } from "@/lib/search/addressSuggestions";
-import { isFocusLeaving, isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "@/lib/search/autocomplete";
+import { isFocusLeaving, isSuggestionListShown, matchStateAfterStaleReload, preventsNativeKeyDefault, type ReferenceStatus } from "@/lib/search/autocomplete";
 import { clearReferenceDataCache, loadReferenceData } from "@/lib/search/referenceData";
 import {
   groupMatchResults,
@@ -69,6 +69,9 @@ export function SearchExperience() {
      which is the one moment that is genuinely a fresh start. */
   const [hasSearched, setHasSearched] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  // Read after an await, where the closure's matchState may predate an edit.
+  const matchStateRef = useRef(matchState);
 
   const visibleSuggestions = useMemo(
     () => searchExactAddressSuggestions(suggestions, query),
@@ -124,6 +127,10 @@ export function SearchExperience() {
   }, [hasHydrated]);
 
   useEffect(() => {
+    matchStateRef.current = matchState;
+  }, [matchState]);
+
+  useEffect(() => {
     if (matchState.status !== "idle") {
       setHasSearched(true);
     }
@@ -171,21 +178,33 @@ export function SearchExperience() {
     return () => document.removeEventListener("pointerdown", handlePointerDown, true);
   }, [isAutocompleteOpen]);
 
-  async function loadReferences() {
+  async function loadReferences(): Promise<boolean> {
     setReferenceStatus("loading");
 
     try {
       const data = await loadReferenceData();
       setSuggestions(data.suggestions);
       setReferenceStatus("ready");
+      return true;
     } catch {
       setReferenceStatus("error");
+      return false;
     }
   }
 
+  // Both retry buttons land here: a stale match can be behind the reference-data error too.
   async function retryReferences() {
     clearReferenceDataCache();
-    await loadReferences();
+    const reloaded = await loadReferences();
+    const current = matchStateRef.current;
+    const next = matchStateAfterStaleReload(current, reloaded, { status: "idle", address: null, grouped: null, selectedAddress: null });
+
+    if (next !== current) {
+      setMatchState(next);
+      // The button unmounts with the banner, and the list closes while focus is outside the field.
+      setIsAutocompleteOpen(true);
+      inputRef.current?.focus();
+    }
   }
 
   async function loadFreshness() {
@@ -343,6 +362,7 @@ export function SearchExperience() {
               <SearchIcon />
               <input
                 id="address-search"
+                ref={inputRef}
                 type="search"
                 autoComplete="off"
                 value={query}

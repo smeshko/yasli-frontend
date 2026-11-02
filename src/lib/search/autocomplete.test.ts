@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isFocusLeaving, isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "./autocomplete";
+import { isFocusLeaving, isSuggestionListShown, matchStateAfterStaleReload, preventsNativeKeyDefault, type ReferenceStatus } from "./autocomplete";
 
 describe("isSuggestionListShown", () => {
   it("is true when reference data is ready, the list is open and there are suggestions", () => {
@@ -57,5 +57,23 @@ describe("isFocusLeaving", () => {
 
   it("stays when the container holds the next node", () => {
     expect(isFocusLeaving(containing, node)).toBe(false);
+  });
+});
+
+describe("matchStateAfterStaleReload", () => {
+  const idle = { status: "idle" };
+
+  it("resets a stale match to idle when the reload succeeded", () => {
+    expect(matchStateAfterStaleReload({ status: "stale" }, true, idle)).toBe(idle);
+  });
+
+  it("keeps the stale state when the reload failed", () => {
+    const stale = { status: "stale" };
+    expect(matchStateAfterStaleReload(stale, false, idle)).toBe(stale);
+  });
+
+  it.each(["idle", "loading", "success", "error"])("leaves a non-stale state alone (%s, edited during the reload)", (status) => {
+    const current = { status };
+    expect(matchStateAfterStaleReload(current, true, { status: "idle" })).toBe(current);
   });
 });
