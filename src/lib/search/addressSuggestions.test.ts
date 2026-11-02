@@ -4,6 +4,8 @@ import type { Address, Street } from "@/lib/api/client";
 
 import {
   buildExactAddressSuggestions,
+  formatLocality,
+  formatStreetLabel,
   isSearchableQuery,
   normalizeSearchText,
   searchExactAddressSuggestions,
@@ -69,6 +71,7 @@ describe("buildExactAddressSuggestions", () => {
     expect(suggestions).toHaveLength(1);
     expect(suggestions[0]?.label).toContain("002А вх.01");
     expect(suggestions[0]?.addressId).toBe(101);
+    expect(suggestions[0]?.context).toBe("гр. Варна");
   });
 
   it("keeps distinct suffix and entrance rows separate", () => {
@@ -100,6 +103,45 @@ describe("buildExactAddressSuggestions", () => {
 
     expect(suggestions.map((suggestion) => suggestion.addressId)).toEqual([201, 202, 203]);
     expect(new Set(suggestions.map((suggestion) => suggestion.label)).size).toBe(3);
+  });
+});
+
+describe("formatLocality", () => {
+  it.each([
+    ["ГР.ВАРНА", "гр. Варна"],
+    ["С.КАМЕНАР", "с. Каменар"],
+    ["С. КАМЕНАР", "с. Каменар"],
+    ["ВАРНА", "Варна"],
+  ])("formats %s as %s", (input, expected) => {
+    expect(formatLocality(input)).toBe(expected);
+  });
+});
+
+describe("formatStreetLabel", () => {
+  const base = { id: 1, city: "ГР.ВАРНА", street_part: "", type_marker: null };
+
+  it("splits the marker off a raw-name label", () => {
+    expect(formatStreetLabel({ ...base, raw_name: "ГР.ВАРНА КК ЧАЙКА 033" })).toBe(
+      "гр. Варна Кк Чайка 033",
+    );
+  });
+
+  it("lowercases the village marker of a raw-name label", () => {
+    expect(
+      formatStreetLabel({ ...base, raw_name: "С.ЗВЕЗДИЦА МЕСТН.ЕКШЕЛМА (ПОД СЕЛОТО) 031" }).startsWith(
+        "с. Звездица ",
+      ),
+    ).toBe(true);
+  });
+
+  it("formats the raw-name-only fixture street", () => {
+    const street = streets.find((s) => s.id === 14) as Street;
+
+    expect(formatStreetLabel(street)).toBe("с. Тополи Бараки Кдд В.коларов");
+  });
+
+  it("keeps a typed street as marker plus street part", () => {
+    expect(formatStreetLabel(streets[0] as Street)).toBe("бул. Генерал Колев");
   });
 });
 

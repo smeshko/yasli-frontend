@@ -184,11 +184,24 @@ export function formatStreetLabel(street: Street): string {
     return streetPart;
   }
 
-  return titleCaseBulgarian(street.raw_name);
+  return formatSettlementName(street.raw_name);
 }
 
 export function formatLocality(value: string): string {
-  return titleCaseBulgarian(value).replace(/^Гр\./, "гр.").replace(/^С\./, "с.");
+  return formatSettlementName(value);
+}
+
+function formatSettlementName(value: string): string {
+  const match = /^(ГР|С)\.\s*/iu.exec(value.trim());
+
+  if (!match) {
+    return titleCaseBulgarian(value);
+  }
+
+  const marker = match[0].trim().toLocaleLowerCase("bg-BG");
+  const rest = value.trim().slice(match[0].length);
+
+  return rest ? `${marker} ${titleCaseBulgarian(rest)}` : marker;
 }
 
 function scoreSuggestion(
