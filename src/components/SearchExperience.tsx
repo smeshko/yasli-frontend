@@ -69,6 +69,8 @@ export function SearchExperience() {
   const [hasSearched, setHasSearched] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Read after an await, where the closure's matchState may predate an edit.
+  const matchStateRef = useRef(matchState);
 
   const visibleSuggestions = useMemo(
     () => searchExactAddressSuggestions(suggestions, query),
@@ -120,6 +122,10 @@ export function SearchExperience() {
 
     delete document.documentElement.dataset.restoringResults;
   }, [hasHydrated]);
+
+  useEffect(() => {
+    matchStateRef.current = matchState;
+  }, [matchState]);
 
   useEffect(() => {
     if (matchState.status !== "idle") {
@@ -191,11 +197,11 @@ export function SearchExperience() {
   async function reloadStaleAddresses() {
     clearReferenceDataCache();
     const reloaded = await loadReferences();
-    setMatchState((current) =>
-      matchStateAfterStaleReload(current, reloaded, { status: "idle", address: null, grouped: null, selectedAddress: null }),
-    );
+    const current = matchStateRef.current;
+    const next = matchStateAfterStaleReload(current, reloaded, { status: "idle", address: null, grouped: null, selectedAddress: null });
 
-    if (reloaded) {
+    if (next !== current) {
+      setMatchState(next);
       // The button unmounts with the banner, and the list closes while focus is outside the field.
       setIsAutocompleteOpen(true);
       inputRef.current?.focus();
