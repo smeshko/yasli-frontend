@@ -6,8 +6,7 @@
 const INSTITUTION_NUMBER = /№\s*(\d+)/u;
 
 /* Names carry their № number inline, so a plain string compare puts №9 after
-   №22. Result cards and the directory (YAS-14) share this collator to order
-   numbers as numbers. */
+   №22. This collator orders the numbers inside names as numbers. */
 export const institutionNameCollator = new Intl.Collator("bg", { numeric: true });
 
 export function parseInstitutionNumber(name: string): string | null {
