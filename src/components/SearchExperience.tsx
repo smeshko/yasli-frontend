@@ -11,7 +11,7 @@ import {
   searchExactAddressSuggestions,
   type ExactAddressSuggestion,
 } from "@/lib/search/addressSuggestions";
-import { isFocusLeaving, isSuggestionListShown, preventsNativeKeyDefault, type ReferenceStatus } from "@/lib/search/autocomplete";
+import { isFocusLeaving, isSuggestionListShown, matchStateAfterStaleReload, preventsNativeKeyDefault, type ReferenceStatus } from "@/lib/search/autocomplete";
 import { clearReferenceDataCache, loadReferenceData } from "@/lib/search/referenceData";
 import {
   groupMatchResults,
@@ -68,6 +68,7 @@ export function SearchExperience() {
      which is the one moment that is genuinely a fresh start. */
   const [hasSearched, setHasSearched] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const visibleSuggestions = useMemo(
     () => searchExactAddressSuggestions(suggestions, query),
@@ -168,21 +169,37 @@ export function SearchExperience() {
     return () => document.removeEventListener("pointerdown", handlePointerDown, true);
   }, [isAutocompleteOpen]);
 
-  async function loadReferences() {
+  async function loadReferences(): Promise<boolean> {
     setReferenceStatus("loading");
 
     try {
       const data = await loadReferenceData();
       setSuggestions(data.suggestions);
       setReferenceStatus("ready");
+      return true;
     } catch {
       setReferenceStatus("error");
+      return false;
     }
   }
 
   async function retryReferences() {
     clearReferenceDataCache();
     await loadReferences();
+  }
+
+  async function reloadStaleAddresses() {
+    clearReferenceDataCache();
+    const reloaded = await loadReferences();
+    setMatchState((current) =>
+      matchStateAfterStaleReload(current, reloaded, { status: "idle", address: null, grouped: null, selectedAddress: null }),
+    );
+
+    if (reloaded) {
+      // The button unmounts with the banner, and the list closes while focus is outside the field.
+      setIsAutocompleteOpen(true);
+      inputRef.current?.focus();
+    }
   }
 
   async function loadFreshness() {
@@ -340,6 +357,7 @@ export function SearchExperience() {
               <SearchIcon />
               <input
                 id="address-search"
+                ref={inputRef}
                 type="search"
                 autoComplete="off"
                 value={query}
@@ -425,7 +443,7 @@ export function SearchExperience() {
         pageSlugs={INSTITUTION_PAGE_SLUGS}
         staleResults={staleResults}
         onFilterChange={setFilter}
-        onRetryStale={() => void retryReferences()}
+        onRetryStale={() => void reloadStaleAddresses()}
         onRetryMatch={() => {
           if (matchState.selectedAddress) {
             void selectSuggestion(matchState.selectedAddress);
