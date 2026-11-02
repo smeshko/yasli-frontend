@@ -4,6 +4,7 @@ import type { Address, Street } from "@/lib/api/client";
 
 import {
   buildExactAddressSuggestions,
+  isSearchableQuery,
   normalizeSearchText,
   searchExactAddressSuggestions,
 } from "./addressSuggestions";
@@ -221,5 +222,27 @@ describe("letter/digit joins in search", () => {
     expect(searchExactAddressSuggestions(neighbours, "2в").map((s) => s.addressId)).toEqual([903]);
     expect(searchExactAddressSuggestions(neighbours, "002В")[0]?.addressId).toBe(903);
     expect(searchExactAddressSuggestions(neighbours, "преслав 2в")[0]?.addressId).toBe(903);
+  });
+});
+
+describe("isSearchableQuery", () => {
+  it.each([
+    ["empty", ""],
+    ["a single Cyrillic letter", "а"],
+    ["a single Latin letter", "a"],
+    ["a single digit", "1"],
+    ["punctuation only", "!!!"],
+    ["a single letter with surrounding spaces", "  а  "],
+  ])("rejects %s", (_name, query) => {
+    expect(isSearchableQuery(query)).toBe(false);
+  });
+
+  it.each([
+    ["two Cyrillic letters", "пр"],
+    ["two digits", "12"],
+    ["two Latin letters", "pr"],
+    ["a Cyrillic word", "жжжжж"],
+  ])("accepts %s", (_name, query) => {
+    expect(isSearchableQuery(query)).toBe(true);
   });
 });
